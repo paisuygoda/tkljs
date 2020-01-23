@@ -17,6 +17,7 @@
 	if (!DaMa_isDatabaseLoaded.call(this)) return false;
 	if (!_loaded_State_Setting) {
 		this.processNotetagsStateDurations($dataSkills);
+		this.processNotetagsStateOracle($dataSkills);
 		_loaded_State_Setting = true;
 	}
 		return true;
@@ -33,6 +34,30 @@
 				var line = notedata[i];
 				if (line.match(noteDuration)) {
 					obj.duration = parseInt(RegExp.$1);
+				}
+			}
+		}
+	};
+	DataManager.processNotetagsStateOracle = function(group) {
+		var noteCount = /<(?:OracleCount):[ ](\d+)>/i;
+		var noteEvent = /<(?:OracleEvent):[ ](\d+)>/i;
+		var noteResist = /<(?:OracleResist):[ ](\d+)>/i;
+		for (var n = 1; n < group.length; n++) {
+			var obj = group[n];
+			var notedata = obj.note.split(/[\r\n]+/);
+
+			obj._oracleCount = 0;
+			obj._oracleEvent = 1;
+			obj._oracleResist = 0;
+
+			for (var i = 0; i < notedata.length; i++) {
+				var line = notedata[i];
+				if (line.match(noteCount)) {
+					obj._oracleCount = parseInt(RegExp.$1);
+				} else if (line.match(noteEvent)) {
+					obj._oracleEvent = parseInt(RegExp.$1);
+				} else if (line.match(noteResist)) {
+					obj._oracleResist = parseInt(RegExp.$1);
 				}
 			}
 		}
@@ -79,11 +104,40 @@
 	    if (this.isStateAddable(stateId)) {
 	        this.resetStateCounts(stateId);
 	        if (!this.isStateAffected(stateId)) {
-	            this.addNewState(stateId);
+				this.addNewState(stateId);
+
+				// ヘイスト/スロウ排他処理
+				if (stateId === 18 && this.isStateAffected(19)) this.removeState(19);
+				else if (stateId === 19 && this.isStateAffected(18)) this.removeState(18);
+
 	            this.refresh();
 	        }
 	        this._result.pushAddedState(stateId);
 	    }
+	};
+
+	// 宣告カウント・内容設定追加
+	Game_Action.prototype.itemEffectAddNormalState = function(target, effect) {
+		var chance = effect.value1;
+		if (!this.isCertainHit()) {
+			chance *= target.stateRate(effect.dataId);
+			chance *= this.lukEffectRate(target);
+		}
+
+		// 宣告の場合宣告内容のステート耐性も見る(実際に発動する時は耐性無視のため)
+		if (effect.dataId === 14) chance *= target.stateRate(this.item()._oracleResist);
+
+		if (Math.random() < chance) {
+			target.addState(effect.dataId);
+
+			// 宣告カウント・内容設定追加
+			if (effect.dataId === 14) {
+				target._oracleCount = this.item()._oracleCount * (5 - this.subject()._jobLevel[17]); // 予言士のジョブID違うかもわからん
+				target._oracleEvent = this.item()._oracleEvent;
+				target._oracleMat = this.subject().mat;
+			}
+			this.makeSuccess(target);
+		}
 	};
 
 	// 一定時間ごとに効果が出るタイプの処理
@@ -98,15 +152,44 @@
 				var value = Math.floor(this.mhp * -this._poisonProgress++ / 20);
 				value = Math.min(value, -1) * this.elementRate(10);
 				if (value !== 0) {
+					this.result().clear();
 					this.gainHp(value);
 				}
 			}
 			// 宣告
 			if (this.isStateAffected(14) && this._stateStartTurn[10] % 20 == BattleManager._turnCount % 20){
-				var value = Math.floor(this.mhp * this.hrg);
-				value = Math.max(value, -this.maxSlipDamage());
-				if (value !== 0) {
-					this.gainHp(value);
+				if (--this._oracleCount === 0 ) {
+					var oracleSkill = $dataSkills[this._oracleEvent];
+
+					if (oracleSkill.damage.type > 0) {
+						try {
+							var a = {};
+							a.mat = this._oracleMat;
+							var b = this;
+							var v = $gameVariables._data;
+							var sign = ([3, 4].contains(oracleSkill.damage.type) ? -1 : 1);
+							var baseValue = Math.max(eval(oracleSkill.damage.formula), 0);
+							if (isNaN(baseValue)) baseValue = 0;
+							basevalue *= ((Math.random() * 2 * variance) + 100 - variance) / 100 * sign;
+						} catch (e) {
+							baseValue = 0;
+						}
+						value = baseValue * this.elementRate(oracleSkill.damage.elementId);
+						
+						if (baseValue < 0) {
+							value *= this.rec;
+						} else {
+							// 魔法攻撃のみ想定
+							value *= this.mdr;
+						}
+						value /= (value > 0 && this.isGuard() ? 2 * this.grd : 1);
+						value = Math.round(value);
+						this.result().clear();
+						this.gainHp(-value);
+					}
+					oracleSkill.effects.forEach(function(effect) {
+						Game_Action.prototype.applyItemEffect(this, effect);
+					}, this);
 				}
 			}
 			// リジェネ
@@ -272,6 +355,37 @@
 		var blightness = (this._glowFrame > 60 ? 120 - this._glowFrame : this._glowFrame) / 30 ;
 		var glowFilter = new PIXI.filters.GlowFilter(6, blightness, blightness, this._glowColor);
 		this._mainSprite.filters = [glowFilter];
+	};
+
+	// 全身の色が変わる系、これは排他
+	var MStEf_Sprite_Actor_prototype_refreshMotion = Sprite_Actor.prototype.refreshMotion;
+    Sprite_Actor.prototype.refreshMotion = function() {
+        MStEf_Sprite_Actor_prototype_refreshMotion.call(this);
+        // 石化
+        if (this._actor.isStateAffected(24)) {
+			this._mainSprite._colorTone = [0,0,0,255];
+		// ゾンビ
+		} else if (this._actor.isStateAffected(25)) {
+			this._mainSprite._colorTone = [-150,-100,-180,90];
+		// 凍結
+		} else if (this._actor.isStateAffected(30)) {
+			this._mainSprite._colorTone = [0,50,255,0];
+		// バーサク
+		} else if (this._actor.isStateAffected(7)) {
+			this._mainSprite._colorTone = [150,-30,-30,0];
+        } else {
+            this._mainSprite._colorTone = [0,0,0,0];
+        }
+	 }
+	 
+	// 混乱で向かい合う
+	MStEf_SpAc_updateTargetPosition = Sprite_Actor.prototype.updateTargetPosition;
+	Sprite_Actor.prototype.updateTargetPosition = function() {
+		if (this._actor.isStateAffected(8)) {
+			this.startMove(-96, 0, 12);
+		} else {
+			MStEf_SpAc_updateTargetPosition.call(this);
+		}
 	};
 
 })();
