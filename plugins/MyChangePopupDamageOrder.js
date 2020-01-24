@@ -49,6 +49,9 @@
 	        case 'damage':
 	            this.updateDamage();
 	            break;
+			case 'specialDamage':
+				this.updateSpecialDamage();
+				break;
 	        case 'turnEnd':
 	            this.updateTurnEnd();
 	            break;
@@ -84,11 +87,26 @@
 
 	BattleManager.updateDamage = function() {
 		if (this._waitAnim > 0) this._waitAnim--;
-	    if (!(this._logWindow.isBusy() || this._subject._isInMotion || this._waitAnim > 0)) {
+	    if (!(this._logWindow.isBusy() || this._subject._isInMotion)) {
 	    	if(this._dualWielding && this._subject._equips[0]._itemId === 0) {
 	    		this._dualWielding = false;
 	    		this._subject._equips[0] = this._tempWeapon;
 	    	}
+	    	var target = this._targets.shift();
+	    	while(target) {
+		        this.invokeAction(this._subject, target);
+		        target = this._targets.shift();
+		    }
+	        this._action = this._action.pop();
+	        if (this._action) this._phase = 'action';
+	    	else this.endAction();
+	    }
+	};
+
+	// 宣告や予言など、subjectの絡まないダメージ処理
+	BattleManager.updateDamage = function() {
+		if (this._waitAnim > 0) this._waitAnim--;
+	    if (!(this._logWindow.isBusy())) {
 	    	var target = this._targets.shift();
 	    	while(target) {
 		        this.invokeAction(this._subject, target);

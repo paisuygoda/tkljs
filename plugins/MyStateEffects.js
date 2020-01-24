@@ -125,7 +125,7 @@
 		}
 
 		// 宣告の場合宣告内容のステート耐性も見る(実際に発動する時は耐性無視のため)
-		if (effect.dataId === 14) chance *= target.stateRate(this.item()._oracleResist);
+		if (effect.dataId === 14 && this.item()._oracleResist > 0) chance *= target.stateRate(this.item()._oracleResist);
 
 		if (Math.random() < chance) {
 			target.addState(effect.dataId);
@@ -157,14 +157,16 @@
 				}
 			}
 			// 宣告
-			if (this.isStateAffected(14) && this._stateStartTurn[10] % 20 == BattleManager._turnCount % 20){
+			if (this.isStateAffected(14) && this._stateStartTurn[14] % 15 == BattleManager._turnCount % 15){
 				if (--this._oracleCount === 0 ) {
 					var oracleSkill = $dataSkills[this._oracleEvent];
 
+					BattleManager._logWindow.showNormalAnimation([this], oracleSkill.animationId);
+					
+
 					if (oracleSkill.damage.type > 0) {
 						try {
-							var a = {};
-							a.mat = this._oracleMat;
+							var a = this._oracleMat;
 							var b = this;
 							var v = $gameVariables._data;
 							var sign = ([3, 4].contains(oracleSkill.damage.type) ? -1 : 1);
@@ -190,6 +192,8 @@
 					oracleSkill.effects.forEach(function(effect) {
 						Game_Action.prototype.applyItemEffect(this, effect);
 					}, this);
+
+					this.removeState(14);
 				}
 			}
 			// リジェネ
@@ -339,12 +343,15 @@
 		this._glowIndex = 0;
 		this._glowFrame = 0;
 		this._glowColor = 0x000000;
+		
+		//宣告で使う
+		this._oracleCountSprite = new Sprite_OracleCount();
+		this._oracleCountSprite.y = -60;
+    	this.addChild(this._oracleCountSprite);
 	};
 	var MStEf_SpAc_updateFrame = Sprite_Actor.prototype.updateFrame;
 	Sprite_Actor.prototype.updateFrame = function() {
 		MStEf_SpAc_updateFrame.call(this);
-		console.log(this._battler._states);
-		console.log(this._battler.glowStates());
 		if (this._glowFrame === 0) {
 			if (this._battler.glowStates().length > 0) {
 				this._glowFrame = 1;
@@ -372,19 +379,123 @@
 			this._mainSprite._colorTone = [0,50,255,0];
 		// バーサク
 		} else if (this._actor.isStateAffected(7)) {
-			this._mainSprite._colorTone = [150,-30,-30,0];
+			this._mainSprite._colorTone = [100,-60,-60, 0];
         } else {
             this._mainSprite._colorTone = [0,0,0,0];
         }
 	 }
 	 
 	// 混乱で向かい合う
-	MStEf_SpAc_updateTargetPosition = Sprite_Actor.prototype.updateTargetPosition;
+	var MStEf_SpAc_updateTargetPosition = Sprite_Actor.prototype.updateTargetPosition;
 	Sprite_Actor.prototype.updateTargetPosition = function() {
 		if (this._actor.isStateAffected(8)) {
 			this.startMove(-96, 0, 12);
 		} else {
 			MStEf_SpAc_updateTargetPosition.call(this);
+		}
+	};
+	var MStEf_SpAc_updateMotion = Sprite_Actor.prototype.updateMotion;
+	Sprite_Actor.prototype.updateMotion = function() {
+		MStEf_SpAc_updateMotion.call(this);
+		this.scale.x = 1;
+		if (this._actor.isStateAffected(8)) this.scale.x *= -1;
+	};
+	var MStEf_SpEn_update = Sprite_Enemy.prototype.update;
+	Sprite_Enemy.prototype.update = function() {
+		MStEf_SpEn_update.call(this);
+		this.scale.x = 1;
+		if (this._enemy && this._enemy.isStateAffected(8)) this.scale.x *= -1;
+		this._oracleCountSprite.y = this.countOffsetY();
+	};
+
+	// 宣告カウントSprite紐づけ
+	Sprite_Actor.prototype.setBattler = function(battler) {
+		Sprite_Battler.prototype.setBattler.call(this, battler);
+		var changed = (battler !== this._actor);
+		if (changed) {
+			this._actor = battler;
+			if (battler) {
+				this.setActorHome(battler.index());
+			}
+			this.startEntryMotion();
+			this._oracleCountSprite.setup(battler);
+		}
+	};
+	Sprite_Actor.prototype.countOffsetY = function() {
+		return -50;
+	}
+	var MStEf_SpEn_initMembers = Sprite_Enemy.prototype.initMembers;
+	Sprite_Enemy.prototype.initMembers = function() {
+		MStEf_SpEn_initMembers.call(this);
+		this._oracleCountSprite = new Sprite_OracleCount();
+    	this.addChild(this._oracleCountSprite);
+	};
+	var MStEf_SpEn_setBattler = Sprite_Enemy.prototype.setBattler;
+	Sprite_Enemy.prototype.setBattler = function(battler) {
+		MStEf_SpEn_setBattler.call(this, battler);
+		this._oracleCountSprite.setup(battler);
+	};
+	Sprite_Enemy.prototype.countOffsetY = function() {
+		return -this._frame.height;
+	}
+
+	// 宣告カウントSprite
+	function Sprite_OracleCount() {
+		this.initialize.apply(this, arguments);
+	}
+	Sprite_OracleCount.prototype = Object.create(Sprite.prototype);
+	Sprite_OracleCount.prototype.constructor = Sprite_OracleCount;
+	Sprite_OracleCount.prototype.initialize = function() {
+		Sprite.prototype.initialize.call(this);
+		this._countBitmap = ImageManager.loadSystem('Damage');
+	};
+	Sprite_OracleCount.prototype.setup = function(battler) {
+		this._battler = battler;
+		var w = this.digitWidth();
+		var h = this.digitHeight();
+		for (var i = 0; i < 2; i++) {
+			var sprite = this.createChildSprite();
+			sprite.setFrame(9 * w, 4 * h, w, h);
+			sprite.x = (i - 1 / 2) * w;
+			sprite.dy = -i;
+		}
+		this.scale.x = 0.5;
+		this.scale.y = 0.5;
+	};
+	Sprite_OracleCount.prototype.createChildSprite = function() {
+		var sprite = new Sprite();
+		sprite.bitmap = this._countBitmap;
+		sprite.anchor.x = 0.5;
+		sprite.anchor.y = 1;
+		sprite.ry = sprite.y;
+		this.addChild(sprite);
+		return sprite;
+	};
+	Sprite_OracleCount.prototype.digitWidth = function() {
+		return this._countBitmap ? this._countBitmap.width / 10 : 0;
+	};
+	Sprite_OracleCount.prototype.digitHeight = function() {
+		return this._countBitmap ? this._countBitmap.height / 5 : 0;
+	};
+	Sprite_OracleCount.prototype.update = function() {
+		Sprite.prototype.update.call(this);
+		if (this._battler) {
+			if (this._battler.isStateAffected(14)) {
+				var count = this._battler._oracleCount % 100;
+				this.updateChild(this.children[0], Math.floor(count / 10) );
+				this.updateChild(this.children[1], count % 10 );
+			} else {
+				this.updateChild(this.children[0], -1 );
+				this.updateChild(this.children[1], -1 );
+			}
+		}
+	};
+	Sprite_OracleCount.prototype.updateChild = function(child, digit) {
+		var w = this.digitWidth();
+		var h = this.digitHeight();
+		if (digit < 0) child.setFrame(9 * w, 4 * h, w, h);
+		else {
+			child.setFrame(digit * w, 0 * h, w, h);
 		}
 	};
 
