@@ -132,7 +132,9 @@
 
 			// 宣告カウント・内容設定追加
 			if (effect.dataId === 14) {
-				target._oracleCount = this.item()._oracleCount * (5 - this.subject()._jobLevel[17]); // 予言士のジョブID違うかもわからん
+				if (this.subject().isActor()) var rate = 5 - this.subject()._jobLevel[17];
+				else var rate = 5;
+				target._oracleCount = this.item()._oracleCount * rate; // 予言士のジョブID違うかもわからん
 				target._oracleEvent = this.item()._oracleEvent;
 				target._oracleMat = this.subject().mat;
 			}

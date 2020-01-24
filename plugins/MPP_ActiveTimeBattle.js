@@ -985,16 +985,18 @@ var turnLength = 6000;
 BattleManager.endTurn = function() {
     this._phase = 'turnEnd';
     this._subject = null;
-    this._turnCount = (this._turnCount + 1) % turnLength;
-    this.allBattleMembers().forEach(function(battler) {
-        battler.regenerateAll();
-        battler.updateStateTurns();
-        battler.updateBuffTurns();
-        battler.removeStatesAuto(2);
-        this.refreshStatus();
-        this._logWindow.displayAutoAffectedStatus(battler);
-        this._logWindow.displayRegeneration(battler);
-    }, this);
+    if (this.isAtbWait) {
+        this._turnCount = (this._turnCount + 1) % turnLength;
+        this.allBattleMembers().forEach(function(battler) {
+            battler.regenerateAll();
+            battler.updateStateTurns();
+            battler.updateBuffTurns();
+            battler.removeStatesAuto(2);
+            this.refreshStatus();
+            this._logWindow.displayAutoAffectedStatus(battler);
+            this._logWindow.displayRegeneration(battler);
+        }, this);
+    }
 };
 
 //340
