@@ -985,7 +985,7 @@ var turnLength = 6000;
 BattleManager.endTurn = function() {
     this._phase = 'turnEnd';
     this._subject = null;
-    if (this.isAtbWait) {
+    if (this.isAtbWait()) {
         this._turnCount = (this._turnCount + 1) % turnLength;
         this.allBattleMembers().forEach(function(battler) {
             battler.regenerateAll();
