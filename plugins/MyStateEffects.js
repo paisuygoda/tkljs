@@ -124,11 +124,18 @@
 			chance *= this.lukEffectRate(target);
 		}
 
+		// 魅了の場合パーティーアタックでは付与されない
+		if (effect.dataId === 9 && target.friendsUnit().aliveMembers().indexOf(this.subject()) >= 0) chance = 0;
 		// 宣告の場合宣告内容のステート耐性も見る(実際に発動する時は耐性無視のため)
 		if (effect.dataId === 14 && this.item()._oracleResist > 0) chance *= target.stateRate(this.item()._oracleResist);
 
 		if (Math.random() < chance) {
 			target.addState(effect.dataId);
+
+			// 魅了の場合魅了対象を設定
+			if (effect.dataId === 9) {
+				target._charmTo = this.subject();
+			}
 
 			// 宣告カウント・内容設定追加
 			if (effect.dataId === 14) {
@@ -140,6 +147,16 @@
 			}
 			this.makeSuccess(target);
 		}
+	};
+
+	Game_Battler.prototype.performCollapse = function() {
+		// 魅了しているアクターを解除
+		this.opponentsUnit().aliveMembers().forEach(function(target) {
+			if (target._charmTo === this) {
+				target._charmTo = null;
+				target.removeState(9);
+			}
+		});
 	};
 
 	// 一定時間ごとに効果が出るタイプの処理
@@ -159,7 +176,7 @@
 				}
 			}
 			// 宣告
-			if (this.isStateAffected(14) && this._stateStartTurn[14] % 10 == BattleManager._turnCount % 10){
+			if (this.isStateAffected(14) && this._stateStartTurn[14] % 2 == BattleManager._turnCount % 2){
 				if (this._oracleCount-- === 0 ) {
 					BattleManager._logWindow.showNormalAnimation([this], $dataSkills[this._oracleEvent].animationId);
 					BattleManager._specialSkill = this._oracleEvent;
@@ -232,6 +249,7 @@
 		this._pattern++;
 		this._pattern %= 8;
 		if (this._battler) {
+			console.log("KOKO");
 			this._overlayIndex = this.statePattern();
 		}
 	};
@@ -360,7 +378,7 @@
 	// 混乱で向かい合う
 	var MStEf_SpAc_updateTargetPosition = Sprite_Actor.prototype.updateTargetPosition;
 	Sprite_Actor.prototype.updateTargetPosition = function() {
-		if (this._actor.isStateAffected(8)) {
+		if (this._actor.isStateAffected(8) || this._actor.isStateAffected(9)) {
 			this.startMove(-96, 0, 12);
 		} else {
 			MStEf_SpAc_updateTargetPosition.call(this);
@@ -370,7 +388,7 @@
 	Sprite_Actor.prototype.updateMotion = function() {
 		MStEf_SpAc_updateMotion.call(this);
 		this.scale.x = 1;
-		if (this._actor.isStateAffected(8)) this.scale.x *= -1;
+		if (this._actor.isStateAffected(8) || this._actor.isStateAffected(9)) this.scale.x *= -1;
 	};
 	var MStEf_SpEn_update = Sprite_Enemy.prototype.update;
 	Sprite_Enemy.prototype.update = function() {

@@ -863,6 +863,7 @@ BattleManager.startBattle = function() {
         actor.clearResult();
     });
     this.setupAllBattlerAt();
+    this._phase = 'turn';
     this.startTurn();
 };
 
@@ -930,7 +931,7 @@ BattleManager.refreshStatus = function() {
 
 //281
 BattleManager.startTurn = function() {
-    this._phase = 'turn';
+    //this._phase = 'turn';
     //this.clearActor();
     //$gameTroop.increaseTurn();
     //this.makeActionOrders();
@@ -965,6 +966,7 @@ BattleManager.processTurn = function() {
     if (action) {
         action.prepare();
         if (action.isValid()) {
+            this._phase = 'action';
             this.startAction();
         }
         subject.removeCurrentAction();
@@ -1002,6 +1004,7 @@ BattleManager.endTurn = function() {
 //340
 BattleManager.updateTurnEnd = function() {
     if (!this._escaping || !$gameParty.canEscape() || !this.processEscape()) {
+        this._phase = 'turn';
         this.startTurn();
     }
 };

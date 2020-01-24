@@ -22,7 +22,6 @@
 	// startActionではアクションを呼ばない
 	BattleManager.startAction = function() {
 	    var action = this._subject.currentAction();
-	    this._phase = 'action';
 	    this._action = action;
 	    this._action.splitActions();
 	    this._subject.useItem(action.item());
@@ -112,35 +111,45 @@
 			BattleManager._specialIsSentence = true;
 
 			this._specialTargets.forEach(function(target) {
-				if (oracleSkill.damage.type > 0) {
-					try {
-						var sign = ([3, 4].contains(oracleSkill.damage.type) ? -1 : 1);
-						var baseValue = Math.max(eval(oracleSkill.damage.formula), 0);
-						if (isNaN(baseValue)) baseValue = 0;
-						baseValue *= ((Math.random() * 2 * oracleSkill.damage.variance) + 100 - oracleSkill.damage.variance) / 100 * sign;
-					} catch (e) {
-						baseValue = 0;
-					}
-					value = baseValue * target.elementRate(oracleSkill.damage.elementId);
-					
-					if (baseValue < 0) {
-						value *= target.rec;
-					} else {
-						// 魔法攻撃のみ想定
-						value *= target.mdr;
-					}
-					value /= (value > 0 && target.isGuard() ? 2 * target.grd : 1);
-					value = Math.round(value);
-					target.result().clear();
-					target.gainHp(-value);
-				}
-				oracleSkill.effects.forEach(function(effect) {
-					Game_Action.prototype.applyItemEffect(target, effect);
-				}, target);
-				if (BattleManager._specialIsSentence) target.removeState(14);
+				BattleManager.updateIndividualSpecialDamage(target, oracleSkill);
 			});
 			this._phase = 'turn';
 	    }
+	};
+
+	BattleManager.updateIndividualSpecialDamage = function(target, oracleSkill) {
+		if (oracleSkill.damage.type > 0) {
+			try {
+				var sign = ([3, 4].contains(oracleSkill.damage.type) ? -1 : 1);
+				var baseValue = Math.max(eval(oracleSkill.damage.formula), 0);
+				if (isNaN(baseValue)) baseValue = 0;
+				baseValue *= ((Math.random() * 2 * oracleSkill.damage.variance) + 100 - oracleSkill.damage.variance) / 100 * sign;
+			} catch (e) {
+				baseValue = 0;
+			}
+			value = baseValue * target.elementRate(oracleSkill.damage.elementId);
+			
+			if (baseValue < 0) {
+				value *= target.rec;
+			} else {
+				// 魔法攻撃のみ想定
+				value *= target.mdr;
+			}
+			value /= (value > 0 && target.isGuard() ? 2 * target.grd : 1);
+			value = Math.round(value);
+			target.result().clear();
+			target.gainHp(-value);
+			this._logWindow.push('popupDamage', target);
+		}
+		oracleSkill.effects.forEach(function(effect) {
+			target.addState(effect.dataId);
+		}, target);
+		if (BattleManager._specialIsSentence) target.removeState(14);
+        this._logWindow.displayAffectedStatus(target);
+	}
+
+	Window_BattleLog.prototype.displayOracleResults = function(target) {
+			this.push('popupDamage', target);
 	};
 
 	// Game_Actionをキューに
@@ -229,15 +238,23 @@
 		}
 	};
 
-	// アクションごとには技名は表示しない
+	// アクションごとには技名は表示しない / アニメーション処理の後にフェーズチェンジ
 	Window_BattleLog.prototype.startAction = function(subject, action, targets) {
 	    var item = action.item();
 	    this.push('performActionStart', subject, action);
 	    this.push('waitForMovement');
 		this.push('performAction', subject, action);
 		this.push('waitForEffect');
-	    this.push('showAnimation', subject, targets.clone(), item.animationId);
+		this.push('showAnimation', subject, targets.clone(), item.animationId);
+		this.push('waitPhase');
 	    // this.displayAction(subject, item);
+	};
+
+	Window_BattleLog.prototype.waitPhase = function() {
+		if (BattleManager._waitAnim > 0) {
+			this._methods.unshift({ name: 'waitPhase', params: [] });
+		}
+		BattleManager.updateDamage();
 	};
 
 	// モーション中の情報を埋め込む

@@ -97,7 +97,8 @@
 	var GaBa_initMembers = Game_Battler.prototype.initMembers;
 	Game_Battler.prototype.initMembers = function() {
 	    GaBa_initMembers.call(this);
-	    this._isForCounter = false;
+		this._isForCounter = false;
+		this._charmTo = null;
 	};
 
 	// counterTypeでカウンター設定呼び出し
