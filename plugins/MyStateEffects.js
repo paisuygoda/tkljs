@@ -158,40 +158,12 @@
 			}
 			// 宣告
 			if (this.isStateAffected(14) && this._stateStartTurn[14] % 15 == BattleManager._turnCount % 15){
-				if (--this._oracleCount === 0 ) {
-					var oracleSkill = $dataSkills[this._oracleEvent];
+				if (this._oracleCount-- === 0 ) {
 
-					BattleManager._logWindow.showNormalAnimation([this], oracleSkill.animationId);
+					BattleManager._logWindow.showNormalAnimation([this], $dataSkills[this._oracleEvent].animationId);
+					BattleManager._phase = 'specialDamage';
+
 					
-
-					if (oracleSkill.damage.type > 0) {
-						try {
-							var a = this._oracleMat;
-							var b = this;
-							var v = $gameVariables._data;
-							var sign = ([3, 4].contains(oracleSkill.damage.type) ? -1 : 1);
-							var baseValue = Math.max(eval(oracleSkill.damage.formula), 0);
-							if (isNaN(baseValue)) baseValue = 0;
-							basevalue *= ((Math.random() * 2 * variance) + 100 - variance) / 100 * sign;
-						} catch (e) {
-							baseValue = 0;
-						}
-						value = baseValue * this.elementRate(oracleSkill.damage.elementId);
-						
-						if (baseValue < 0) {
-							value *= this.rec;
-						} else {
-							// 魔法攻撃のみ想定
-							value *= this.mdr;
-						}
-						value /= (value > 0 && this.isGuard() ? 2 * this.grd : 1);
-						value = Math.round(value);
-						this.result().clear();
-						this.gainHp(-value);
-					}
-					oracleSkill.effects.forEach(function(effect) {
-						Game_Action.prototype.applyItemEffect(this, effect);
-					}, this);
 
 					this.removeState(14);
 				}
