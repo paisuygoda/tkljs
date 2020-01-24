@@ -117,7 +117,7 @@
 						var sign = ([3, 4].contains(oracleSkill.damage.type) ? -1 : 1);
 						var baseValue = Math.max(eval(oracleSkill.damage.formula), 0);
 						if (isNaN(baseValue)) baseValue = 0;
-						basevalue *= ((Math.random() * 2 * variance) + 100 - variance) / 100 * sign;
+						baseValue *= ((Math.random() * 2 * oracleSkill.damage.variance) + 100 - oracleSkill.damage.variance) / 100 * sign;
 					} catch (e) {
 						baseValue = 0;
 					}
@@ -139,6 +139,7 @@
 				}, target);
 				if (BattleManager._specialIsSentence) target.removeState(14);
 			});
+			this._phase = 'turn';
 	    }
 	};
 

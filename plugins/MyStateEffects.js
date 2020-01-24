@@ -157,14 +157,12 @@
 				}
 			}
 			// 宣告
-			if (this.isStateAffected(14) && this._stateStartTurn[14] % 15 == BattleManager._turnCount % 15){
+			if (this.isStateAffected(14) && this._stateStartTurn[14] % 10 == BattleManager._turnCount % 10){
 				if (this._oracleCount-- === 0 ) {
-
 					BattleManager._logWindow.showNormalAnimation([this], $dataSkills[this._oracleEvent].animationId);
+					BattleManager._specialSkill = this._oracleEvent;
+					BattleManager._specialTargets = [this];
 					BattleManager._phase = 'specialDamage';
-
-					
-
 					this.removeState(14);
 				}
 			}
