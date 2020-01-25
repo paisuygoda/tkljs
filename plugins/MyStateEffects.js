@@ -104,7 +104,9 @@
 	    if (this.isStateAddable(stateId)) {
 	        this.resetStateCounts(stateId);
 	        if (!this.isStateAffected(stateId)) {
-				this.addNewState(stateId);
+				if (stateId === 1 && target.isStateAffected(11)) {
+					this.setHp(this.mhp);
+				} else this.addNewState(stateId);
 
 				// ヘイスト/スロウ排他処理
 				if (stateId === 18 && this.isStateAffected(19)) this.removeState(19);
@@ -126,6 +128,8 @@
 
 		// 魅了の場合パーティーアタックでは付与されない
 		if (effect.dataId === 9 && target.friendsUnit().aliveMembers().indexOf(this.subject()) >= 0) chance = 0;
+		// アンデッドに即死は必中する
+		if (effect.dataId === 1 && target.isStateAffected(11)) chance = 1;
 		// 宣告の場合宣告内容のステート耐性も見る(実際に発動する時は耐性無視のため)
 		if (effect.dataId === 14 && this.item()._oracleResist > 0) chance *= target.stateRate(this.item()._oracleResist);
 
@@ -135,6 +139,7 @@
 			// 魅了の場合魅了対象を設定
 			if (effect.dataId === 9) {
 				target._charmTo = this.subject();
+				BattleManager._logWindow.push('addItemNameText', '死ぬまで味方を殴りなさい');
 			}
 
 			// 宣告カウント・内容設定追加
@@ -151,8 +156,9 @@
 
 	Game_Battler.prototype.performCollapse = function() {
 		// 魅了しているアクターを解除
+		var sub = this;
 		this.opponentsUnit().aliveMembers().forEach(function(target) {
-			if (target._charmTo === this) {
+			if (target._charmTo === sub) {
 				target._charmTo = null;
 				target.removeState(9);
 			}
@@ -176,7 +182,7 @@
 				}
 			}
 			// 宣告
-			if (this.isStateAffected(14) && this._stateStartTurn[14] % 2 == BattleManager._turnCount % 2){
+			if (this.isStateAffected(14) && this._stateStartTurn[14] % 10 == BattleManager._turnCount % 10){
 				if (this._oracleCount-- === 0 ) {
 					BattleManager._logWindow.showNormalAnimation([this], $dataSkills[this._oracleEvent].animationId);
 					BattleManager._specialSkill = this._oracleEvent;
@@ -241,6 +247,8 @@
 			this._charmStateSprite.setup(battler);
 			this._sleepStateSprite.setup(battler);
 			this._paralyzeStateSprite.setup(battler);
+
+			this._oracleCountSprite.setup(battler);
 		}
 	};
 
@@ -249,7 +257,6 @@
 		this._pattern++;
 		this._pattern %= 8;
 		if (this._battler) {
-			console.log("KOKO");
 			this._overlayIndex = this.statePattern();
 		}
 	};
@@ -399,18 +406,6 @@
 	};
 
 	// 宣告カウントSprite紐づけ
-	Sprite_Actor.prototype.setBattler = function(battler) {
-		Sprite_Battler.prototype.setBattler.call(this, battler);
-		var changed = (battler !== this._actor);
-		if (changed) {
-			this._actor = battler;
-			if (battler) {
-				this.setActorHome(battler.index());
-			}
-			this.startEntryMotion();
-			this._oracleCountSprite.setup(battler);
-		}
-	};
 	Sprite_Actor.prototype.countOffsetY = function() {
 		return -50;
 	}
