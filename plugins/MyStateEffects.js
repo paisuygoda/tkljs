@@ -99,14 +99,28 @@
 		}
 	};
 
+	// 石化・ゾンビ状態にはステート付与させない
+	var MStEf_GaBa_isStateAddable = Game_Battler.prototype.isStateAddable;
+	Game_Battler.prototype.isStateAddable = function(stateId) {
+		return MStEf_GaBa_isStateAddable.call(this, stateId) && !this.isStateAffected(25) && !this.isStateAffected(24);
+	};
+
 	// 持続ターン数を決めてからステート付与(持続ターン決めでステートにかかっているかを参照するため)
 	Game_Battler.prototype.addState = function(stateId) {
 	    if (this.isStateAddable(stateId)) {
-	        this.resetStateCounts(stateId);
+			this.resetStateCounts(stateId);
+			
 	        if (!this.isStateAffected(stateId)) {
-				if (stateId === 1 && target.isStateAffected(11)) {
-					this.setHp(this.mhp);
-				} else this.addNewState(stateId);
+
+				// デスは通常即死を耐性無視で付与し、アンデッドは全快させる
+				if (stateId === 37) {
+					if (target.isStateAffected(11)) this.setHp(this.mhp);
+					else this.addNewState(1);
+				}
+				// 敵が石化/ゾンビ化したらそのステートではなく戦闘不能を耐性無視で付与
+				else if (stateId === 24 & this.isEnemy()) this.addNewState(1);
+				else this.addNewState(stateId);
+
 
 				// ヘイスト/スロウ排他処理
 				if (stateId === 18 && this.isStateAffected(19)) this.removeState(19);
@@ -116,6 +130,60 @@
 	        }
 	        this._result.pushAddedState(stateId);
 	    }
+	};
+
+	Game_Battler.prototype.removeState = function(stateId) {
+		if (this.isStateAffected(stateId)) {
+			// ゾンビ解除時もhp1で回復
+			if (stateId === this.deathStateId() || stateId === 25) {
+				this.revive();
+			}
+			this.eraseState(stateId);
+			this.refresh();
+			this._result.pushRemovedState(stateId);
+		}
+	};
+
+	Game_Party.prototype.reviveBattleMembers = function() {
+		this.battleMembers().forEach(function(actor) {
+			if (actor.isDown()) {
+				actor.setHp(1);
+			} 
+			if (actor.isStateAffected(24)) actor.removeState(24);
+		});
+	};
+
+	Game_Unit.prototype.isAllDead = function() {
+		var fineMembers = this.filter(function(member) {
+            return !(this.isAppeared() && (this.isDeathStateAffected() || this.isStateAffected(24) || this.isStateAffected(25)));
+        });
+		return fineMembers.length === 0;
+	};
+
+	Game_BattlerBase.prototype.isDown = function() {
+		return this.isAppeared() && (this.isDeathStateAffected() || this.isStateAffected(25));
+	};
+
+	Game_Battler.prototype.refresh = function() {
+		Game_BattlerBase.prototype.refresh.call(this);
+		// HP0で死後ゾンビならゾンビにする
+		if (this.hp === 0 && this.isStateAffected(36) && !this.isStateAffected(25) ) {
+			this.removeState(this.deathStateId());
+			this.addState(25);
+		// HP0でもゾンビなら戦闘不能ステートは付与しない
+		} else if (this.hp === 0 && !this.isStateAffected(25)) {
+			this.addState(this.deathStateId());
+		}else {
+			this.removeState(this.deathStateId());
+			this.removeState(25);
+		}
+	};
+
+	Game_Battler.prototype.gainHp = function(value) {
+		this._result.hpDamage = -value;
+		this._result.hpAffected = true;
+		// ゾンビの時、ダメージ表示はするが実際にダメージは受けない(回復させないため)
+		if (!this.isStateAffected(25)) this.setHp(this.hp + value);
 	};
 
 	// 宣告カウント・内容設定追加
@@ -128,10 +196,10 @@
 
 		// 魅了の場合パーティーアタックでは付与されない
 		if (effect.dataId === 9 && target.friendsUnit().aliveMembers().indexOf(this.subject()) >= 0) chance = 0;
-		// アンデッドに即死は必中する
-		if (effect.dataId === 1 && target.isStateAffected(11)) chance = 1;
+		// アンデッドにデスは必中する
+		else if (effect.dataId === 37 && target.isStateAffected(11)) chance = 1;
 		// 宣告の場合宣告内容のステート耐性も見る(実際に発動する時は耐性無視のため)
-		if (effect.dataId === 14 && this.item()._oracleResist > 0) chance *= target.stateRate(this.item()._oracleResist);
+		else if (effect.dataId === 14 && this.item()._oracleResist > 0) chance *= target.stateRate(this.item()._oracleResist);
 
 		if (Math.random() < chance) {
 			target.addState(effect.dataId);

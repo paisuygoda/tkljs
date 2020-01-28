@@ -471,12 +471,18 @@ BattleManager.makeRewards = function() {
     this._rewards.abilities = this.gainJp();
 };
 
+Game_Unit.prototype.fineMembers = function() {
+  return this.members().filter(function(member) {
+      return member.isAlive() && !this.isStateAffected(25) && !this.isStateAffected(24);
+  });
+};
+
 BattleManager.gainJp = function() {
 		var jp = $gameTroop.jpTotal();
 		var gainedAbilities = [];
 		$gameMessage.newPage();
     if (Yanfly.Param.JpAliveActors) {
-      var members = $gameParty.aliveMembers();
+      var members = $gameParty.fineMembers();
     } else {
       var members = $gameParty.members();
     }
