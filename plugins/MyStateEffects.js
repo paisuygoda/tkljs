@@ -114,7 +114,10 @@
 
 				// デスは通常即死を耐性無視で付与し、アンデッドは全快させる
 				if (stateId === 37) {
-					if (target.isStateAffected(11)) this.setHp(this.mhp);
+					if (target.isStateAffected(11)) {
+						this.setHp(this.mhp);
+						this.performReanimate();
+					}
 					else this.addNewState(1);
 				}
 				// 敵が石化/ゾンビ化したらそのステートではなく戦闘不能を耐性無視で付与
@@ -130,6 +133,100 @@
 	        }
 	        this._result.pushAddedState(stateId);
 	    }
+	};
+
+	// # 本当は死亡SEじゃないのが欲しい
+	Game_Actor.prototype.performReanimate = function() {
+		if ($gameParty.inBattle()) {
+			SoundManager.playActorCollapse();
+		}
+	};
+	Game_Enemy.prototype.performReanimate = function() {
+		this.requestEffect('reanimate');
+		SoundManager.playEnemyCollapse();
+	};
+
+	// アンデッド復活エフェクト追加
+	Sprite_Enemy.prototype.startEffect = function(effectType) {
+		this._effectType = effectType;
+		switch (this._effectType) {
+		case 'appear':
+			this.startAppear();
+			break;
+		case 'disappear':
+			this.startDisappear();
+			break;
+		case 'whiten':
+			this.startWhiten();
+			break;
+		case 'blink':
+			this.startBlink();
+			break;
+		case 'collapse':
+			this.startCollapse();
+			break;
+		case 'bossCollapse':
+			this.startBossCollapse();
+			break;
+		case 'instantCollapse':
+			this.startInstantCollapse();
+			break;
+		case 'reanimate':
+			this.startReanimate();
+			break;
+		}
+		this.revertToNormal();
+	};
+	Sprite_Enemy.prototype.startReanimate = function() {
+		this._effectDuration = 64;
+	};
+	Sprite_Enemy.prototype.updateEffect = function() {
+		this.setupEffect();
+		if (this._effectDuration > 0) {
+			this._effectDuration--;
+			switch (this._effectType) {
+			case 'whiten':
+				this.updateWhiten();
+				break;
+			case 'blink':
+				this.updateBlink();
+				break;
+			case 'appear':
+				this.updateAppear();
+				break;
+			case 'disappear':
+				this.updateDisappear();
+				break;
+			case 'collapse':
+				this.updateCollapse();
+				break;
+			case 'bossCollapse':
+				this.updateBossCollapse();
+				break;
+			case 'instantCollapse':
+				this.updateInstantCollapse();
+				break;
+			case 'reanimate':
+				this.updateReanimate();
+				break;
+			}
+			if (this._effectDuration === 0) {
+				this._effectType = null;
+			}
+		}
+	};
+	Sprite_Enemy.prototype.updateReanimate = function() {
+		var rate = this._effectDuration / (this._effectDuration + 1);
+		this.opacity *= 1 - rate;
+		var reflectionFilter = new PIXI.filters.ReflectionFilter (false, rate, [50, 50], [50,50]);
+		this.filters = [reflectionFilter];
+	};
+
+	// エフェクトが中断された時の戻し対象にfilterを追加
+	var MStEf_SpEn_revertToNormal = Sprite_Enemy.prototype.revertToNormal;
+	Sprite_Enemy.prototype.revertToNormal = function() {
+		MStEf_SpEn_revertToNormal.call(this);
+		this.filters = [];
 	};
 
 	Game_Battler.prototype.removeState = function(stateId) {
@@ -154,8 +251,8 @@
 	};
 
 	Game_Unit.prototype.isAllDead = function() {
-		var fineMembers = this.filter(function(member) {
-            return !(this.isAppeared() && (this.isDeathStateAffected() || this.isStateAffected(24) || this.isStateAffected(25)));
+		var fineMembers = this.members().filter(function(member) {
+            return !(member.isAppeared() && (member.isDeathStateAffected() || member.isStateAffected(24) || member.isStateAffected(25)));
         });
 		return fineMembers.length === 0;
 	};
