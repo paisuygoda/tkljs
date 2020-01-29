@@ -122,12 +122,13 @@
 	// 反撃は相手の攻撃をキャンセルしない、反撃処理は必ず行う（実際に動くかは反撃処理の中で決める）
 	BattleManager.invokeAction = function(subject, target) {
 	    this._logWindow.push('pushBaseLine');
-		this.invokeCounterAttack(subject, target);
 	    if (Math.random() < this._action.itemMrf(target)) {
 	        this.invokeMagicReflection(subject, target);
 	    } else {
+			var realTarget = this.applySubstitute(target);
+			this.invokeCounterAttack(subject, realTarget);
 			this._effectDuration = this._action.item().duration;
-	        this.invokeNormalAction(subject, target);
+	        this.invokeNormalAction(subject, realTarget);
 	    }
 	    subject.setLastTarget(target);
 	    this._logWindow.push('popBaseLine');

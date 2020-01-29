@@ -129,8 +129,10 @@
 				if (stateId === 18 && this.isStateAffected(19)) this.removeState(19);
 				else if (stateId === 19 && this.isStateAffected(18)) this.removeState(18);
 
-	            this.refresh();
-	        }
+				this.refresh();
+			
+			// カエル・小人は重ねがけで解除
+	        } else if (stateId === 12 || stateId === 13) this.removeState(stateId);
 	        this._result.pushAddedState(stateId);
 	    }
 	};
@@ -304,6 +306,7 @@
 			// 魅了の場合魅了対象を設定
 			if (effect.dataId === 9) {
 				target._charmTo = this.subject();
+				BattleManager._logWindow.push('waitForNewLine');
 				BattleManager._logWindow.push('addItemNameText', '死ぬまで味方を殴りなさい');
 			}
 
@@ -646,6 +649,72 @@
 		if (digit < 0) child.setFrame(9 * w, 4 * h, w, h);
 		else {
 			child.setFrame(digit * w, 0 * h, w, h);
+		}
+	};
+
+	// カエル状態の時Spriteをカエルに変更
+	Game_Player.prototype.refresh = function() {
+		var actor = $gameParty.leader();
+		var characterName = actor ? actor.characterName() : '';
+		var characterIndex = actor ? actor.characterIndex() : 0;
+		this._isFrog = actor.isStateAffected(12) ? true : false;
+		this.setImage(characterName, characterIndex);
+		this._followers.refresh();
+	};
+	Sprite_Character.prototype.updateBitmap = function() {
+		if (this.isImageChanged()) {
+			this._tilesetId = $gameMap.tilesetId();
+			this._tileId = this._character.tileId();
+			if (this._character._isFrog){
+				this._characterName = 'Frog';
+				this._characterIndex = 0;
+			} else {
+				this._characterName = this._character.characterName();
+				this._characterIndex = this._character.characterIndex();
+			}
+			if (this._tileId > 0) {
+				this.setTileBitmap();
+			} else {
+				this.setCharacterBitmap();
+			}
+		}
+	};
+	Sprite_ActorFace.prototype.updateBitmap = function()
+	{
+		var name = this._actor.faceName();
+		var index = this._actor.faceIndex();
+		if ( this._faceName !== name || this._faceIndex !== index )
+		{
+			if (this._isFrog){
+				this._faceName = 'Frog';
+				this._faceIndex = 0;
+
+			} else {
+				this._faceName = name;
+				this._faceIndex = index;
+			}
+			this.bitmap = ImageManager.loadFace(name);
+		}
+	};
+	Sprite_Actor.prototype.updateBitmap = function() {
+		Sprite_Battler.prototype.updateBitmap.call(this);
+		var name = this._actor.battlerName();
+		if (this._battlerName !== name) {
+			this._battlerName = name;
+			if (this._actor.isStateAffected(12)) this._mainSprite.bitmap = ImageManager.loadSvActor('Frog');
+			else this._mainSprite.bitmap = ImageManager.loadSvActor(name);
+		}
+	};
+	Sprite_Enemy.prototype.updateBitmap = function() {
+		Sprite_Battler.prototype.updateBitmap.call(this);
+		var name = this._enemy.battlerName();
+		var hue = this._enemy.battlerHue();
+		if (this._battlerName !== name || this._battlerHue !== hue) {
+			this._battlerName = name;
+			this._battlerHue = hue;
+			if (this._actor.isStateAffected(12)) this.loadBitmap('Frog', hue);
+			else this.loadBitmap(name, hue);
+			this.initVisibility();
 		}
 	};
 

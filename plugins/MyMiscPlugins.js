@@ -100,7 +100,7 @@
 	        }
 	    }
 	};
-
+	/*
 	// 敵の行動時光る
 	Sprite_Enemy.prototype.startWhiten = function() {
 		this._effectDuration = 24;
@@ -111,6 +111,22 @@
 			else this.setBlendColor([0, 0, 0, 255]);
 		} else {
 				this.setBlendColor([0, 0, 0, 0]);
+		}
+	};
+	*/
+	// 敵の行動時光る
+	Sprite_Enemy.prototype.startWhiten = function() {
+		this._effectDuration = 24;
+	};
+	Sprite_Enemy.prototype.updateWhiten = function() {
+		if (this._effectDuration % 16 > 8) {
+			this.setBlendColor([255, 255, 255, 255]);
+			var glowFilter = new PIXI.filters.GlowFilter(6, 4, 4, 0x000000);
+			this.filters = [glowFilter];
+		}
+		else {
+			this.setBlendColor([0, 0, 0, 0]);
+			this.filters = [];
 		}
 	};
 
@@ -144,13 +160,12 @@
 	};
 	// 瀕死攻撃などではダメージ表示しない
 	BattleManager.invokeNormalAction = function(subject, target) {
-		var realTarget = this.applySubstitute(target);
-		this._action.apply(realTarget);
+		this._action.apply(target);
 		if (!$dataSkills[this._action._item._itemId]._damagePopUp) {
-			realTarget.clearDamagePopup();
-        	realTarget.clearResult();
+			target.clearDamagePopup();
+        	target.clearResult();
 		}
-		this._logWindow.displayActionResults(subject, realTarget);
+		this._logWindow.displayActionResults(subject, target);
 	};
 
 	// 属性耐性は累計でなく一番有利な耐性のみを取る
