@@ -67,7 +67,8 @@
 	Game_BattlerBase.prototype.clearStates = function() {
 	    this._states = [];
 	    this._stateTurns = {};
-	    this._stateStartTurn = {};
+		this._stateStartTurn = {};
+		this._blinks = 0;
 	};
 
 	// ステートを付与するとき起点ターンも登録する
@@ -99,10 +100,10 @@
 		}
 	};
 
-	// 石化・ゾンビ状態にはステート付与させない
+	// 石化状態にはステート付与させない
 	var MStEf_GaBa_isStateAddable = Game_Battler.prototype.isStateAddable;
 	Game_Battler.prototype.isStateAddable = function(stateId) {
-		return MStEf_GaBa_isStateAddable.call(this, stateId) && !this.isStateAffected(25) && !this.isStateAffected(24);
+		return MStEf_GaBa_isStateAddable.call(this, stateId) && !this.isStateAffected(24);
 	};
 
 	// 持続ターン数を決めてからステート付与(持続ターン決めでステートにかかっているかを参照するため)
@@ -121,7 +122,14 @@
 					else this.addNewState(1);
 				}
 				// 敵が石化/ゾンビ化したらそのステートではなく戦闘不能を耐性無視で付与
-				else if (stateId === 24 & this.isEnemy()) this.addNewState(1);
+				else if ((stateId === 24 || stateId === 25) & this.isEnemy()) this.addNewState(1);
+				// 味方が石化したら一部のステート削除
+				else if (stateId === 24) {
+					this.addNewState(stateId);
+					var nonStoneStates = [4,5,6,7,8,9,15,16,17,18,19,20,21,22,23,27,28,29,30,31,34];
+					var actor = this;
+					nonStoneStates.forEach(function(tempstate){actor.removeState(tempstate);});
+				}
 				else this.addNewState(stateId);
 
 
@@ -132,7 +140,12 @@
 				this.refresh();
 			
 			// カエル・小人は重ねがけで解除
-	        } else if (stateId === 12 || stateId === 13) this.removeState(stateId);
+			} else if (stateId === 12 || stateId === 13) this.removeState(stateId);
+			
+			// 分身の場合2枚追加(MAX3枚)
+			if (stateId === 27) {
+				this._blinks = Math.min(this._blinks + 2, 3);
+			}
 	        this._result.pushAddedState(stateId);
 	    }
 	};
@@ -236,7 +249,8 @@
 			// ゾンビ解除時もhp1で回復
 			if (stateId === this.deathStateId() || stateId === 25) {
 				this.revive();
-			}
+			// 分身解除の場合枚数を0にする
+			} else if (stateId === 27) this._blinks = 0;
 			this.eraseState(stateId);
 			this.refresh();
 			this._result.pushRemovedState(stateId);
@@ -547,7 +561,16 @@
 			this._mainSprite._colorTone = [100,-60,-60, 0];
         } else {
             this._mainSprite._colorTone = [0,0,0,0];
-        }
+		}
+		
+		// 小人処理
+		if (this._actor.isStateAffected(13)) {
+			this.scale.x = 0.5;
+			this.scale.y = 0.5;
+        } else {
+			this.scale.x = 1;
+			this.scale.y = 1;
+		}
 	 }
 	 
 	// 混乱で向かい合う
@@ -716,6 +739,23 @@
 			else this.loadBitmap(name, hue);
 			this.initVisibility();
 		}
+	};
+
+	// 小人の時回避率2倍(盾とかは関係ない)
+	Game_Action.prototype.itemEva = function(target) {
+		var eva = 0;
+		if (this.isPhysical()) {
+			// target分身時、分身を一枚減らして回避率100%にする
+			if (target.isStateAffected(27)) {
+				if (--target._blinks === 0) target.removeState(27);
+				eva = 1;
+			} else eva = target.eva;
+		} else if (this.isMagical()) {
+			eva = target.mev;
+		}
+		if (target.isStateAffected(13)) eva *= 2;
+		
+		return eva;
 	};
 
 })();
