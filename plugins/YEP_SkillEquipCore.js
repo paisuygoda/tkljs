@@ -378,8 +378,9 @@ Game_Actor.prototype.releaseUnequippableAbs = function(forcing) {
 };
 
 Game_Actor.prototype.abrefresh = function() {
+    var actor = this;
     this.skillEquips().forEach(function(ability) {
-        if (ability && ability.counterType) this._counterType = ability.counterType;
+        if (ability && ability.counterType) actor._counterType = ability.counterType;
     }, this);
     this.releaseUnequippableAbs(false);
     this.refresh();

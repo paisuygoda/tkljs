@@ -195,10 +195,36 @@
 	};
 
 	// 戦闘モーションが終わったらその情報を外す
-	var SpAc_refreshMotion = Sprite_Actor.prototype.refreshMotion;
 	Sprite_Actor.prototype.refreshMotion = function() {
-		this._actor._isInMotion = false;
-	    SpAc_refreshMotion.call(this);
+		var actor = this._actor;
+		actor._isInMotion = false;
+		var motionGuard = Sprite_Actor.MOTIONS['guard'];
+		if (actor) {
+			if (this._motion === motionGuard && !BattleManager.isInputting()) {
+					return;
+			}
+			var stateMotion = actor.stateMotionIndex();
+			if (actor.isInputting() || actor.isActing()) {
+				this.startMotion('walk');
+			} else if (stateMotion === 3) {
+				this.startMotion('dead');
+			} else if (stateMotion === 2) {
+				this.startMotion('sleep');
+			} else if (actor.isChanting()) {
+				this.startMotion('chant');
+			} else if (actor.isGuard() || actor.isGuardWaiting()) {
+				this.startMotion('guard');
+			} else if (stateMotion === 1) {
+				this.startMotion('abnormal');
+			// ゾンビなら瀕死モーションはとらない
+			} else if (actor.isDying() && !actor.isStateAffected(25)) {
+				this.startMotion('dying');
+			} else if (actor.isUndecided()) {
+				this.startMotion('walk');
+			} else {
+				this.startMotion('wait');
+			}
+		}
 	};
 
 	// 通常消滅エフェクトの敵の場合同時撃破時には同時に消える

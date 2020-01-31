@@ -104,9 +104,7 @@
 	// ゾンビなら死んでても付与する
 	var MStEf_GaBa_isStateAddable = Game_Battler.prototype.isStateAddable;
 	Game_Battler.prototype.isStateAddable = function(stateId) {
-		console.log(stateId);
 		if (stateId === 25) {
-			console.log(!this.isStateResist(stateId) && !this._result.isStateRemoved(stateId) && !this.isStateAffected(24));
 			return !this.isStateResist(stateId) && !this._result.isStateRemoved(stateId) && !this.isStateAffected(24);
 		}
 		else return MStEf_GaBa_isStateAddable.call(this, stateId) && !this.isStateAffected(24);
@@ -114,6 +112,7 @@
 
 	// 持続ターン数を決めてからステート付与(持続ターン決めでステートにかかっているかを参照するため)
 	Game_Battler.prototype.addState = function(stateId) {
+		console.log(this.isStateAddable(stateId));
 	    if (this.isStateAddable(stateId)) {
 			this.resetStateCounts(stateId);
 			
@@ -337,7 +336,7 @@
 			// 魅了の場合魅了対象を設定
 			if (effect.dataId === 9) {
 				target._charmTo = this.subject();
-				BattleManager._logWindow.push('waitForNewLine');
+				BattleManager._logWindow.push('clear');
 				BattleManager._logWindow.push('addItemNameText', '死ぬまで味方を殴りなさい');
 			}
 
@@ -457,6 +456,7 @@
 		this._pattern %= 8;
 		if (this._battler) {
 			this._overlayIndex = this.statePattern();
+			if (this._battler.isStateAffected(8) || this._battler.isStateAffected(9)) this.scale.x = -1;
 		}
 	};
 	Sprite_StateOverlay.prototype.statePattern = function() {
@@ -558,11 +558,13 @@
 		} else if (++this._glowFrame === 120) this._glowFrame = 0; 
 		var blightness = (this._glowFrame > 60 ? 120 - this._glowFrame : this._glowFrame) / 30 ;
 		var glowFilter = new PIXI.filters.GlowFilter(6, blightness, blightness, this._glowColor);
-
+		
 		// バニシュ輪郭線フィルタ
-		var vanishline = this._battler.isStateAffected(31) ? 1 : 0;
-		var outlineFilter = new PIXI.filters.GlowFilter(vanishline, 4, 4, 0x000000);
-		this._mainSprite.filters = [outlineFilter, glowFilter];
+		if (this._battler.isStateAffected(31)) {
+			var outlineFilter = new PIXI.filters.GlowFilter(2, 10, 10, 0x000000);
+			this._mainSprite.filters = [outlineFilter, glowFilter];
+		}
+		this._mainSprite.filters = [glowFilter];
 	};
 
 	// 全身の色が変わる系、これは排他
@@ -599,7 +601,7 @@
 	var MStEf_SpAc_updateTargetPosition = Sprite_Actor.prototype.updateTargetPosition;
 	Sprite_Actor.prototype.updateTargetPosition = function() {
 		if (this._actor.isStateAffected(8) || this._actor.isStateAffected(9)) {
-			this.startMove(-96, 0, 12);
+			this.startMove(-75, 0, 12);
 		} else {
 			MStEf_SpAc_updateTargetPosition.call(this);
 		}
@@ -766,5 +768,17 @@
 		
 		return eva;
 	};
+
+	// ゾンビの時HPの文字は赤色だが瀕死モーションはとらない
+	Window_Base.prototype.hpColor = function(actor) {
+		if (actor.hp === 0) {
+			return this.deathColor();
+		} else if (actor.isDying()) {
+			return this.crisisColor();
+		} else {
+			return this.normalColor();
+		}
+	};
+	//Sprite_Actor.prototype.refreshMotionの処理はMyChangePopUpDamageOrder:L198に書いた
 
 })();

@@ -157,8 +157,8 @@
 		if (this.counterHappenGeneral(subject, target)) {
 			var action = this._action;
 			target.counters().some(function(counter) {
-					if ((counter.hit === 0 && action.isPhysical())
-						|| (counter.hit === 1 && action.isMagical())
+					if ((counter.hit === 0 && action.isMagical())
+						|| (counter.hit === 1 && action.isPhysical())
 						|| (counter.hit === 2 && !action.isCertainHit())
 						|| (counter.hit === 3 && action.isCertainHit())
 						|| (counter.hit === 4)) var hit = true;

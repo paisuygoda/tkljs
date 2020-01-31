@@ -116,12 +116,12 @@
 	*/
 	// 敵の行動時光る
 	Sprite_Enemy.prototype.startWhiten = function() {
-		this._effectDuration = 24;
+		this._effectDuration = 30;
 	};
 	Sprite_Enemy.prototype.updateWhiten = function() {
-		if (this._effectDuration % 16 > 8) {
+		if (this._effectDuration > 10 && this._effectDuration % 10 > 5) {
 			this.setBlendColor([255, 255, 255, 255]);
-			var glowFilter = new PIXI.filters.GlowFilter(6, 4, 4, 0x000000);
+			var glowFilter = new PIXI.filters.GlowFilter(4, 4, 4, 0x000000);
 			this.filters = [glowFilter];
 		}
 		else {
@@ -206,6 +206,11 @@
 				}
 			}
 		}
+	};
+	
+	// 味方をもう少し左端へ寄せる
+	Sprite_Actor.prototype.setActorHome = function(index) {
+		this.setHome(650 + index * 20, 250 + index * 56);
 	};
 
 })();
