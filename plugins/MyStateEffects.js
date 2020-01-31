@@ -304,9 +304,8 @@
 		// HP0でもゾンビなら戦闘不能ステートは付与しない
 		} else if (this.hp === 0 && !this.isStateAffected(25)) {
 			this.addState(this.deathStateId());
-		}else {
+		} else {
 			this.removeState(this.deathStateId());
-			this.removeState(25);
 		}
 	};
 
@@ -549,6 +548,7 @@
 	var MStEf_SpAc_updateFrame = Sprite_Actor.prototype.updateFrame;
 	Sprite_Actor.prototype.updateFrame = function() {
 		MStEf_SpAc_updateFrame.call(this);
+		// 輪郭線エフェクトフィルタ
 		if (this._glowFrame === 0) {
 			if (this._battler.glowStates().length > 0) {
 				this._glowFrame = 1;
@@ -558,7 +558,11 @@
 		} else if (++this._glowFrame === 120) this._glowFrame = 0; 
 		var blightness = (this._glowFrame > 60 ? 120 - this._glowFrame : this._glowFrame) / 30 ;
 		var glowFilter = new PIXI.filters.GlowFilter(6, blightness, blightness, this._glowColor);
-		this._mainSprite.filters = [glowFilter];
+
+		// バニシュ輪郭線フィルタ
+		var vanishline = this._battler.isStateAffected(31) ? 1 : 0;
+		var outlineFilter = new PIXI.filters.GlowFilter(vanishline, 4, 4, 0x000000);
+		this._mainSprite.filters = [outlineFilter, glowFilter];
 	};
 
 	// 全身の色が変わる系、これは排他
