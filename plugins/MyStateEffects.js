@@ -101,9 +101,15 @@
 	};
 
 	// 石化状態にはステート付与させない
+	// ゾンビなら死んでても付与する
 	var MStEf_GaBa_isStateAddable = Game_Battler.prototype.isStateAddable;
 	Game_Battler.prototype.isStateAddable = function(stateId) {
-		return MStEf_GaBa_isStateAddable.call(this, stateId) && !this.isStateAffected(24);
+		console.log(stateId);
+		if (stateId === 25) {
+			console.log(!this.isStateResist(stateId) && !this._result.isStateRemoved(stateId) && !this.isStateAffected(24));
+			return !this.isStateResist(stateId) && !this._result.isStateRemoved(stateId) && !this.isStateAffected(24);
+		}
+		else return MStEf_GaBa_isStateAddable.call(this, stateId) && !this.isStateAffected(24);
 	};
 
 	// 持続ターン数を決めてからステート付与(持続ターン決めでステートにかかっているかを参照するため)
@@ -119,10 +125,16 @@
 						this.setHp(this.mhp);
 						this.performReanimate();
 					}
-					else this.addNewState(1);
+					else {
+						this.addNewState(1);
+						this._result.pushAddedState(1);
+					}
 				}
 				// 敵が石化/ゾンビ化したらそのステートではなく戦闘不能を耐性無視で付与
-				else if ((stateId === 24 || stateId === 25) & this.isEnemy()) this.addNewState(1);
+				else if ((stateId === 24 || stateId === 25) & this.isEnemy()) {
+					this.addNewState(1);
+					this._result.pushAddedState(1);
+				}
 				// 味方が石化したら一部のステート削除
 				else if (stateId === 24) {
 					this.addNewState(stateId);
@@ -130,8 +142,14 @@
 					var actor = this;
 					nonStoneStates.forEach(function(tempstate){actor.removeState(tempstate);});
 				}
+				// 生きたままゾンビになったら死亡処理を挟む
+				else if (stateId === 25) {
+					this._hp = 0;
+					this.clearStates();
+					this.clearBuffs();
+					this.addNewState(stateId);
+				}
 				else this.addNewState(stateId);
-
 
 				// ヘイスト/スロウ排他処理
 				if (stateId === 18 && this.isStateAffected(19)) this.removeState(19);
@@ -702,22 +720,9 @@
 			}
 		}
 	};
-	Sprite_ActorFace.prototype.updateBitmap = function()
-	{
-		var name = this._actor.faceName();
-		var index = this._actor.faceIndex();
-		if ( this._faceName !== name || this._faceIndex !== index )
-		{
-			if (this._isFrog){
-				this._faceName = 'Frog';
-				this._faceIndex = 0;
-
-			} else {
-				this._faceName = name;
-				this._faceIndex = index;
-			}
-			this.bitmap = ImageManager.loadFace(name);
-		}
+	Window_Base.prototype.drawActorFace = function(actor, x, y, width, height) {
+		if (actor && actor.isStateAffected(12)) this.drawFace('Frog', 0, x, y, width, height);
+		else this.drawFace(actor.faceName(), actor.faceIndex(), x, y, width, height);
 	};
 	Sprite_Actor.prototype.updateBitmap = function() {
 		Sprite_Battler.prototype.updateBitmap.call(this);
@@ -735,7 +740,7 @@
 		if (this._battlerName !== name || this._battlerHue !== hue) {
 			this._battlerName = name;
 			this._battlerHue = hue;
-			if (this._actor.isStateAffected(12)) this.loadBitmap('Frog', hue);
+			if (this._actor && this._actor.isStateAffected(12)) this.loadBitmap('Frog', hue);
 			else this.loadBitmap(name, hue);
 			this.initVisibility();
 		}

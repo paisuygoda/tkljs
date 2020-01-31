@@ -473,7 +473,7 @@ BattleManager.makeRewards = function() {
 
 Game_Unit.prototype.fineMembers = function() {
   return this.members().filter(function(member) {
-      return member.isAlive() && !this.isStateAffected(25) && !this.isStateAffected(24);
+      return member.isAlive() && !member.isStateAffected(25) && !member.isStateAffected(24);
   });
 };
 
