@@ -213,4 +213,11 @@
 		this.setHome(650 + index * 20, 250 + index * 56);
 	};
 
+	// 敵にダメージ与えた時の点滅をなくす
+	Game_Enemy.prototype.performDamage = function() {
+		Game_Battler.prototype.performDamage.call(this);
+		SoundManager.playEnemyDamage();
+		// this.requestEffect('blink');
+	};
+
 })();

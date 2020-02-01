@@ -2774,14 +2774,15 @@ animationId, mirror) {
         targets.forEach(function(target) {
             target.startAnimation(animationId, mirror, 0);
         });
+        BattleManager._waitAnim += $dataAnimations[animationId].frames.length;
       } else {
           var delay = this.animationBaseDelay();
           var nextDelay = this.animationNextDelay();
           targets.forEach(function(target) {
               target.startAnimation(animationId, mirror, delay);
               delay += nextDelay;
-              BattleManager._waitAnim = $dataAnimations[animationId].frames.length;
           });
+          BattleManager._waitAnim += $dataAnimations[animationId].frames.length + delay;
       }
     }
 };

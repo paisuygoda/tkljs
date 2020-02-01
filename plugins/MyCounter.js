@@ -38,7 +38,7 @@
 
 			obj.counters = [];
 			var hpCondition = 0;
-			var hitCondition = 0;
+			var hitCondition = 1;
 			var attributeCondition = 0;
 			var skillTypeCondition = 0;
 
@@ -62,7 +62,7 @@
 					});
 
 					hpCondition = 0;
-					hitCondition = 0;
+					hitCondition = 1;
 					attributeCondition = 0;
 					skillTypeCondition = 0;
 				}
@@ -180,7 +180,8 @@
 						counterActor._isForCounter = target;
 						this._actionBattlers.unshift(counterActor);
 				    	return true;
-				    }
+					}
+					return false;
 			    }, this);
 		}
 	};

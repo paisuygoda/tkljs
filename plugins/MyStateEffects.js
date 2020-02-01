@@ -112,7 +112,6 @@
 
 	// 持続ターン数を決めてからステート付与(持続ターン決めでステートにかかっているかを参照するため)
 	Game_Battler.prototype.addState = function(stateId) {
-		console.log(this.isStateAddable(stateId));
 	    if (this.isStateAddable(stateId)) {
 			this.resetStateCounts(stateId);
 			
@@ -120,7 +119,7 @@
 
 				// デスは通常即死を耐性無視で付与し、アンデッドは全快させる
 				if (stateId === 37) {
-					if (target.isStateAffected(11)) {
+					if (this.isStateAffected(11)) {
 						this.setHp(this.mhp);
 						this.performReanimate();
 					}
