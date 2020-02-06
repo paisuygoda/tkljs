@@ -40,10 +40,11 @@
 		26 行動不能耐性
 		# 27 分身
 		# 28 マヒ
-		29 老化
+		# 29 老化
 		# 30 凍結 - 炎で解除 MyMiscPlugins:L175
 		31 透明 - MyStateEffect:L562で輪郭線だけ実装したが、まずプラグインを試す
 		32 戦線離脱 - 全員離脱すると逃走　吸い込みシステムをどうするか？決まり手の吸い込みは別技にするとか？
+			BattleManager.checkAbortや$gameParty.isEmpty()を見る限り追放システムはデフォである？
 		33 リレイズ - updateSpecialDamageってタイミングがかぶったらどうなる？BattleManager._phaseを強引に変えるのはよくなさそう
 		34 せいしんは
 		35 瀕死耐性

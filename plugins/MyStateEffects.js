@@ -525,7 +525,8 @@
 		17 : 0xFF00FF, //ストップ
 		18 : 0xFF4000, //ヘイスト
 		19 : 0xFFFFFF, //スロウ
-		21 : 0x0080FF  //リフレク
+		21 : 0x0080FF, //リフレク
+		29 : 0x804000  //老化
 	};
 	Game_BattlerBase.prototype.glowStates = function() {
 		return this._states.filter(function(stateId) {
@@ -596,10 +597,13 @@
 		}
 	 }
 	 
-	// 混乱で向かい合う
 	var MStEf_SpAc_updateTargetPosition = Sprite_Actor.prototype.updateTargetPosition;
 	Sprite_Actor.prototype.updateTargetPosition = function() {
-		if (this._actor.isStateAffected(8) || this._actor.isStateAffected(9)) {
+		//戦線離脱の時画面外に出る
+		if (this._actor.isStateAffected(32)) {
+			this.startMove(300, 0, 0);
+		// 混乱or魅了で向かい合う
+		} else if (this._actor.isStateAffected(8) || this._actor.isStateAffected(9)) {
 			this.startMove(-75, 0, 12);
 		} else {
 			MStEf_SpAc_updateTargetPosition.call(this);
