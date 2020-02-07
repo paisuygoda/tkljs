@@ -45,17 +45,18 @@
 		31 透明 - MyStateEffect:L562で輪郭線だけ実装したが、まずプラグインを試す
 		32 戦線離脱 - 全員離脱すると逃走　吸い込みシステムをどうするか？決まり手の吸い込みは別技にするとか？
 			BattleManager.checkAbortや$gameParty.isEmpty()を見る限り追放システムはデフォである？
-		33 リレイズ - updateSpecialDamageってタイミングがかぶったらどうなる？BattleManager._phaseを強引に変えるのはよくなさそう
-		34 せいしんは
+		# 33 リレイズ - updateSpecialDamageってタイミングがかぶったらどうなる？BattleManager._phaseを強引に変えるのはよくなさそう
+		# 34 せいしんは
 		35 瀕死耐性
 		# 36 死後ゾンビ
 		37 デス
 		38 隠れる
 
 バトル画面
-	選択中の指の位置をSpriteのサイズによって動的に決める
+	# 選択中の指の位置をSpriteのサイズによって動的に決める
 	ステータスのTP削除
 	選択中のステータス画面がバニラ
+		Scene_Battle.prototype.createActorWindowのWindow_BattleActorをWindow_BattleStatusにできないだろうか
 	画面左端に敵の名前欄を作り、それにかぶせる形でコマンドウィンドウが開く
 	敵選択中も上下に移動したい
 	武器を装備していなければすでと表示する

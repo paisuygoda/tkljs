@@ -71,6 +71,20 @@
 		this._blinks = 0;
 	};
 
+	// リレイズ要求
+	Game_BattlerBase.prototype.die = function() {
+		if (this.isStateAffected(33)) {
+			BattleManager._specialSkills.push({
+				skillId		:	10, // # リレイズのスキルIDに書き換え
+				targets 	:	[this],
+				origin 		:	'rerise'
+			});
+		}
+		this._hp = 0;
+		this.clearStates();
+		this.clearBuffs();
+	};
+
 	// ステートを付与するとき起点ターンも登録する
 	Game_BattlerBase.prototype.resetStateCounts = function(stateId) {
 		var state = $dataStates[stateId];
@@ -380,12 +394,12 @@
 			}
 			// 宣告
 			if (this.isStateAffected(14) && this._stateStartTurn[14] % 10 == BattleManager._turnCount % 10){
-				if (this._oracleCount-- === 0 ) {
-					BattleManager._logWindow.showNormalAnimation([this], $dataSkills[this._oracleEvent].animationId);
-					BattleManager._specialSkill = this._oracleEvent;
-					BattleManager._specialTargets = [this];
-					BattleManager._phase = 'specialDamage';
-					this.removeState(14);
+				if (--this._oracleCount === 0 ) {
+					BattleManager._specialSkills.push({
+						skillId		:	this._oracleEvent,
+						targets 	:	[this],
+						origin 		:	'oracle' // 宣告
+					});
 				}
 			}
 			// リジェネ
