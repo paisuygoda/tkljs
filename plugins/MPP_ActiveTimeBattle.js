@@ -941,21 +941,24 @@ BattleManager.startTurn = function() {
 
 //290
 BattleManager.updateTurn = function() {
-    $gameParty.requestMotionRefresh();
-    if (!this._subject) {
-        this._subject = this.getNextSubject();
-        if (this._subject) {
-            this._subject.onTurnEnd();
-            this.refreshStatus();
-            this._logWindow.displayAutoAffectedStatus(this._subject);
-            this._logWindow.displayRegeneration(this._subject);
-            if (this._logWindow.isBusy()) return;
+    if (this._waitAnim > 0) this._waitAnim--;
+    if (this._waitAnim <= 0) {
+        $gameParty.requestMotionRefresh();
+        if (!this._subject) {
+            this._subject = this.getNextSubject();
+            if (this._subject) {
+                this._subject.onTurnEnd();
+                this.refreshStatus();
+                this._logWindow.displayAutoAffectedStatus(this._subject);
+                this._logWindow.displayRegeneration(this._subject);
+                if (this._logWindow.isBusy()) return;
+            }
         }
-    }
-    if (this._subject) {
-        this.processTurn();
-    } else {
-        this.endTurn();
+        if (this._subject) {
+            this.processTurn();
+        } else {
+            this.endTurn();
+        }
     }
 };
 

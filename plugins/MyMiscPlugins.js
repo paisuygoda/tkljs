@@ -220,4 +220,52 @@
 		// this.requestEffect('blink');
 	};
 
+	// 戦闘不能者対象の技が生存者に当たった場合、デフォルトでは戦闘不能者にターゲットをずらすが
+	// そのまま生存者に当てるよう変更(アンデッドに蘇生技を当てるため)
+	Game_Action.prototype.targetsForFriends = function() {
+		var targets = [];
+		var unit = this.friendsUnit();
+		if (this.isForUser()) {
+			return [this.subject()];
+		} else if (this.isForDeadFriend()) {
+			if (this.isForOne()) {
+				//targets.push(unit.smoothDeadTarget(this._targetIndex));
+				targets.push(unit.members()[this._targetIndex]);
+			} else {
+				targets = unit.deadMembers();
+			}
+		} else if (this.isForOne()) {
+			if (this._targetIndex < 0) {
+				targets.push(unit.randomTarget());
+			} else {
+				targets.push(unit.smoothTarget(this._targetIndex));
+			}
+		} else {
+			targets = unit.aliveMembers();
+		}
+		return targets;
+	};
+
+	Game_Action.prototype.testApply = function(target) {
+		return (
+				// 戦闘不能者対象の技が生存者にもあたる（アンデッドに蘇生技を当てるため）
+				(this.isForDeadFriend() === target.isDead() || this.isForDeadFriend()) &&
+				($gameParty.inBattle() || this.isForOpponent() ||
+				(this.isHpRecover() && target.hp < target.mhp) ||
+				(this.isMpRecover() && target.mp < target.mmp) ||
+				(this.hasItemAnyValidEffects(target))));
+	};
+
+	// 敵消滅を早く
+	Sprite_Enemy.prototype.startCollapse = function() {
+		this._effectDuration = 16;
+		this._appeared = false;
+	};
+	// 敵消滅時、黒くなる
+	Sprite_Enemy.prototype.updateCollapse = function() {
+		this.blendMode = Graphics.BLEND_MULTIPLY;
+		this.setBlendColor([90, 0, 90, 128]);
+		this.opacity *= this._effectDuration / (this._effectDuration + 1);
+	};
+
 })();

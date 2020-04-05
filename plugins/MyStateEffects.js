@@ -64,11 +64,29 @@
 	};
 
 	// game_battler初期化時にステートの起点ターンarrayを作る
+	// アンデッドなどのパッシブステートはクリアされない
 	Game_BattlerBase.prototype.clearStates = function() {
-	    this._states = [];
-	    this._stateTurns = {};
-		this._stateStartTurn = {};
-		this._blinks = 0;
+		// リセット時
+		if (this._states) {
+			// パッシブステート記憶
+			var isUndead = this._states.indexOf(11) >= 0;
+
+			// clearState
+			this._states = [];
+			this._stateTurns = {};
+			this._stateStartTurn = {};
+			this._blinks = 0;
+
+			// パッシブステート復帰
+			if (isUndead) this._states.push(11);
+
+		// 初期化時
+		} else {
+			this._states = [];
+			this._stateTurns = {};
+			this._stateStartTurn = {};
+			this._blinks = 0;
+		}
 	};
 
 	// ステートを付与するとき起点ターンも登録する
@@ -147,7 +165,15 @@
 					this.clearBuffs();
 					this.addNewState(stateId);
 				}
-				else this.addNewState(stateId);
+				// アンデッドがゾンビ攻撃受けても効果なし
+				else if (stateId === 25 && this.isStateAffected(11));
+				// ゾンビがアンデッド化したらゾンビ回復→アンデッド付与する。ただしこの処理は起きない想定
+				else if (this.isStateAffected(25) && stateId === 11) {
+					this.removeState(25);
+					this.addNewState(stateId);
+				}
+				else {
+					this.addNewState(stateId);}
 
 				// ヘイスト/スロウ排他処理
 				if (stateId === 18 && this.isStateAffected(19)) this.removeState(19);
@@ -210,6 +236,7 @@
 	};
 	Sprite_Enemy.prototype.startReanimate = function() {
 		this._effectDuration = 64;
+		BattleManager._waitAnim = 64;
 	};
 	Sprite_Enemy.prototype.updateEffect = function() {
 		this.setupEffect();
@@ -247,10 +274,19 @@
 		}
 	};
 	Sprite_Enemy.prototype.updateReanimate = function() {
-		var rate = this._effectDuration / (this._effectDuration + 1);
-		this.opacity *= 1 - rate;
-		var reflectionFilter = new PIXI.filters.ReflectionFilter (false, rate, [50, 50], [50,50]);
-		this.filters = [reflectionFilter];
+		if (this._effectDuration > 48) {
+			this.blendMode = Graphics.BLEND_MULTIPLY;
+			this.setBlendColor([90, 0, 90, 128]);
+			this.opacity *= (this._effectDuration - 48) / (this._effectDuration - 47);
+		} else if (this._effectDuration > 32) {
+			this.blendMode = Graphics.BLEND_NORMAL;
+			this.opacity = 0;
+		} else {
+			var rate = this._effectDuration / 32;
+			this.opacity = (1 - rate) * 255;
+			this.setBlendColor([90, 0, 90, 255 * rate]);
+			console.log([255 * rate, 0, 255 * rate, 255 * rate]);
+		}
 	};
 
 	// エフェクトが中断された時の戻し対象にfilterを追加
@@ -261,7 +297,9 @@
 	};
 
 	Game_Battler.prototype.removeState = function(stateId) {
-		if (this.isStateAffected(stateId)) {
+		// 死亡アンデッドに蘇生をかけても何も起きない
+		if (this.isStateAffected(stateId) && this.isStateAffected(11));
+		else if (this.isStateAffected(stateId)) {
 			// ゾンビ解除時もhp1で回復
 			if (stateId === this.deathStateId() || stateId === 25) {
 				this.revive();
@@ -270,6 +308,10 @@
 			this.eraseState(stateId);
 			this.refresh();
 			this._result.pushRemovedState(stateId);
+		
+		// 生存アンデッドがレイズorゾンビ回復効果を受けると即死
+		} else if (this.isStateAffected(11) && (stateId === this.deathStateId() || stateId === 25)) {
+			this.addState(this.deathStateId());
 		}
 	};
 
@@ -302,9 +344,11 @@
 		// HP0でもゾンビなら戦闘不能ステートは付与しない
 		} else if (this.hp === 0 && !this.isStateAffected(25)) {
 			this.addState(this.deathStateId());
-		} else {
-			this.removeState(this.deathStateId());
-		}
+		} 
+		// HPがあれば自動で戦闘不能解除する処理を外す（アンデッドが常時蘇生効果を受けてしまって即死するのを防ぐ）
+		//else {
+		//	this.removeState(this.deathStateId());
+		//}
 	};
 
 	Game_Battler.prototype.gainHp = function(value) {
