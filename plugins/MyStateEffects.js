@@ -89,6 +89,20 @@
 		}
 	};
 
+	// リレイズ要求
+	Game_BattlerBase.prototype.die = function() {
+		if (this.isStateAffected(33)) {
+			BattleManager._specialSkills.push({
+				skillId		:	10, // # リレイズのスキルIDに書き換え
+				targets 	:	[this],
+				origin 		:	'rerise'
+			});
+		}
+		this._hp = 0;
+		this.clearStates();
+		this.clearBuffs();
+	};
+
 	// ステートを付与するとき起点ターンも登録する
 	Game_BattlerBase.prototype.resetStateCounts = function(stateId) {
 		var state = $dataStates[stateId];
@@ -424,12 +438,12 @@
 			}
 			// 宣告
 			if (this.isStateAffected(14) && this._stateStartTurn[14] % 10 == BattleManager._turnCount % 10){
-				if (this._oracleCount-- === 0 ) {
-					BattleManager._logWindow.showNormalAnimation([this], $dataSkills[this._oracleEvent].animationId);
-					BattleManager._specialSkill = this._oracleEvent;
-					BattleManager._specialTargets = [this];
-					BattleManager._phase = 'specialDamage';
-					this.removeState(14);
+				if (--this._oracleCount === 0 ) {
+					BattleManager._specialSkills.push({
+						skillId		:	this._oracleEvent,
+						targets 	:	[this],
+						origin 		:	'oracle' // 宣告
+					});
 				}
 			}
 			// リジェネ
@@ -569,7 +583,8 @@
 		17 : 0xFF00FF, //ストップ
 		18 : 0xFF4000, //ヘイスト
 		19 : 0xFFFFFF, //スロウ
-		21 : 0x0080FF  //リフレク
+		21 : 0x0080FF, //リフレク
+		29 : 0x804000  //老化
 	};
 	Game_BattlerBase.prototype.glowStates = function() {
 		return this._states.filter(function(stateId) {
@@ -640,10 +655,13 @@
 		}
 	 }
 	 
-	// 混乱で向かい合う
 	var MStEf_SpAc_updateTargetPosition = Sprite_Actor.prototype.updateTargetPosition;
 	Sprite_Actor.prototype.updateTargetPosition = function() {
-		if (this._actor.isStateAffected(8) || this._actor.isStateAffected(9)) {
+		//戦線離脱の時画面外に出る
+		if (this._actor.isStateAffected(32)) {
+			this.startMove(300, 0, 0);
+		// 混乱or魅了で向かい合う
+		} else if (this._actor.isStateAffected(8) || this._actor.isStateAffected(9)) {
 			this.startMove(-75, 0, 12);
 		} else {
 			MStEf_SpAc_updateTargetPosition.call(this);

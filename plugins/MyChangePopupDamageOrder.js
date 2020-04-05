@@ -17,6 +17,8 @@
 		this._dualWielding = false;
 		this._tempWeapon = null;
 		this._waitAnim = 0;
+		this._specialSkills = [];
+		this._special = null;
 	};
 
 	// startActionではアクションを呼ばない
@@ -59,6 +61,27 @@
 	            break;
 	        }
 	    }
+	};
+
+	// 特殊行動がある時はそちらを優先
+	BattleManager.updateTurn = function() {
+		$gameParty.requestMotionRefresh();
+		if (this._specialSkills.length > 0) {
+			this._special = this._specialSkills.shift();
+			var oracleSkill = $dataSkills[this._special[skillId]];
+			var targets = this._special[targets];
+			this._logWindow.showNormalAnimation(targets, oracleSkill.animationId);
+			this._phase = 'specialDamage';
+		} else {
+			if (!this._subject) {
+				this._subject = this.getNextSubject();
+			}
+			if (this._subject) {
+				this.processTurn();
+			} else {
+				this.endTurn();
+			}
+		}
 	};
 
 	// 二刀流の場合にはこのタイミングでアクションを分割
@@ -106,11 +129,10 @@
 	BattleManager.updateSpecialDamage = function() {
 		if (this._waitAnim > 0) this._waitAnim--;
 	    if (!(this._logWindow.isBusy())) {
-			var oracleSkill = $dataSkills[this._specialSkill];
+			var oracleSkill = $dataSkills[this._special[skillId]];
+			var targets = this._special[targets];
 
-			BattleManager._specialIsSentence = true;
-
-			this._specialTargets.forEach(function(target) {
+			targets.forEach(function(target) {
 				BattleManager.updateIndividualSpecialDamage(target, oracleSkill);
 			});
 			this._phase = 'turn';
@@ -144,7 +166,8 @@
 		oracleSkill.effects.forEach(function(effect) {
 			target.addState(effect.dataId);
 		}, target);
-		if (BattleManager._specialIsSentence) target.removeState(14);
+		if (this._special[origin] === 'oracle') target.removeState(14);
+		else if (this._special[origin] === 'rerise') target.removeState(33);
         this._logWindow.displayAffectedStatus(target);
 	}
 
