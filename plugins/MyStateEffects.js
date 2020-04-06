@@ -646,13 +646,30 @@
 		
 		// 小人処理
 		if (this._actor.isStateAffected(13)) {
-			this.scale.x = 0.5;
-			this.scale.y = 0.5;
+			this.scale.x = 0.3;
+			this.scale.y = 0.3;
         } else {
 			this.scale.x = 1;
 			this.scale.y = 1;
 		}
 	 }
+
+	 // Enemyの小人処理
+	 Sprite_Enemy.prototype.update = function() {
+		Sprite_Battler.prototype.update.call(this);
+		if (this._enemy) {
+			this.updateEffect();
+			this.updateStateSprite();
+
+			if (this._enemy.isStateAffected(13)) {
+				this.scale.x = 0.3;
+				this.scale.y = 0.3;
+			} else {
+				this.scale.x = 1;
+				this.scale.y = 1;
+			}
+		}
+	};
 	 
 	var MStEf_SpAc_updateTargetPosition = Sprite_Actor.prototype.updateTargetPosition;
 	Sprite_Actor.prototype.updateTargetPosition = function() {
@@ -669,13 +686,11 @@
 	var MStEf_SpAc_updateMotion = Sprite_Actor.prototype.updateMotion;
 	Sprite_Actor.prototype.updateMotion = function() {
 		MStEf_SpAc_updateMotion.call(this);
-		this.scale.x = 1;
 		if (this._actor.isStateAffected(8) || this._actor.isStateAffected(9)) this.scale.x *= -1;
 	};
 	var MStEf_SpEn_update = Sprite_Enemy.prototype.update;
 	Sprite_Enemy.prototype.update = function() {
 		MStEf_SpEn_update.call(this);
-		this.scale.x = 1;
 		if (this._enemy && this._enemy.isStateAffected(8)) this.scale.x *= -1;
 		this._oracleCountSprite.y = this.countOffsetY();
 	};
