@@ -299,7 +299,6 @@
 			var rate = this._effectDuration / 32;
 			this.opacity = (1 - rate) * 255;
 			this.setBlendColor([90, 0, 90, 255 * rate]);
-			console.log([255 * rate, 0, 255 * rate, 255 * rate]);
 		}
 	};
 
@@ -312,7 +311,7 @@
 
 	Game_Battler.prototype.removeState = function(stateId) {
 		// 死亡アンデッドに蘇生をかけても何も起きない
-		if (this.isStateAffected(stateId) && this.isStateAffected(11));
+		if (this.isStateAffected(stateId) &&  this.isStateAffected(11));
 		else if (this.isStateAffected(stateId)) {
 			// ゾンビ解除時もhp1で回復
 			if (stateId === this.deathStateId() || stateId === 25) {
@@ -791,24 +790,35 @@
 		if (actor && actor.isStateAffected(12)) this.drawFace('Frog', 0, x, y, width, height);
 		else this.drawFace(actor.faceName(), actor.faceIndex(), x, y, width, height);
 	};
+	var MyStEf_SpBa_initMembers = Sprite_Battler.prototype.initMembers;
+	Sprite_Battler.prototype.initMembers = function() {
+		MyStEf_SpBa_initMembers.call(this);
+		this._isFrog = false;
+	};
 	Sprite_Actor.prototype.updateBitmap = function() {
 		Sprite_Battler.prototype.updateBitmap.call(this);
 		var name = this._actor.battlerName();
-		if (this._battlerName !== name) {
-			this._battlerName = name;
+		if (this._isFrog !== this._actor.isStateAffected(12)) {
 			if (this._actor.isStateAffected(12)) this._mainSprite.bitmap = ImageManager.loadSvActor('Frog');
 			else this._mainSprite.bitmap = ImageManager.loadSvActor(name);
+			this._isFrog = this._actor.isStateAffected(12);
+		} else if (this._battlerName !== name) {
+			this._battlerName = name;
+			this._mainSprite.bitmap = ImageManager.loadSvActor(name);
 		}
 	};
 	Sprite_Enemy.prototype.updateBitmap = function() {
 		Sprite_Battler.prototype.updateBitmap.call(this);
 		var name = this._enemy.battlerName();
 		var hue = this._enemy.battlerHue();
-		if (this._battlerName !== name || this._battlerHue !== hue) {
+		if (this._isFrog !== this._enemy.isStateAffected(12)) {
+			if (this._enemy.isStateAffected(12)) this.loadBitmap('Frog', hue);
+			else this.loadBitmap(name, hue);
+			this._isFrog = this._enemy.isStateAffected(12);
+		} else if (this._battlerName !== name || this._battlerHue !== hue) {
 			this._battlerName = name;
 			this._battlerHue = hue;
-			if (this._actor && this._actor.isStateAffected(12)) this.loadBitmap('Frog', hue);
-			else this.loadBitmap(name, hue);
+			this.loadBitmap(name, hue);
 			this.initVisibility();
 		}
 	};

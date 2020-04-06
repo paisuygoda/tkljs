@@ -163,9 +163,9 @@
 		this._action.apply(target);
 		if (!$dataSkills[this._action._item._itemId]._damagePopUp) {
 			target.clearDamagePopup();
-        	target.clearResult();
 		}
 		this._logWindow.displayActionResults(subject, target);
+		target.clearResult();
 	};
 
 	// 属性耐性は累計でなく一番有利な耐性のみを取る
