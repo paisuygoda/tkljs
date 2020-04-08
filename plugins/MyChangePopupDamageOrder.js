@@ -64,6 +64,7 @@
 	};
 
 	// 特殊行動がある時はそちらを優先
+	/* MPP_ActiveTimeBattleに統合
 	BattleManager.updateTurn = function() {
 		$gameParty.requestMotionRefresh();
 		if (this._specialSkills.length > 0) {
@@ -83,6 +84,7 @@
 			}
 		}
 	};
+	*/
 
 	// 二刀流の場合にはこのタイミングでアクションを分割
 	BattleManager.updateAction = function() {
@@ -129,8 +131,8 @@
 	BattleManager.updateSpecialDamage = function() {
 		if (this._waitAnim > 0) this._waitAnim--;
 	    if (!(this._logWindow.isBusy())) {
-			var oracleSkill = $dataSkills[this._special[skillId]];
-			var targets = this._special[targets];
+			var oracleSkill = $dataSkills[this._special['skillId']];
+			var targets = this._special['targets'];
 
 			targets.forEach(function(target) {
 				BattleManager.updateIndividualSpecialDamage(target, oracleSkill);

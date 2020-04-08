@@ -7,6 +7,7 @@ var $plugins =
 {"name":"MyChangePopupDamageOrder","status":true,"description":"モーション・アクションとダメージ表示のフェーズを別に管理","parameters":{}},
 {"name":"MyCounter","status":true,"description":"カウンターをFF仕様に変更","parameters":{}},
 {"name":"MyStateEffects","status":true,"description":"ステート処理プラグイン","parameters":{}},
+{"name":"MyDamageFormula","status":true,"description":"細かなプラグイン集","parameters":{}},
 {"name":"Community_Basic","status":true,"description":"基本的なパラメーターを設定するプラグインです。","parameters":{"cacheLimit":"20","screenWidth":"816","screenHeight":"624","changeWindowWidthTo":"","changeWindowHeightTo":"","renderingMode":"auto","alwaysDash":"on"}},
 {"name":"EnemyBook","status":true,"description":"モンスター図鑑です。敵キャラの詳細なステータスを表示します。","parameters":{"Unknown Data":"？？？？？？"}},
 {"name":"-------------------------","status":false,"description":"--------------------","parameters":{}},

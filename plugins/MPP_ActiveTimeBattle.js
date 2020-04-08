@@ -940,24 +940,33 @@ BattleManager.startTurn = function() {
 };
 
 //290
+// 特殊行動がある時はそちらを優先
 BattleManager.updateTurn = function() {
     if (this._waitAnim > 0) this._waitAnim--;
     if (this._waitAnim <= 0) {
         $gameParty.requestMotionRefresh();
-        if (!this._subject) {
-            this._subject = this.getNextSubject();
-            if (this._subject) {
-                this._subject.onTurnEnd();
-                this.refreshStatus();
-                this._logWindow.displayAutoAffectedStatus(this._subject);
-                this._logWindow.displayRegeneration(this._subject);
-                if (this._logWindow.isBusy()) return;
+        if (this._specialSkills.length > 0) {
+			this._special = this._specialSkills.shift();
+			var oracleSkill = $dataSkills[this._special['skillId']];
+			var targets = this._special['targets'];
+			this._logWindow.showNormalAnimation(targets, oracleSkill.animationId);
+			this._phase = 'specialDamage';
+		} else {
+            if (!this._subject) {
+                this._subject = this.getNextSubject();
+                if (this._subject) {
+                    this._subject.onTurnEnd();
+                    this.refreshStatus();
+                    this._logWindow.displayAutoAffectedStatus(this._subject);
+                    this._logWindow.displayRegeneration(this._subject);
+                    if (this._logWindow.isBusy()) return;
+                }
             }
-        }
-        if (this._subject) {
-            this.processTurn();
-        } else {
-            this.endTurn();
+            if (this._subject) {
+                this.processTurn();
+            } else {
+                this.endTurn();
+            }
         }
     }
 };

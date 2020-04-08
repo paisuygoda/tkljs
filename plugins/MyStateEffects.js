@@ -443,6 +443,7 @@
 						targets 	:	[this],
 						origin 		:	'oracle' // 宣告
 					});
+					this.removeState(14);
 				}
 			}
 			// リジェネ
