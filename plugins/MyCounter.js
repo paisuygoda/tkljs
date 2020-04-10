@@ -121,7 +121,8 @@
 
 	// 反撃は相手の攻撃をキャンセルしない、反撃処理は必ず行う（実際に動くかは反撃処理の中で決める）
 	BattleManager.invokeAction = function(subject, target) {
-	    this._logWindow.push('pushBaseLine');
+		this._logWindow.push('pushBaseLine');
+		/* リフレクの判定時点を早めたので削除
 	    if (Math.random() < this._action.itemMrf(target)) {
 	        this.invokeMagicReflection(subject, target);
 	    } else {
@@ -129,7 +130,12 @@
 			this.invokeCounterAttack(subject, realTarget);
 			this._effectDuration = this._action.item().duration;
 	        this.invokeNormalAction(subject, realTarget);
-	    }
+		}
+		*/
+		var realTarget = this.applySubstitute(target);
+		this.invokeCounterAttack(subject, realTarget);
+		this._effectDuration = this._action.item().duration;
+		this.invokeNormalAction(subject, realTarget);
 	    subject.setLastTarget(target);
 	    this._logWindow.push('popBaseLine');
 	    this.refreshStatus();
@@ -199,6 +205,7 @@
 	    }
 	};
 
+	/* リフレクの判定時点を早めたので削除
 	// リフレク発動時の処理
 	BattleManager.invokeMagicReflection = function(subject, target) {
 		this._action._reflectionTarget = target;
@@ -216,5 +223,6 @@
 		if (substitute) return substitute;
 		return target;
 	};
+	*/
 
 })();

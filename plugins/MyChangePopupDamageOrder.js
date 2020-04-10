@@ -89,8 +89,11 @@
 	// 二刀流の場合にはこのタイミングでアクションを分割
 	BattleManager.updateAction = function() {
 		if (!this._logWindow.isBusy()) {
-	    	this._targets = this._action.makeTargets();
-	    	// Actionがたたかう系であることの確認も必要
+			
+			// ._targetsと._reflecTargetsに対象を詰める
+			this.splitTargetByReflec();
+			
+			// Actionがたたかう系であることの確認も必要だが、まだ実装できていない（たたかう系に属するスキルIDが定まっていないため）
 	    	if(this._subject.isActor()) {
 		    	if(!this._dualWielding && this._subject.weapons()[1]) {
 		    		this._dualWielding = true;
@@ -104,12 +107,38 @@
 		    		this._subject._equips[0] = null;
 		    	}
 		    }
-	    	this._logWindow.startAction(this._subject, this._action, this._targets);
+	    	this._logWindow.startAction(this._subject, this._action, this._targets, this._reflectTargets);
 		    this._phase = 'damage';
     	}
 	};
 
+	// リフレク状態によってtargetsを分割
+	BattleManager.splitTargetByReflec = function() {
+		if (this._action.isMagical()) {
+			rawTargets = this._action.makeTargets();
+			this._targets = [];
+			this._reflectTargets = [];
+			rawTargets.forEach(function(target) {
+				if (target.isStateAffected(21)) BattleManager._reflectTargets.push(target);
+				else BattleManager._targets.push(target);
+			});
+			
+			// リフレク者が一人でもいれば反射先を選定しtargetに加える
+			// リフレクアニメと反射後の攻撃アニメが同時に流れる
+			if (this._reflectTargets.length > 0) {
+				this._reflectTargets.forEach(function(target) {
+					var substitute = target.opponentsUnit().randomTarget();
+					if (substitute) BattleManager._targets.push(substitute);
+				});
+			}
+		} else {
+			this._targets = this._action.makeTargets();
+			this._reflectTargets = [];
+		}
+	};
+
 	BattleManager.updateDamage = function() {
+		if (this._dualWielding && this._subject.isActor()) console.log(this._subject._equips[0]._itemId);
 		if (this._waitAnim > 0) this._waitAnim--;
 	    if (!(this._logWindow.isBusy() || this._subject._isInMotion)) {
 	    	if(this._dualWielding && this._subject._equips[0]._itemId === 0) {
@@ -290,12 +319,14 @@
 	};
 
 	// アクションごとには技名は表示しない / アニメーション処理の後にフェーズチェンジ
-	Window_BattleLog.prototype.startAction = function(subject, action, targets) {
+	Window_BattleLog.prototype.startAction = function(subject, action, targets, reflectTargets) {
 	    var item = action.item();
 	    this.push('performActionStart', subject, action);
 	    this.push('waitForMovement');
 		this.push('performAction', subject, action);
 		this.push('waitForEffect');
+		// リフレク表示
+		this.push('showAnimation', subject, reflectTargets.clone(), 123);
 		this.push('showAnimation', subject, targets.clone(), item.animationId);
 		this.push('waitPhase');
 	    // this.displayAction(subject, item);
