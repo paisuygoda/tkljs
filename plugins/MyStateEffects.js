@@ -427,7 +427,7 @@
 		        this.setHp(this.hp - 1);
 			}
 			// 毒
-			if (this.isStateAffected(4) && this._stateStartTurn[4] % 20 == BattleManager._turnCount % 20){
+			if (this.activating(4, 20)){
 				var value = Math.floor(this.mhp * -this._poisonProgress++ / 20);
 				value = Math.min(value, -1) * this.elementRate(10);
 				if (value !== 0) {
@@ -436,7 +436,7 @@
 				}
 			}
 			// 宣告
-			if (this.isStateAffected(14) && this._stateStartTurn[14] % 10 == BattleManager._turnCount % 10){
+			if (this.activating(14, 10)){
 				if (--this._oracleCount === 0 ) {
 					BattleManager._specialSkills.push({
 						skillId		:	this._oracleEvent,
@@ -447,7 +447,7 @@
 				}
 			}
 			// リジェネ
-			if (this.isStateAffected(20) && this._stateStartTurn[20] % 20 == BattleManager._turnCount % 20){
+			if (this.activating(20, 20)){
 				var value = Math.floor(this.mhp / 10);
 				value = Math.max(value, 1);
 				if (value !== 0) {
@@ -455,11 +455,11 @@
 				}
 			}
 			// オールド
-			if (this.isStateAffected(29) && this._stateStartTurn[29] % 10 == BattleManager._turnCount % 10){
+			if (this.activating(29, 10)){
 				this.blv--;
 			}
 			// 精神波
-			if (this.isStateAffected(34) && this._stateStartTurn[34] % 20 == BattleManager._turnCount % 20){
+			if (this.activating(34, 20)){
 				var value = Math.floor(this.mmp / 20);
 				value = Math.max(value, 1);
 				if (value !== 0) {
@@ -468,6 +468,13 @@
 			}
 	    }
 	};
+	Game_Battler.prototype.activating = function(stateId, interval) {
+		if (this.isPassiveStateAffected(stateId)) {
+			return BattleManager._turnCount % interval === 0;
+		} else if (this.isStateAffected(stateId)) {
+			return BattleManager._turnCount % interval === this._stateStartTurn[stateId] % interval;
+		}
+	}
 
 	// 重ね掛けのためアニメーション分(6つ)追加
 	Sprite_Actor.prototype.createStateSprite = function() {
@@ -587,7 +594,7 @@
 		29 : 0x804000  //老化
 	};
 	Game_BattlerBase.prototype.glowStates = function() {
-		return this._states.filter(function(stateId) {
+		return this._states.concat(this.passiveStatesRaw()).filter(function(stateId) {
 			return [15, 16, 17, 18, 19, 21].contains(stateId);
 		});
 	};
