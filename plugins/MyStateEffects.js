@@ -604,6 +604,10 @@
 		this._glowIndex = 0;
 		this._glowFrame = 0;
 		this._glowColor = 0x000000;
+		this._levitateOffset = 0;
+		this._levitateUpward = true;
+		// 1フレーム1ピクセルでは速すぎる動きの隔Xフレーム判断用
+		this._clock = 0;
 		
 		//宣告で使う
 		this._oracleCountSprite = new Sprite_OracleCount();
@@ -662,8 +666,32 @@
 		}
 	 }
 
-	 // Enemyの小人処理
-	 Sprite_Enemy.prototype.update = function() {
+	// レビテト時の浮遊モーション
+	Sprite_Actor.prototype.updatePosition = function() {
+		if(!this._actor.isStateAffected(22)) {
+			this._levitateOffset = 0;
+			this._levitateUpward = true;
+		} else if (this._clock % 5 === 0) {
+			if (this._levitateUpward) {
+				this._levitateOffset++;
+				if (this._levitateOffset > 9) this._levitateUpward = false;
+			} else {
+				this._levitateOffset--;
+				if (this._levitateOffset === 0) this._levitateUpward = true;
+			}
+		}
+		this.x = this._homeX + this._offsetX;
+		this.y = this._homeY + this._offsetY - this._levitateOffset;
+	};
+	
+	// レビテト時の浮遊モーションの影
+	Sprite_Actor.prototype.updateShadow = function() {
+		this._shadowSprite.visible = !!this._actor;
+		this._shadowSprite.y = -2 + this._levitateOffset;
+	};
+
+	// Enemyの小人処理
+	Sprite_Enemy.prototype.update = function() {
 		Sprite_Battler.prototype.update.call(this);
 		if (this._enemy) {
 			this.updateEffect();

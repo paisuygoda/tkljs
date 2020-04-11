@@ -201,6 +201,20 @@
 		this.setHome(650 + index * 20, 250 + index * 56);
 	};
 
+	
+	// Sprite_Actorに1フレーム1ピクセルでは速すぎる動きの隔Xフレーム判断用にclockを仕込む
+	Sprite_Actor.prototype.update = function() {
+		Sprite_Battler.prototype.update.call(this);
+		this.updateShadow();
+		this.updateClock();
+		if (this._actor) {
+			this.updateMotion();
+		}
+	};
+	Sprite_Actor.prototype.updateClock = function() {
+		if (++this._clock === 60) this._clock = 0;
+	};
+
 	// 敵にダメージ与えた時の点滅をなくす
 	Game_Enemy.prototype.performDamage = function() {
 		Game_Battler.prototype.performDamage.call(this);
@@ -234,7 +248,12 @@
 		return targets;
 	};
 
+	// 接地技リスト
+	var surfaceSkills = [9];
+
 	Game_Action.prototype.testApply = function(target) {
+		// レビテト者が接地技を食らったらそれを無効にする(接地技は手書きで指定、一部地属性技はレビテト回避されると不自然なため)
+		if (target.isStateAffected(22) && surfaceSkills.contains(this._item._itemId)) return false;
 		return (
 				// 戦闘不能者対象の技が生存者にもあたる（アンデッドに蘇生技を当てるため）
 				(this.isForDeadFriend() === target.isDead() || this.isForDeadFriend()) &&
