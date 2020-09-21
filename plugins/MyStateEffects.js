@@ -637,9 +637,7 @@
 	};
 
 	// 全身の色が変わる系、これは排他
-	var MStEf_Sprite_Actor_prototype_refreshMotion = Sprite_Actor.prototype.refreshMotion;
-    Sprite_Actor.prototype.refreshMotion = function() {
-        MStEf_Sprite_Actor_prototype_refreshMotion.call(this);
+    Sprite_Actor.prototype.alterSpriteByState = function() {
         // 石化
         if (this._actor.isStateAffected(24)) {
 			this._mainSprite._colorTone = [0,0,0,255];
@@ -663,6 +661,43 @@
         } else {
 			this.scale.x = 1;
 			this.scale.y = 1;
+		}
+	};
+
+	var MStEf_Sprite_Actor_prototype_refreshMotion = Sprite_Actor.prototype.refreshMotion;
+    Sprite_Actor.prototype.refreshMotion = function() {
+	
+		// 色変え処理を先に呼ぶ
+		this.alterSpriteByState();
+
+        var actor = this._actor;
+		actor._isInMotion = false;
+		var motionGuard = Sprite_Actor.MOTIONS['guard'];
+		if (actor) {
+			if ((this._motion === motionGuard) && !BattleManager.isInputting()) {
+					return;
+			}
+			var stateMotion = actor.stateMotionIndex();
+			if (actor.isInputting() || actor.isActing()) {
+				this.startMotion('walk');
+			} else if (stateMotion === 3) {
+				this.startMotion('dead');
+			} else if (stateMotion === 2) {
+				this.startMotion('sleep');
+			} else if (actor.isChanting()) {
+				this.startMotion('chant');
+			} else if (actor.isGuard() || actor.isGuardWaiting()) {
+				this.startMotion('guard');
+			} else if (stateMotion === 1) {
+				this.startMotion('abnormal');
+			// ゾンビなら瀕死モーションはとらない
+			} else if (actor.isDying() && !actor.isStateAffected(25)) {
+				this.startMotion('dying');
+			} else if (actor.isUndecided()) {
+				this.startMotion('walk');
+			} else {
+				this.startMotion('wait');
+			}
 		}
 	 }
 
@@ -901,6 +936,24 @@
 			return this.normalColor();
 		}
 	};
-	//Sprite_Actor.prototype.refreshMotionの処理はMyChangePopUpDamageOrder:L198に書いた
+	//Sprite_Actor.prototype.refreshMotionの処理はL641に書いた
+
+	Sprite_Actor.prototype.updateMotionCount = function() {
+		if (this._motion && ++this._motionCount >= this.motionSpeed()) {
+			if (this._motion.loop) {
+				// 動けないステートの時は止まる
+				if (this._actor.isStateAffected(17) || this._actor.isStateAffected(24) || this._actor.isStateAffected(30)) {
+					this._pattern = 3;
+				} else {
+					this._pattern = (this._pattern + 1) % 4;
+				}
+			} else if (this._pattern < 2) {
+				this._pattern++;
+			} else {
+				this.refreshMotion();
+			}
+			this._motionCount = 0;
+		}
+	};
 
 })();

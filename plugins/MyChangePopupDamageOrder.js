@@ -248,39 +248,6 @@
 	    }
 	};
 
-	// 戦闘モーションが終わったらその情報を外す
-	Sprite_Actor.prototype.refreshMotion = function() {
-		var actor = this._actor;
-		actor._isInMotion = false;
-		var motionGuard = Sprite_Actor.MOTIONS['guard'];
-		if (actor) {
-			if (this._motion === motionGuard && !BattleManager.isInputting()) {
-					return;
-			}
-			var stateMotion = actor.stateMotionIndex();
-			if (actor.isInputting() || actor.isActing()) {
-				this.startMotion('walk');
-			} else if (stateMotion === 3) {
-				this.startMotion('dead');
-			} else if (stateMotion === 2) {
-				this.startMotion('sleep');
-			} else if (actor.isChanting()) {
-				this.startMotion('chant');
-			} else if (actor.isGuard() || actor.isGuardWaiting()) {
-				this.startMotion('guard');
-			} else if (stateMotion === 1) {
-				this.startMotion('abnormal');
-			// ゾンビなら瀕死モーションはとらない
-			} else if (actor.isDying() && !actor.isStateAffected(25)) {
-				this.startMotion('dying');
-			} else if (actor.isUndecided()) {
-				this.startMotion('walk');
-			} else {
-				this.startMotion('wait');
-			}
-		}
-	};
-
 	// 通常消滅エフェクトの敵の場合同時撃破時には同時に消える
 	Sprite_Enemy.prototype.isEffecting = function() {
 	    return this._effectType !== null && this._effectType !== 'collapse';

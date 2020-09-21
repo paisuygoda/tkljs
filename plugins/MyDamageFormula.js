@@ -7,6 +7,9 @@
 (function() {
 
     Game_Action.prototype.makeDamageValue = function(target, critical) {
+		// 石化時は一切の計算をせずに0で返す
+		if (target.isStateAffected(24)) return 0;
+		
 		var item = this.item();
 		var baseValue = this.evalDamageFormula(target);
 		var value = baseValue * this.calcElementRate(target);
