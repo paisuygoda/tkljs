@@ -110,7 +110,7 @@
 		var duration = 1;
 		// 持続ターン数決定
 		if (this.isStateAffected(26) && stunStates.indexOf(stateId) >= 0) {
-			duration = 30;
+			duration = 5;
 		} else if (BattleManager._effectDuration > 0) {
 			duration = BattleManager._effectDuration;
 		} else {
@@ -492,6 +492,12 @@
 		this.addChild(this._sleepStateSprite);
 		this._paralyzeStateSprite = new Sprite_ParalyzeStateOverlay();
 		this.addChild(this._paralyzeStateSprite);
+
+		// 分身部分
+		this._blinkSprite = new Sprite_Base();
+		this._blinkSprite.visible = false;
+		this._blinkSprite.blinkPosition = 0;
+		this.addChild(this._blinkSprite);
 	};
 	Sprite_Actor.prototype.setBattler = function(battler) {
 		Sprite_Battler.prototype.setBattler.call(this, battler);
@@ -614,9 +620,19 @@
 		this._oracleCountSprite.y = -60;
     	this.addChild(this._oracleCountSprite);
 	};
-	var MStEf_SpAc_updateFrame = Sprite_Actor.prototype.updateFrame;
 	Sprite_Actor.prototype.updateFrame = function() {
-		MStEf_SpAc_updateFrame.call(this);
+		Sprite_Battler.prototype.updateFrame.call(this);
+		var bitmap = this._mainSprite.bitmap;
+		if (bitmap) {
+			var motionIndex = this._motion ? this._motion.index : 0;
+			var pattern = this._pattern < 3 ? this._pattern : 1;
+			var cw = bitmap.width / 9;
+			var ch = bitmap.height / 6;
+			var cx = Math.floor(motionIndex / 6) * 3 + pattern;
+			var cy = motionIndex % 6;
+			this._mainSprite.setFrame(cx * cw, cy * ch, cw, ch);
+		}
+
 		// 輪郭線エフェクトフィルタ
 		if (this._glowFrame === 0) {
 			if (this._battler.glowStates().length > 0) {
@@ -634,6 +650,20 @@
 			this._mainSprite.filters = [outlineFilter, glowFilter];
 		}
 		this._mainSprite.filters = [glowFilter];
+
+		// 分身描画
+		if (this._actor._blinks > 0) {
+			this._blinkSprite.blinkPosition += 1;
+			this._blinkSprite.blinkPosition %= 3;
+			if (this._blinkSprite.blinkPosition < this._actor._blinks) {
+				this._blinkSprite.setFrame(cx * cw, cy * ch, cw, ch);
+				this._blinkSprite.anchor.x = 0.2 - this._blinkSprite.blinkPosition * 0.3;
+    			this._blinkSprite.anchor.y = 1;
+				this._blinkSprite.visible = true;
+			} else this._blinkSprite.visible = false;
+		} else {
+			this._blinkSprite.visible = false;
+		}
 	};
 
 	// 全身の色が変わる系、これは排他
@@ -739,6 +769,18 @@
 				this.scale.x = 1;
 				this.scale.y = 1;
 			}
+
+			if (this._enemy._blinks > 0) {
+				this._blinkSprite.blinkPosition += 1;
+				this._blinkSprite.blinkPosition %= 3;
+				if (this._blinkSprite.blinkPosition < this._enemy._blinks) {
+					this._blinkSprite.visible = true;
+					this._blinkSprite.anchor.x = 0.65 + this._blinkSprite.blinkPosition * 0.15;
+					this._blinkSprite.anchor.y = 1;
+				} else this._blinkSprite.visible = false;
+			} else {
+				this._blinkSprite.visible = false;
+			}
 		}
 	};
 	 
@@ -775,6 +817,10 @@
 		MStEf_SpEn_initMembers.call(this);
 		this._oracleCountSprite = new Sprite_OracleCount();
     	this.addChild(this._oracleCountSprite);
+		this._blinkSprite = new Sprite_Base();
+		this._blinkSprite.visible = false;
+		this._blinkSprite.blinkPosition = 0;
+    	this.addChild(this._blinkSprite);
 	};
 	var MStEf_SpEn_setBattler = Sprite_Enemy.prototype.setBattler;
 	Sprite_Enemy.prototype.setBattler = function(battler) {
@@ -892,6 +938,8 @@
 			this._battlerName = name;
 			this._mainSprite.bitmap = ImageManager.loadSvActor(name);
 		}
+		// 分身にbitmapをコピー
+		this._blinkSprite.bitmap = this._mainSprite.bitmap;
 	};
 	Sprite_Enemy.prototype.updateBitmap = function() {
 		Sprite_Battler.prototype.updateBitmap.call(this);
@@ -907,6 +955,8 @@
 			this.loadBitmap(name, hue);
 			this.initVisibility();
 		}
+		// 分身にbitmapをコピー
+		this._blinkSprite.bitmap = this.bitmap;
 	};
 
 	// 小人の時回避率2倍(盾とかは関係ない)
