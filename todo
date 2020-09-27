@@ -1,6 +1,5 @@
 animationは一マス192pixel四方
 バトルシステム
-		ChangeScope で味方を向いたままキャンセルすると迷子になる
 		かばいモーション(MyCounter:L130)
 			x:32, y:48 移動
 			庇う対象のパーティ位置やSprite座標の取り方を要調査

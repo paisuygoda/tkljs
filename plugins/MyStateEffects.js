@@ -668,6 +668,7 @@
 		} else if (++this._glowFrame === 120) this._glowFrame = 0; 
 		var blightness = (this._glowFrame > 60 ? 120 - this._glowFrame : this._glowFrame) / 30 ;
 		var glowFilter = new PIXI.filters.GlowFilter(6, blightness, blightness, this._glowColor);
+		this._mainSprite.filters = [glowFilter];
 
 		// 分身描画
 		if (this._actor._blinks > 0) {
@@ -781,6 +782,18 @@
 			this.updateEffect();
 			this.updateStateSprite();
 
+			// 輪郭線エフェクトフィルタ
+			if (this._glowFrame === 0) {
+				if (this._battler.glowStates().length > 0) {
+					this._glowFrame = 1;
+					this._glowIndex = this._glowIndex + 1 >= this._enemy.glowStates().length ? 0 : this._glowIndex + 1;
+					this._glowColor = colorDict[this._enemy.glowStates()[this._glowIndex]];
+				}
+			} else if (++this._glowFrame === 120) this._glowFrame = 0; 
+			var blightness = (this._glowFrame > 60 ? 120 - this._glowFrame : this._glowFrame) / 30 ;
+			var glowFilter = new PIXI.filters.GlowFilter(6, blightness, blightness, this._glowColor);
+			this.filters = [glowFilter];
+
 			if (this._enemy.isStateAffected(13)) {
 				this.scale.x = 0.3;
 				this.scale.y = 0.3;
@@ -834,6 +847,9 @@
 	var MStEf_SpEn_initMembers = Sprite_Enemy.prototype.initMembers;
 	Sprite_Enemy.prototype.initMembers = function() {
 		MStEf_SpEn_initMembers.call(this);
+		this._glowIndex = 0;
+		this._glowFrame = 0;
+		this._glowColor = 0x000000;
 		this._oracleCountSprite = new Sprite_OracleCount();
     	this.addChild(this._oracleCountSprite);
 		this._blinkSprite = new Sprite_Base();
