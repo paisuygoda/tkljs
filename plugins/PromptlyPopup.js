@@ -122,6 +122,7 @@ Window_BattleLog.prototype.displaySubstitute = function(substitute, target) {
 };
 
 Window_BattleLog.prototype.displayActionResults = function(subject, target) {
+    console.log(target.result());
     if (target.result().used) {
         this.displayCritical(target);
         this.push('popupDamage', target);

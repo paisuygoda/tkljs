@@ -2564,6 +2564,7 @@ Scene_Battle.prototype.onEnemyOk = function() {
 
 Scene_Battle.prototype.onEnemyCancel = function() {
     this._enemyWindow.hide();
+    console.log(this._actorCommandWindow.currentSymbol());
     switch (this._actorCommandWindow.currentSymbol()) {
     case 'attack':
         this._actorCommandWindow.activate();

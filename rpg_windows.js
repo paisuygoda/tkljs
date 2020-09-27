@@ -5195,6 +5195,7 @@ Window_BattleLog.prototype.displayTpDamage = function(target) {
 };
 
 Window_BattleLog.prototype.displayAffectedStatus = function(target) {
+    console.log(target.result());
     if (target.result().isStatusAffected()) {
         this.push('pushBaseLine');
         this.displayChangedStates(target);

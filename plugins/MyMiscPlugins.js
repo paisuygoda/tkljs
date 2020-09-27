@@ -142,18 +142,18 @@
 		return true;
 	};
 	DataManager.processNotetagsDamagePopUp = function(group) {
-		var noteCounter = /<(?:DamagePopUp):[ ](\d+)>/i;
+		var noteCounter = /<(?:DamageNotPopUp)>/i;
 		for (var n = 1; n < group.length; n++) {
 			var obj = group[n];
 			var notedata = obj.note.split(/[\r\n]+/);
 
 			obj.counterType = 0;
 
+			obj._damagePopUp = true;
 			for (var i = 0; i < notedata.length; i++) {
 				var line = notedata[i];
 				if (line.match(noteCounter)) {
-					if (parseInt(RegExp.$1) == '0') obj._damagePopUp = false;
-					else obj._damagePopUp = true;
+					obj._damagePopUp = false;
 				}
 			}
 		}
