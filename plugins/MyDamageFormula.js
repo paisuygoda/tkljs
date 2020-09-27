@@ -38,7 +38,7 @@
 	// 吸収>無効>半減>弱点
 	Game_BattlerBase.prototype.elementRate = function(elementId) {
 		// ついでに凍結解除
-		if (this.isStateAffected(30) && elementId === 1) this.removeState(30);
+		if (this.isStateAffected(30) && elementId === 2) this.removeState(30);
 		return this.traitsWithId(Game_BattlerBase.TRAIT_ELEMENT_RATE, elementId).reduce(function(r, trait) {
 			if (trait.value === 0) return -1;
 			if (trait.value === 0.01) return Math.min(r, 0);

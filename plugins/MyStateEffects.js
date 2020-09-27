@@ -70,6 +70,10 @@
 		if (this._states) {
 			// パッシブステート記憶
 			var isUndead = this._states.indexOf(11) >= 0;
+			// 行動不能耐性記憶
+			var isResistStun = this._states.indexOf(26) >= 0;
+			// 瀕死耐性記憶
+			var isBoss = this._states.indexOf(35) >= 0;
 
 			// clearState
 			this._states = [];
@@ -79,6 +83,10 @@
 
 			// パッシブステート復帰
 			if (isUndead) this._states.push(11);
+			// 行動不能耐性復帰
+			if (isResistStun) this._states.push(26);
+			// 瀕死耐性復帰
+			if (isBoss) this._states.push(35);
 
 		// 初期化時
 		} else {
@@ -93,7 +101,7 @@
 	Game_BattlerBase.prototype.die = function() {
 		if (this.isStateAffected(33)) {
 			BattleManager._specialSkills.push({
-				skillId		:	10, // # リレイズのスキルIDに書き換え
+				skillId		:	16, // # リレイズのスキルIDに書き換え
 				targets 	:	[this],
 				origin 		:	'rerise'
 			});
@@ -149,7 +157,7 @@
 			
 	        if (!this.isStateAffected(stateId)) {
 
-				// デスは通常即死を耐性無視で付与し、アンデッドは全快させる
+				// デスは戦闘不能を耐性無視で付与し、アンデッドは全快させる
 				if (stateId === 37) {
 					if (this.isStateAffected(11)) {
 						this.setHp(this.mhp);
@@ -159,6 +167,11 @@
 						this.addNewState(1);
 						this._result.pushAddedState(1);
 					}
+				}
+				// 即死は戦闘不能を耐性無視で付与
+				else if (stateId === 38) {
+					this.addNewState(1);
+					this._result.pushAddedState(1);
 				}
 				// 敵が石化/ゾンビ化したらそのステートではなく戦闘不能を耐性無視で付与
 				else if ((stateId === 24 || stateId === 25) & this.isEnemy()) {
@@ -344,6 +357,14 @@
 		return fineMembers.length === 0;
 	};
 
+	Game_Party.prototype.isAllDead = function() {
+    if (Game_Unit.prototype.isAllDead.call(this)) {
+        return !this.isEmpty();
+    } else {
+        return false;
+    }
+};
+
 	Game_BattlerBase.prototype.isDown = function() {
 		return this.isAppeared() && (this.isDeathStateAffected() || this.isStateAffected(25));
 	};
@@ -357,11 +378,10 @@
 		// HP0でもゾンビなら戦闘不能ステートは付与しない
 		} else if (this.hp === 0 && !this.isStateAffected(25)) {
 			this.addState(this.deathStateId());
-		} 
-		// HPがあれば自動で戦闘不能解除する処理を外す（アンデッドが常時蘇生効果を受けてしまって即死するのを防ぐ）
-		//else {
-		//	this.removeState(this.deathStateId());
-		//}
+		// アンデッドの時、HPがあれば自動で戦闘不能解除する処理を外す（常時蘇生効果を受けてしまって即死するのを防ぐ）
+		} else if (this.hp != 0 && !this.isStateAffected(11)) {
+			this.removeState(this.deathStateId());
+		}
 	};
 
 	Game_Battler.prototype.gainHp = function(value) {
@@ -456,14 +476,14 @@
 			}
 			// オールド
 			if (this.activating(29, 10)){
-				this.blv--;
+				if (this.blv > 1) this.blv--;
 			}
 			// 精神波
 			if (this.activating(34, 20)){
 				var value = Math.floor(this.mmp / 20);
 				value = Math.max(value, 1);
 				if (value !== 0) {
-					this.gainHp(value);
+					this.gainMp(value);
 				}
 			}
 	    }
@@ -601,7 +621,7 @@
 	};
 	Game_BattlerBase.prototype.glowStates = function() {
 		return this._states.concat(this.passiveStatesRaw()).filter(function(stateId) {
-			return [15, 16, 17, 18, 19, 21].contains(stateId);
+			return [15, 16, 17, 18, 19, 21, 29].contains(stateId);
 		});
 	};
 	var MStEf_SpAc_initMembers = Sprite_Actor.prototype.initMembers;
@@ -643,13 +663,6 @@
 		} else if (++this._glowFrame === 120) this._glowFrame = 0; 
 		var blightness = (this._glowFrame > 60 ? 120 - this._glowFrame : this._glowFrame) / 30 ;
 		var glowFilter = new PIXI.filters.GlowFilter(6, blightness, blightness, this._glowColor);
-		
-		// バニシュ輪郭線フィルタ
-		if (this._battler.isStateAffected(31)) {
-			var outlineFilter = new PIXI.filters.GlowFilter(2, 10, 10, 0x000000);
-			this._mainSprite.filters = [outlineFilter, glowFilter];
-		}
-		this._mainSprite.filters = [glowFilter];
 
 		// 分身描画
 		if (this._actor._blinks > 0) {
@@ -668,6 +681,7 @@
 
 	// 全身の色が変わる系、これは排他
     Sprite_Actor.prototype.alterSpriteByState = function() {
+		if (!this._actor) return;
         // 石化
         if (this._actor.isStateAffected(24)) {
 			this._mainSprite._colorTone = [0,0,0,255];
@@ -701,9 +715,9 @@
 		this.alterSpriteByState();
 
         var actor = this._actor;
-		actor._isInMotion = false;
 		var motionGuard = Sprite_Actor.MOTIONS['guard'];
 		if (actor) {
+			actor._isInMotion = false;
 			if ((this._motion === motionGuard) && !BattleManager.isInputting()) {
 					return;
 			}
@@ -967,9 +981,14 @@
 			if (target.isStateAffected(27)) {
 				if (--target._blinks === 0) target.removeState(27);
 				eva = 1;
-			} else eva = target.eva;
-		} else if (this.isMagical()) {
-			eva = target.mev;
+			} else if (target.isStateAffected(31)) {
+				eva = 1;
+			}else eva = target.eva;
+		} else {
+			if (target.isStateAffected(31)) target.removeState(31);
+			if (this.isMagical()) {
+				eva = target.mev;
+			}
 		}
 		if (target.isStateAffected(13)) eva *= 2;
 		
