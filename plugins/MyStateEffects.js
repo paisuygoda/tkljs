@@ -802,7 +802,7 @@
 	Sprite_Actor.prototype.updateTargetPosition = function() {
 		//戦線離脱の時画面外に出る
 		if (this._actor.isStateAffected(32)) {
-			this.startMove(300, 0, 0);
+			this.startMove(300, 0, 30);
 		// 混乱or魅了で向かい合う
 		} else if (this._actor.isStateAffected(8) || this._actor.isStateAffected(9)) {
 			this.startMove(-75, 0, 12);

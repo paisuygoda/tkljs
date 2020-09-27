@@ -251,11 +251,10 @@
 	// 接地技リスト
 	var surfaceSkills = [9];
 
+	// targetへのアニメーション表示は行いつつダメージ計算は行わない場合ここに書く
 	Game_Action.prototype.testApply = function(target) {
-		// レビテト者が接地技を食らったらそれを無効にする(接地技は手書きで指定、一部地属性技はレビテト回避されると不自然なため)
+		// レビテト者が接地技を食らったらアニメーションは表示しつつそれを無効にする(接地技は手書きで指定、一部地属性技はレビテト回避されると不自然なため)
 		if (target.isStateAffected(22) && surfaceSkills.contains(this._item._itemId)) return false;
-		// 瀕死耐性がいついているとき、割合&瀕死ダメージが当たらない
-		if (target.isStateAffected(35) && this.item().damage.elementId === 12) return false;
 		return (
 				// 戦闘不能者対象の技が生存者にもあたる（アンデッドに蘇生技を当てるため）
 				(this.isForDeadFriend() === target.isDead() || this.isForDeadFriend()) &&

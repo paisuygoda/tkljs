@@ -32,6 +32,7 @@
 	// ターゲットの配列作成
 	var _Game_Action_makeTargets_Change_Scope = Game_Action.prototype.makeTargets;
 	Game_Action.prototype.makeTargets = function() {
+		var rawTargets;
 		if (this.subject()._change_scope) {
 			var targets = [];
 			if (!this._forcing && this.subject().isConfused()) {
@@ -41,10 +42,23 @@
 			} else if (this.isForFriend()) {
 				targets = this.targetsForOpponents(); // 入れ替え
 			}
-			return this.repeatTargets(targets);
+			rawTargets = this.repeatTargets(targets);
 		} else {
-			return _Game_Action_makeTargets_Change_Scope.call(this);
+			rawTargets = _Game_Action_makeTargets_Change_Scope.call(this);
 		}
+
+		// 条件により効果対象から外す処理
+		targets = [];
+		var item = this.item();
+		rawTargets.forEach(function(target){
+			// 瀕死耐性がついているとき、割合&瀕死ダメージが当たらない
+			if (!(target.isStateAffected(35) && item.damage.elementId === 12)
+				// かくれる状態の時は当たらない TODO: あらわれるスキルIDのハードコーディング
+				&& !(target.isStateAffected(32) && item.id != 20)) {
+					targets.push(target);
+				}
+		});
+		return targets;
 	};
 	// 選択判定
 	var _Scene_Battle_update_Change_Scope = Scene_Battle.prototype.update;
