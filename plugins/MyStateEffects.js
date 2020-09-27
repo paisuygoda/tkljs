@@ -185,6 +185,11 @@
 					var actor = this;
 					nonStoneStates.forEach(function(tempstate){actor.removeState(tempstate);});
 				}
+				// ストップor凍結した場合分身削除
+				else if (stateId === 17 || stateId === 30) {
+					this.addNewState(stateId);
+					this.removeState(27);
+				}
 				// 生きたままゾンビになったら死亡処理を挟む
 				else if (stateId === 25) {
 					this._hp = 0;
