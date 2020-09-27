@@ -634,6 +634,44 @@ FTKR.EBC = FTKR.EBC || {};
         this._actorCommandWindow.hideHelpWindow();
     };
 
+    // 【追加スクリプト】customコマンドでキャンセルを押して呼ぶ先の関数がcustomに対応していないので対応させる
+    Scene_Battle.prototype.onEnemyCancel = function() {
+        this._enemyWindow.hide();
+        switch (this._actorCommandWindow.currentSymbol()) {
+        case 'attack':
+            this._actorCommandWindow.activate();
+            break;
+        case 'skill':
+            this._skillWindow.show();
+            this._skillWindow.activate();
+            break;
+        case 'item':
+            this._itemWindow.show();
+            this._itemWindow.activate();
+            break;
+        case 'custom':
+            this._actorCommandWindow.activate();
+            break;
+        }
+    };
+    Scene_Battle.prototype.onActorCancel = function() {
+        this._actorWindow.hide();
+        switch (this._actorCommandWindow.currentSymbol()) {
+        case 'skill':
+            this._skillWindow.show();
+            this._skillWindow.activate();
+            break;
+        case 'item':
+            this._itemWindow.show();
+            this._itemWindow.activate();
+            break;
+        case 'attack':
+        case 'custom':
+            this._actorCommandWindow.activate();
+            break;
+        }
+    };
+
     //=============================================================================
     // スキルタイプ重複表示の不具合修正
     //=============================================================================
