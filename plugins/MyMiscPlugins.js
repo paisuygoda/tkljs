@@ -248,7 +248,7 @@
 	};
 	// 敵消滅時、黒くなる
 	Sprite_Enemy.prototype.updateCollapse = function() {
-		this.blendMode = Graphics.BLEND_MULTIPLY;
+		this.blendMode = Graphics.BLEND_ADD;
 		this.setBlendColor([90, 0, 90, 128]);
 		this.opacity *= this._effectDuration / (this._effectDuration + 1);
 	};
