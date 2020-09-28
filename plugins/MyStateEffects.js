@@ -773,6 +773,7 @@
 		if (this._actor._substitutePosition != 0) {
 			substituteX = 20 * this._actor._substitutePosition - 40;
 			substituteY = 56 * this._actor._substitutePosition;
+			this.setPriorityMostFront();
 		} else {
 			substituteX = 0;
 			substituteY = 0;

@@ -4441,6 +4441,7 @@ Game_Enemy.prototype.performDamage = function() {
 };
 
 Game_Enemy.prototype.performCollapse = function() {
+    console.log(this.collapseType());
     Game_Battler.prototype.performCollapse.call(this);
     switch (this.collapseType()) {
     case 0:

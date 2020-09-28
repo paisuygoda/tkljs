@@ -932,7 +932,6 @@ function Sprite_Dummy() {
             this._attackY = this._targetAttackY;
             this._attackZ = this._targetAttackZ;
         } else {
-            this.setPriorityMostFront();
             if (additionalInfo.afterimage && !paramNoAfterimage && !this._battler.isVanish()) {
                 this.setVisibleAfterImage(true);
             }
@@ -1390,7 +1389,7 @@ function Sprite_Dummy() {
     };
 
     Spriteset_Battle.prototype.setBattlerPriorityMostFront = function(sprite, playingOnly) {
-        if (!playingOnly || sprite.isPlayingAttackMotion()) sprite.setPriorityMostFront();
+        return;
     };
 
     var _Spriteset_Battle_updateZCoordinates      = Spriteset_Battle.prototype.updateZCoordinates;
