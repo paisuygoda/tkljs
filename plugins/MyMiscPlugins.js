@@ -253,4 +253,27 @@
 		this.opacity *= this._effectDuration / (this._effectDuration + 1);
 	};
 
+	// パーティーコマンド表示時に同時に表示するPAUSEウィンドウ作成
+	MyMi_ScBa_createAllWindows = Scene_Battle.prototype.createAllWindows;
+	Scene_Battle.prototype.createAllWindows = function() {
+		MyMi_ScBa_createAllWindows.call(this);
+		this.createPauseWindow();
+	};
+	Scene_Battle.prototype.createPauseWindow = function() {
+		this._pauseWindow = new Window_Pause();
+		this.addWindow(this._pauseWindow);
+		this._pauseWindow.close();
+	};
+	function Window_Pause() {
+		this.initialize.apply(this, arguments);
+	}
+	Window_Pause.prototype = Object.create(Window_Base.prototype);
+	Window_Pause.prototype.constructor = Window_Pause;
+	Window_Pause.prototype.initialize = function() {
+		var width = 120;
+		var height = 70;
+		Window_Base.prototype.initialize.call(this, (Graphics.boxWidth - width) / 2, (Graphics.boxHeight - height) / 2, width, height);
+		this.drawTextEx('PAUSE', this.textPadding(), 0);
+	};
+
 })();
