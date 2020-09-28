@@ -77,29 +77,6 @@
 	    this.recoverAll();
 	};
 
-
-	// 物理攻撃のみかばう
-	BattleManager.checkSubstitute = function(target) {
-	    return target.isDying() && this._action.isPhysical();
-	};
-
-
-	// HP高い順にかばう
-	Game_Unit.prototype.substituteBattler = function() {
-	    var members = this.members().sort(function(a, b) {
-	        var p1 = a.hp / a.mhp;
-	        var p2 = b.hp / b.mhp;
-	        if (p1 !== p2) {
-	            return p2 - p1;
-	        }
-	        return a - b;
-	    });
-	    for (var i = 0; i < members.length; i++) {
-	        if (members[i].isSubstitute()) {
-	            return members[i];
-	        }
-	    }
-	};
 	/*
 	// 敵の行動時光る
 	Sprite_Enemy.prototype.startWhiten = function() {

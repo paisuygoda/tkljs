@@ -714,7 +714,6 @@
 		}
 	};
 
-	var MStEf_Sprite_Actor_prototype_refreshMotion = Sprite_Actor.prototype.refreshMotion;
     Sprite_Actor.prototype.refreshMotion = function() {
 	
 		// 色変え処理を先に呼ぶ
@@ -727,6 +726,8 @@
 			if ((this._motion === motionGuard) && !BattleManager.isInputting()) {
 					return;
 			}
+			// かばう移動量リセット
+			actor._substitutePosition = 0;
 			var stateMotion = actor.stateMotionIndex();
 			if (actor.isInputting() || actor.isActing()) {
 				this.startMotion('walk');
@@ -765,14 +766,37 @@
 				if (this._levitateOffset === 0) this._levitateUpward = true;
 			}
 		}
-		this.x = this._homeX + this._offsetX;
-		this.y = this._homeY + this._offsetY - this._levitateOffset;
+
+		// かばう時の移動量設定
+		var substituteX;
+		var substituteY;
+		if (this._actor._substitutePosition != 0) {
+			substituteX = 20 * this._actor._substitutePosition - 40;
+			substituteY = 56 * this._actor._substitutePosition;
+		} else {
+			substituteX = 0;
+			substituteY = 0;
+		}
+
+		// 直接攻撃分の移動距離も追加
+		this.x = this._homeX + this._offsetX + substituteX + this._attackX;
+		this.y = this._homeY + this._offsetY + substituteY + this._attackY - this.getAttackAltitude() - this._levitateOffset;
+
+		if (this.isVisibleAfterimage()) {
+            this.updateAfterimages();
+        } else if (this._afterimageLocus.length > 0) {
+            this._afterimageLocus = [];
+        }
 	};
 	
 	// レビテト時の浮遊モーションの影
 	Sprite_Actor.prototype.updateShadow = function() {
+		/*
 		this._shadowSprite.visible = !!this._actor;
 		this._shadowSprite.y = -2 + this._levitateOffset;
+		*/
+		// よく動かす都合で影がないほうが描画しやすいので消す
+		this._shadowSprite.visible = false;
 	};
 
 	// Enemyの小人処理
