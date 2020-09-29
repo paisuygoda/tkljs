@@ -139,6 +139,10 @@
 	BattleManager.invokeNormalAction = function(subject, target) {
 		this._action.apply(target);
 		if (!$dataSkills[this._action._item._itemId]._damagePopUp) {
+			// 死亡描画だけは行う
+			if (target.result().addedStateObjects().indexOf($dataStates[1]) >= 0){
+				target.performCollapse();
+			}
 			target.clearDamagePopup();
 			target.clearResult();
 		}

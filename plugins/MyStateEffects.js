@@ -342,7 +342,7 @@
 		
 		// 生存アンデッドがレイズorゾンビ回復効果を受けると即死
 		} else if (this.isStateAffected(11) && (stateId === this.deathStateId() || stateId === 25)) {
-			this.addState(this.deathStateId());
+			this.addState(38);
 		}
 	};
 

@@ -39,6 +39,8 @@
 	Game_BattlerBase.prototype.elementRate = function(elementId) {
 		// ついでに凍結解除
 		if (this.isStateAffected(30) && elementId === 2) this.removeState(30);
+		// 生存者に蘇生技が当たっていたら回復量を無効化する
+		if (this.isAlive() && elementId === 13) return 0;
 		return this.traitsWithId(Game_BattlerBase.TRAIT_ELEMENT_RATE, elementId).reduce(function(r, trait) {
 			if (trait.value === 0) return -1;
 			if (trait.value === 0.01) return Math.min(r, 0);
