@@ -77,14 +77,14 @@
 			var obj = group[n];
 			var notedata = obj.note.split(/[\r\n]+/);
 
-			obj.counterType = 0;
+			obj._counterType = 0;
 
 			for (var i = 0; i < notedata.length; i++) {
 				var line = notedata[i];
 				if (line.match(noteCounter1)) {
-					obj.counterType = 1;
+					obj._counterType = 1;
 				} else if (line.match(noteCounter2)) {
-					obj.counterType = 2;
+					obj._counterType = 2;
 				}
 			}
 		}

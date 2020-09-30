@@ -856,7 +856,8 @@
 	var MStEf_SpAc_updateMotion = Sprite_Actor.prototype.updateMotion;
 	Sprite_Actor.prototype.updateMotion = function() {
 		MStEf_SpAc_updateMotion.call(this);
-		if (this._actor.isStateAffected(8) || this._actor.isStateAffected(9)) this.scale.x *= -1;
+		if ((this._actor.isStateAffected(8) || this._actor.isStateAffected(9)) && this.scale.x > 0) this.scale.x *= -1;
+		else if (!(this._actor.isStateAffected(8) || this._actor.isStateAffected(9)) && this.scale.x < 0) this.scale.x *= -1;
 	};
 	var MStEf_SpEn_update = Sprite_Enemy.prototype.update;
 	Sprite_Enemy.prototype.update = function() {

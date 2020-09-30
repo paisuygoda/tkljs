@@ -138,7 +138,7 @@
 	};
 
 	BattleManager.updateDamage = function() {
-		if (this._dualWielding && this._subject.isActor()) console.log(this._subject._equips[0]._itemId);
+		// if (this._dualWielding && this._subject.isActor()) console.log(this._subject._equips[0]._itemId);
 		if (this._waitAnim > 0) this._waitAnim--;
 	    if (!(this._logWindow.isBusy() || this._subject._isInMotion)) {
 	    	if(this._dualWielding && this._subject._equips[0]._itemId === 0) {
