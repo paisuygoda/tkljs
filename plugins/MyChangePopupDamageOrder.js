@@ -91,7 +91,7 @@
 		if (!this._logWindow.isBusy()) {
 			
 			// ._targetsと._reflecTargetsに対象を詰める
-			this.splitTargetByReflec();
+			this.substituteBeforeAnim();
 			
 			// Actionがたたかう系であることの確認も必要だが、まだ実装できていない（たたかう系に属するスキルIDが定まっていないため）
 	    	if(this._subject.isActor()) {
@@ -113,12 +113,14 @@
 	};
 
 	// リフレク状態によってtargetsを分割
-	BattleManager.splitTargetByReflec = function() {
+	// かばうによるものを含めて、スキルアニメーションが表示される前に真のtargetを決めることで描画に矛盾をなくす
+	BattleManager.substituteBeforeAnim = function() {
 		if (this._action.isMagical()) {
 			rawTargets = this._action.makeTargets();
 			this._targets = [];
 			this._reflectTargets = [];
-			rawTargets.forEach(function(target) {
+			rawTargets.forEach(function(rawTarget) {
+				var target = BattleManager.applySubstitute(rawTarget);
 				if (target.isStateAffected(21)) BattleManager._reflectTargets.push(target);
 				else BattleManager._targets.push(target);
 			});
@@ -132,7 +134,10 @@
 				});
 			}
 		} else {
-			this._targets = this._action.makeTargets();
+			this._targets = [];
+			this._action.makeTargets().forEach(function(rawTarget) {
+				BattleManager._targets.push(BattleManager.applySubstitute(rawTarget));
+			});
 			this._reflectTargets = [];
 		}
 	};

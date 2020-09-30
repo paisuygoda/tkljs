@@ -5,11 +5,16 @@
 
 (function() {
 
-	// 物理攻撃のみかばう
+	// 物理攻撃のみかばわれる
 	BattleManager.checkSubstitute = function(target) {
 	    return target.isDying() && this._action.isPhysical();
 	};
 
+	// 混乱 or 魅了でないときのみかばえる
+	Game_BattlerBase.prototype.isSubstitute = function() {
+		return this.specialFlag(Game_BattlerBase.FLAG_ID_SUBSTITUTE) && this.canMove()
+		&& !(this.isStateAffected(8) || this.isStateAffected(9));
+	};
 
 	// HP高い順にかばう
 	Game_Unit.prototype.substituteBattler = function() {

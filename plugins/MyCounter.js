@@ -103,17 +103,19 @@
 
 	// counterTypeでカウンター設定呼び出し
 	Game_Actor.prototype.counters = function() {
-		if (this._counterType !== 0) {
-			return [{
-					hp 		: 	0,
-					hit 	: 	this._counterType,
-					att 	: 	0,
-					skill 	: 	0,
-					action 	: 	1
-				}];
-		} else {
-		    return [];
-		}
+		var counters = [];
+		this.skillEquips().forEach(function(equip) {
+			if (equip && equip._counterType !== 0) {
+				counters.push({
+						hp 		: 	0,
+						hit 	: 	equip._counterType,
+						att 	: 	0,
+						skill 	: 	0,
+						action 	: 	1
+					});
+			}
+		})
+		return counters;
 	};
 	Game_Enemy.prototype.counters = function() {
 	    return this.enemy().counters;
@@ -132,10 +134,9 @@
 	        this.invokeNormalAction(subject, realTarget);
 		}
 		*/
-		var realTarget = this.applySubstitute(target);
-		this.invokeCounterAttack(subject, realTarget);
+		this.invokeCounterAttack(subject, target);
 		this._effectDuration = this._action.item().duration;
-		this.invokeNormalAction(subject, realTarget);
+		this.invokeNormalAction(subject, target);
 	    subject.setLastTarget(target);
 	    this._logWindow.push('popBaseLine');
 	    this.refreshStatus();

@@ -773,7 +773,6 @@
 		if (this._actor._substitutePosition != 0) {
 			substituteX = 20 * this._actor._substitutePosition - 40;
 			substituteY = 56 * this._actor._substitutePosition;
-			this.setPriorityMostFront();
 		} else {
 			substituteX = 0;
 			substituteY = 0;
@@ -846,8 +845,8 @@
 		//戦線離脱の時画面外に出る
 		if (this._actor.isStateAffected(32)) {
 			this.startMove(300, 0, 30);
-		// 混乱or魅了で向かい合う
-		} else if (this._actor.isStateAffected(8) || this._actor.isStateAffected(9)) {
+		// 混乱or魅了、かつ、かばうによって位置移動していないとき向かい合う
+		} else if ((this._actor.isStateAffected(8) || this._actor.isStateAffected(9)) && this._actor._substitutePosition == 0) {
 			this.startMove(-75, 0, 12);
 		} else {
 			MStEf_SpAc_updateTargetPosition.call(this);
@@ -856,7 +855,8 @@
 	var MStEf_SpAc_updateMotion = Sprite_Actor.prototype.updateMotion;
 	Sprite_Actor.prototype.updateMotion = function() {
 		MStEf_SpAc_updateMotion.call(this);
-		if ((this._actor.isStateAffected(8) || this._actor.isStateAffected(9)) && this.scale.x > 0) this.scale.x *= -1;
+		if ((this._actor.isStateAffected(8) || this._actor.isStateAffected(9)) && this.scale.x > 0
+			&& this._actor._substitutePosition == 0) this.scale.x *= -1;
 		else if (!(this._actor.isStateAffected(8) || this._actor.isStateAffected(9)) && this.scale.x < 0) this.scale.x *= -1;
 	};
 	var MStEf_SpEn_update = Sprite_Enemy.prototype.update;
