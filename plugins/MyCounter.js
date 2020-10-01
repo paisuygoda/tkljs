@@ -97,7 +97,8 @@
 	var GaBa_initMembers = Game_Battler.prototype.initMembers;
 	Game_Battler.prototype.initMembers = function() {
 	    GaBa_initMembers.call(this);
-		this._isForCounter = false;
+		this._isCounter = false;
+		this._counterActions = [];
 		this._charmTo = null;
 	};
 
@@ -154,7 +155,7 @@
 	// カウンター処理　クイックでない、対象が行動可能、
 	// カウンターにはカウンターしない、パーティーアタックにはカウンターしない
 	BattleManager.counterHappenGeneral = function(subject, target) {
-		return !this._action._counter && !this._quick && target.canMove() &&
+		return !this._action._counter && !subject._isCounter && target.canMove() &&
 				(target.isActor() ? subject.isEnemy() : true);
 	};
 
@@ -181,11 +182,9 @@
 						counterAction._targetIndex = subject.index();
 						counterAction._forcing = true;
 						
-						var counterActor = JsonEx.makeDeepCopy(target);
-						counterActor.clearActions();
-						counterActor._actions.push(counterAction);
-						counterActor._isForCounter = target;
-						this._actionBattlers.unshift(counterActor);
+						target._counterActions.push(counterAction);
+						target._isCounter = true;
+						this._actionBattlers.unshift(target);
 				    	return true;
 					}
 					return false;
@@ -193,17 +192,14 @@
 		}
 	};
 
-	// カウンター用アクターは飛ばさない
-	BattleManager.getNextSubject = function() {
-	    for (;;) {
-	        var battler = this._actionBattlers.shift();
-	        if (!battler) {
-	            return null;
-	        }
-	        if ((battler.isBattleMember() || battler._isForCounter) && battler.isAlive()) {
-	            return battler;
-	        }
-	    }
+	Game_Battler.prototype.currentAction = function() {
+		if (this._isCounter) return this._counterActions[0];
+		else return this._actions[0];
+	};
+
+	Game_Battler.prototype.removeCurrentAction = function() {
+		if (this._isCounter) return this._counterActions.shift();
+		else this._actions.shift();
 	};
 
 	/* リフレクの判定時点を早めたので削除

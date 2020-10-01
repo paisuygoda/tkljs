@@ -29,8 +29,6 @@
 	    this._subject.useItem(action.item());
 	    this._action.applyGlobal();
 	    this.refreshStatus();
-	    // アクションの一連のシーケンスに入る前に技名を出す
-	    this._subject = this._subject._isForCounter ? this._subject._isForCounter : this._subject;
 	    this._logWindow.displayAction(this._subject, action.item());
 	};
 
