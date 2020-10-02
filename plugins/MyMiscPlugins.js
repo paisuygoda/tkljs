@@ -280,4 +280,18 @@
 		this.drawTextEx('PAUSE', this.textPadding(), 0);
 	};
 
+	// ダメージを受けたらステート解除するのは物理技のときに限る
+	//　暗にGame_Battler.prototype.onDamage を一切呼ばなくなっている
+	Game_Action.prototype.executeHpDamage = function(target, value) {
+		if (this.isDrain()) {
+			value = Math.min(target.hp, value);
+		}
+		this.makeSuccess(target);
+		target.gainHp(-value);
+		if (value > 0 && this.isPhysical()) {
+			target.removeStatesByDamage();
+		}
+		this.gainDrainedHp(value);
+	};
+
 })();
