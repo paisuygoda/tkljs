@@ -1327,7 +1327,6 @@ Game_Actor.prototype.makeConfusionActions = function() {
 //736
 Alias.GaAc_makeActions = Game_Actor.prototype.makeActions;
 Game_Actor.prototype.makeActions = function() {
-    this._change_scope = false;
     Alias.GaAc_makeActions.apply(this, arguments);
     if (!this.canInput()) {
         this.onMadeAction();

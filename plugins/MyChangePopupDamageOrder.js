@@ -211,7 +211,7 @@
 
 	// Game_Actionをキューに
 	var GaAc_initialize = Game_Action.prototype.initialize;
-	Game_Action.prototype.initialize = function(subject, forcing, frame) {
+	Game_Action.prototype.initialize = function(subject, forcing) {
 	    GaAc_initialize.call(this, subject, forcing);
 	    this._nextAction = null;
 		this._turnFrame = 0;

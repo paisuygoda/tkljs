@@ -33,7 +33,7 @@
 	var _Game_Action_makeTargets_Change_Scope = Game_Action.prototype.makeTargets;
 	Game_Action.prototype.makeTargets = function() {
 		var rawTargets;
-		if (this.subject()._change_scope) {
+		if (this._change_scope) {
 			var targets = [];
 			if (!this._forcing && this.subject().isConfused()) {
 				targets = [this.confusionTarget()]; // 変更なし
@@ -75,5 +75,38 @@
 			this.selectActorSelection(); // 切り替え
 		}
 		_Scene_Battle_update_Change_Scope.call(this);
+	};
+	
+
+	var Ch_Sc_GaAc_initialize = Game_Action.prototype.initialize;
+	Game_Action.prototype.initialize = function(subject, forcing) {
+	    Ch_Sc_GaAc_initialize.call(this, subject, forcing);
+	    this._change_scope = null;
+	};
+	
+	// Game_Actionに個別にChange_Scope情報を渡す
+	Scene_Battle.prototype.onEnemyOk = function() {
+		var action = BattleManager.inputtingAction();
+		if (BattleManager.actor()._change_scope) {
+			BattleManager.actor()._change_scope = false;
+			action._change_scope = true;
+		}
+		action.setTarget(this._enemyWindow.enemyIndex());
+		this._enemyWindow.hide();
+		this._skillWindow.hide();
+		this._itemWindow.hide();
+		this.selectNextCommand();
+	};
+	Scene_Battle.prototype.onActorOk = function() {
+		var action = BattleManager.inputtingAction();
+		if (BattleManager.actor()._change_scope) {
+			BattleManager.actor()._change_scope = false;
+			action._change_scope = true;
+		}
+		action.setTarget(this._actorWindow.index());
+		this._actorWindow.hide();
+		this._skillWindow.hide();
+		this._itemWindow.hide();
+		this.selectNextCommand();
 	};
 })();

@@ -172,7 +172,7 @@
 						|| (counter.hit === 4)) var hit = true;
 					else var hit = false;
 
-			        if ((counter.hp === 0 || counter.hp === target.hp)
+			        if ((counter.hp === 0 || counter.hp >= target.hp)
 			        	&& hit
 			        	&& (counter.att === 0 || counter.att === action.item().damage.elementId)
 			        	&& (counter.skill === 0 || counter.skill === action.item().stypeId)) {
@@ -181,6 +181,7 @@
 				    	counterAction.setSkill(counter.action);
 						counterAction._targetIndex = subject.index();
 						counterAction._forcing = true;
+						if (subject.isEnemy() && target.isEnemy()) counterAction._change_scope = true;
 						
 						target._counterActions.push(counterAction);
 						target._isCounter = true;
