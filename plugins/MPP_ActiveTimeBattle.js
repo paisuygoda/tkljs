@@ -976,7 +976,6 @@ BattleManager.processTurn = function() {
     var subject = this._subject;
     var action = subject.currentAction();
     if (action) {
-        action.prepare();
         if (action.isValid()) {
             this._phase = 'action';
             this.startAction();

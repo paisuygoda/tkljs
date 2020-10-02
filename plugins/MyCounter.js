@@ -193,9 +193,16 @@
 		}
 	};
 
+	// カウンターアクションについては混乱を考えない
 	Game_Battler.prototype.currentAction = function() {
-		if (this._isCounter) return this._counterActions[0];
-		else return this._actions[0];
+		if (this._isCounter) {
+			return this._counterActions[0];
+		}
+		else {
+			var action = this._actions[0];
+			if (action) action.prepare();
+			return action;
+		}
 	};
 
 	Game_Battler.prototype.removeCurrentAction = function() {

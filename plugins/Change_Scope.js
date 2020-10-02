@@ -30,21 +30,24 @@
 		this._change_scope = false; // 初期化
 	};
 	// ターゲットの配列作成
-	var _Game_Action_makeTargets_Change_Scope = Game_Action.prototype.makeTargets;
 	Game_Action.prototype.makeTargets = function() {
 		var rawTargets;
 		if (this._change_scope) {
 			var targets = [];
-			if (!this._forcing && this.subject().isConfused()) {
-				targets = [this.confusionTarget()]; // 変更なし
-			} else if (this.isForOpponent()) {
+			if (this.isForOpponent()) {
 				targets = this.targetsForFriends(); // 入れ替え
 			} else if (this.isForFriend()) {
 				targets = this.targetsForOpponents(); // 入れ替え
 			}
 			rawTargets = this.repeatTargets(targets);
 		} else {
-			rawTargets = _Game_Action_makeTargets_Change_Scope.call(this);
+			var targets = [];
+			if (this.isForOpponent()) {
+				targets = this.targetsForOpponents();
+			} else if (this.isForFriend()) {
+				targets = this.targetsForFriends();
+			}
+			rawTargets = this.repeatTargets(targets);
 		}
 
 		// 条件により効果対象から外す処理
@@ -53,7 +56,7 @@
 		rawTargets.forEach(function(target){
 			// 瀕死耐性がついているとき、割合&瀕死ダメージが当たらない
 			if (!(target.isStateAffected(35) && item.damage.elementId === 12)
-				// かくれる状態の時は当たらない TODO: あらわれるスキルIDのハードコーディング
+				// かくれる状態の時は自身の「あらわれる」以外当たらない TODO: あらわれるスキルIDのハードコーディング
 				&& !(target.isStateAffected(32) && item.id != 20)) {
 					targets.push(target);
 				}
@@ -108,5 +111,11 @@
 		this._skillWindow.hide();
 		this._itemWindow.hide();
 		this.selectNextCommand();
+	};
+
+	// 敵は混乱中も通常のルーティーンで技を出し、その対象を敵にする
+	Game_Action.prototype.setConfusion = function() {
+		if (this.subject().isActor()) this.setAttack();
+		this._change_scope = true;
 	};
 })();
