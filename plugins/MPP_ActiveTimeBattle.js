@@ -1192,12 +1192,14 @@ Game_Battler.prototype.onBattleStart = function() {
 //427
 Alias.GaBa_onAllActionsEnd = Game_Battler.prototype.onAllActionsEnd;
 Game_Battler.prototype.onAllActionsEnd = function() {
-    Alias.GaBa_onAllActionsEnd.apply(this, arguments);
-    this._turnCount++;
-    this._ct = 0;
-    this._maxCt = 0;
-    this.setDecided(0);
-    this.setActionState('undecided');
+    if (!this._isCounter) {
+        Alias.GaBa_onAllActionsEnd.apply(this, arguments);
+        this._turnCount++;
+        this._ct = 0;
+        this._maxCt = 0;
+        this.setDecided(0);
+        this.setActionState('undecided');
+    }
 };
 
 //433
