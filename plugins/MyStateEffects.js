@@ -1056,6 +1056,8 @@
 	// 小人の時回避率2倍(盾とかは関係ない)
 	Game_Action.prototype.itemEva = function(target) {
 		var eva = 0;
+		// 命中率が0の技は必中に読み替えるので回避率0
+		if (this.item().successRate == 0) return eva;
 		if (this.isPhysical()) {
 			// target分身時、分身を一枚減らして回避率100%にする
 			if (target.isStateAffected(27)) {
