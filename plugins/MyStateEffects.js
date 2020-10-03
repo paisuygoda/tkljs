@@ -101,7 +101,7 @@
 	Game_BattlerBase.prototype.die = function() {
 		if (this.isStateAffected(33)) {
 			BattleManager._specialSkills.push({
-				skillId		:	16, // # リレイズのスキルIDに書き換え
+				skillId		:	16, // # TODO: リレイズの発動スキルIDをハードコーディング
 				targets 	:	[this],
 				origin 		:	'rerise'
 			});
@@ -1071,6 +1071,8 @@
 			}
 		}
 		if (target.isStateAffected(13)) eva *= 2;
+		// 回避率半減スキルの反映
+		if (this.item()._halfEva) eva /= 2;
 		
 		return eva;
 	};

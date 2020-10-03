@@ -114,6 +114,7 @@
 	if (!DaMaSkill_isDatabaseLoaded.call(this)) return false;
 	if (!_loaded_DamagePopUp_Setting) {
 		this.processNotetagsDamagePopUp($dataSkills);
+		this.processNotetagsHalfEvasion($dataSkills);
 		_loaded_DamagePopUp_Setting = true;
 	}
 		return true;
@@ -131,6 +132,22 @@
 				var line = notedata[i];
 				if (line.match(noteCounter)) {
 					obj._damagePopUp = false;
+				}
+			}
+		}
+	};
+	// 相手の回避率半減で計算する特徴を作成
+	DataManager.processNotetagsHalfEvasion = function(group) {
+		var noteHalfEva = /<(?:HalfEvasion)>/i;
+		for (var n = 1; n < group.length; n++) {
+			var obj = group[n];
+			var notedata = obj.note.split(/[\r\n]+/);
+
+			obj._halfEva = false;
+			for (var i = 0; i < notedata.length; i++) {
+				var line = notedata[i];
+				if (line.match(noteHalfEva)) {
+					obj._halfEva = true;
 				}
 			}
 		}
