@@ -983,9 +983,9 @@ BattleManager.processTurn = function() {
         subject.removeCurrentAction();
     } else {
         $gameTroop.increaseTurn();
-        subject.onAllActionsEnd();
         if (subject._isCounter) subject._isCounter = false;
         else subject.resetAt(this._action ? this._action.item() : null);
+        subject.onAllActionsEnd();
         this.refreshStatus();
         this._logWindow.displayAutoAffectedStatus(subject);
         this._logWindow.displayCurrentState(subject);

@@ -50,7 +50,6 @@
 	
 	Sprite_Battler.prototype.updateSelectionEffect = function() {
 	    if (this._battler.isSelected()) {
-			console.log(this._battler);
 	    	this._pointSlot._pointed = true;
 	    }
 	    else if (!this._battler.isSelected()) {
