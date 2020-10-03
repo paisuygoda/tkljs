@@ -2156,10 +2156,10 @@ Scene_Battle.prototype.changeInputWindow = function() {
             this.endCommandSelection();
         }
     } else if (!this._actor) {
-        // if (Input.isTriggered('cancel') || TouchInput.isCancelled()) {
-            // SoundManager.playCancel();
-            // this.startPartyCommandSelection();
-        // }
+        if (Input.isTriggered('cancel') || TouchInput.isCancelled()) {
+            SoundManager.playCancel();
+            this.startPartyCommandSelection();
+        }
     }
 };
 
