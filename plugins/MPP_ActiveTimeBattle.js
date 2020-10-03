@@ -847,7 +847,7 @@ BattleManager.isEvantWait = function() {
 };
 
 BattleManager.isAtbWait = function() {
-    if (MPPlugin.StopTimeOnAction && this._subject && this._subject.isEnemy())
+    if (MPPlugin.StopTimeOnAction && this._subject)
         return true;
     return (this.isEvantWait() || this._waitHandler());
 };
