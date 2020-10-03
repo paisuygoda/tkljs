@@ -210,6 +210,10 @@
 		var unit = this.friendsUnit();
 		if (this.isForUser()) {
 			return [this.subject()];
+		} else if (this.isForRandom()) {
+			for (var i = 0; i < this.numTargets(); i++) {
+				targets.push(unit.randomTarget());
+			}
 		} else if (this.isForDeadFriend()) {
 			if (this.isForOne()) {
 				//targets.push(unit.smoothDeadTarget(this._targetIndex));

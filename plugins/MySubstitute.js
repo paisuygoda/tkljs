@@ -5,9 +5,9 @@
 
 (function() {
 
-	// 物理攻撃のみかばわれる
+	// 物理攻撃 & 全体攻撃でない時のみかばわれる
 	BattleManager.checkSubstitute = function(target) {
-	    return target.isDying() && this._action.isPhysical();
+	    return target.isDying() && this._action.isPhysical() && !this._action.isForAll();
 	};
 
 	// 混乱 or 魅了でないときのみかばえる

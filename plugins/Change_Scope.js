@@ -32,7 +32,9 @@
 	// ターゲットの配列作成
 	Game_Action.prototype.makeTargets = function() {
 		var rawTargets;
-		if (this._change_scope) {
+		if (this.isForUser()) {
+			rawTargets = [this.subject()];
+		} else if (this._change_scope) {
 			var targets = [];
 			if (this.isForOpponent()) {
 				targets = this.targetsForFriends(); // 入れ替え
