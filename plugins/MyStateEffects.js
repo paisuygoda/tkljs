@@ -551,7 +551,15 @@
 		this._pattern %= 8;
 		if (this._battler) {
 			this._overlayIndex = this.statePattern();
-			if (this._battler.isStateAffected(8) || this._battler.isStateAffected(9)) this.scale.x = -1;
+			var prefix = 1;
+			if (this._battler.isStateAffected(8) || this._battler.isStateAffected(9)) {
+				prefix = -1;
+			}
+			var size = 1;
+			if (this._battler.isStateAffected(13)) {
+				size = 0.3;
+			}
+			this.scale.x = prefix * size;
 		}
 	};
 	Sprite_StateOverlay.prototype.statePattern = function() {
@@ -706,11 +714,9 @@
 		
 		// 小人処理
 		if (this._actor.isStateAffected(13)) {
-			this.scale.x = 0.3;
-			this.scale.y = 0.3;
+			this._isSmall = true;
         } else {
-			this.scale.x = 1;
-			this.scale.y = 1;
+			this._isSmall = false;
 		}
 	};
 
@@ -818,14 +824,6 @@
 			var glowFilter = new PIXI.filters.GlowFilter(6, blightness, blightness, this._glowColor);
 			this.filters = [glowFilter];
 
-			if (this._enemy.isStateAffected(13)) {
-				this.scale.x = 0.3;
-				this.scale.y = 0.3;
-			} else {
-				this.scale.x = 1;
-				this.scale.y = 1;
-			}
-
 			if (this._enemy._blinks > 0) {
 				this._blinkSprite.blinkPosition += 1;
 				this._blinkSprite.blinkPosition %= 3;
@@ -837,7 +835,29 @@
 			} else {
 				this._blinkSprite.visible = false;
 			}
+			
+			// 小人および混乱によるspriteスケール操作
+			if (this._enemy.isStateAffected(13)) {
+				if (!this._isSmall) this._pointSlot.hide();
+				this._isSmall = true;
+			} else {
+				if (this._isSmall) this._pointSlot.hide();
+				this._isSmall = false;
+			}
+
+			if (this._enemy.isStateAffected(8)) {
+				if (!this._isInverted) this._pointSlot.hide();
+				this._isInverted = true;
+			} else {
+				if (this._isInverted) this._pointSlot.hide();
+				this._isInverted = false;
+			}
+
+			var prefix = this._isInverted ? -1 : 1;
+			var size = this._isSmall ? 0.3 : 1;
+			this.scale.x = prefix * size;
 		}
+		this._oracleCountSprite.y = this.countOffsetY();
 	};
 	 
 	var MStEf_SpAc_updateTargetPosition = Sprite_Actor.prototype.updateTargetPosition;
@@ -855,15 +875,26 @@
 	var MStEf_SpAc_updateMotion = Sprite_Actor.prototype.updateMotion;
 	Sprite_Actor.prototype.updateMotion = function() {
 		MStEf_SpAc_updateMotion.call(this);
-		if ((this._actor.isStateAffected(8) || this._actor.isStateAffected(9)) && this.scale.x > 0
-			&& this._actor._substitutePosition == 0) this.scale.x *= -1;
-		else if (!(this._actor.isStateAffected(8) || this._actor.isStateAffected(9)) && this.scale.x < 0) this.scale.x *= -1;
-	};
-	var MStEf_SpEn_update = Sprite_Enemy.prototype.update;
-	Sprite_Enemy.prototype.update = function() {
-		MStEf_SpEn_update.call(this);
-		if (this._enemy && this._enemy.isStateAffected(8)) this.scale.x *= -1;
-		this._oracleCountSprite.y = this.countOffsetY();
+		if ((this._actor.isStateAffected(8) || this._actor.isStateAffected(9)) && !this.isMoving()) {
+			this._isInverted = true;
+			// 対象にポインターを当てたまま反転すると一瞬反転されたポインターが見えてしまうのでポインター側のupdateまで消しておく
+			if (this.scale.x > 0) this._pointSlot.hide();
+		}
+		else {
+			this._isInverted = false;
+			if (this.scale.x < 0) this._pointSlot.hide();
+		}
+		if (this._actor.isStateAffected(13)) {
+			this._isSmall = true;
+			if (Math.abs(this.scale.x) == 1) this._pointSlot.hide();
+		} else {
+			this._isSmall = false;
+			if (Math.abs(this.scale.x) < 1) this._pointSlot.hide();
+		}
+		var prefix = this._isInverted ? -1 : 1;
+		var size = this._isSmall ? 0.3 : 1;
+		this.scale.x = prefix * size;
+		this.scale.y = size;
 	};
 
 	// 宣告カウントSprite紐づけ
@@ -987,6 +1018,8 @@
 	Sprite_Battler.prototype.initMembers = function() {
 		MyStEf_SpBa_initMembers.call(this);
 		this._isFrog = false;
+		this._isSmall = false;
+		this._isInverted = false;
 	};
 	Sprite_Actor.prototype.updateBitmap = function() {
 		Sprite_Battler.prototype.updateBitmap.call(this);
