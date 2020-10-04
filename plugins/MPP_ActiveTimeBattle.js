@@ -1423,6 +1423,14 @@ Window_BattleLog.prototype.isFastForward = function() {
 //-----------------------------------------------------------------------------
 // Window_PartyCommand
 
+// 左端に敵名表示のため左に寄せる
+Window_PartyCommand.prototype.initialize = function() {
+    var y = Graphics.boxHeight - this.windowHeight();
+    Window_Command.prototype.initialize.call(this, 108, y);
+    this.openness = 0;
+    this.deactivate();
+};
+
 //28
 Window_PartyCommand.prototype.makeCommandList = function() {
     this.addCommand(TextManager.escape, 'escape', BattleManager.canEscape());
@@ -1434,6 +1442,18 @@ Window_PartyCommand.prototype.makeCommandList = function() {
 };
 
 //-----------------------------------------------------------------------------
+// Window_ActorCommand
+
+// 左端に敵名表示のため左に寄せる
+Window_ActorCommand.prototype.initialize = function() {
+    var y = Graphics.boxHeight - this.windowHeight();
+    Window_Command.prototype.initialize.call(this, 108, y);
+    this.openness = 0;
+    this.deactivate();
+    this._actor = null;
+};
+
+//-----------------------------------------------------------------------------
 // Window_BattleStatus
 
 //13
@@ -1441,6 +1461,11 @@ Alias.WiBaSt_initialize = Window_BattleStatus.prototype.initialize;
 Window_BattleStatus.prototype.initialize = function() {
     this._createDrawer = false;
     Alias.WiBaSt_initialize.apply(this, arguments);
+};
+
+// 敵名表示ウィンドウの分小さくする
+Window_BattleStatus.prototype.windowWidth = function() {
+    return Graphics.boxWidth - 300;
 };
 
 Window_BattleStatus.prototype.setActorCmdWindow = function(actorCmdWindow) {
@@ -1541,6 +1566,10 @@ Window_BattleStatus.prototype.refresh = function() {
     this._createDrawer = false;
 };
 
+Window_BattleStatus.prototype.drawBasicArea = function(rect, actor) {
+    this.drawActorName(actor, rect.x + 0, rect.y, rect.width);
+};
+
 //63
 Alias.WiBaSt_gaugeAreaWidth = Window_BattleStatus.prototype.gaugeAreaWidth;
 Window_BattleStatus.prototype.gaugeAreaWidth = function() {
@@ -1638,7 +1667,7 @@ Window_BattleActor.prototype.isCursorMovable =
     Window_Selectable.prototype.isCursorMovable;
 
 Window_BattleActor.prototype.isDrawAt = function() {
-    return false;
+    return true;
 };
 
 Window_BattleActor.prototype.selectForItem = function() {
@@ -1826,8 +1855,8 @@ Window_BattleEnemy.prototype.isCurrentItemEnabled = function() {
 
 //58
 Window_BattleEnemy.prototype.show = function() {
-    //this.refresh();
-    //this.select(0);
+    this.refresh();
+    this.select(0);
     Window_Selectable.prototype.show.call(this);
 };
 
@@ -2172,13 +2201,7 @@ Scene_Battle.prototype.terminate = function() {
 
 //106
 Scene_Battle.prototype.updateWindowPositions = function() {
-    var statusX = 0;
-    var partyWindow = this._partyCommandWindow;
-    if (!partyWindow.isClosed() || !this._actorCommandWindow.isClosed()) {
-        statusX = partyWindow.width;
-    } else {
-        statusX = partyWindow.width * MPPlugin.stWindowPos / 2;
-    }
+    var statusX = this._partyCommandWindow.width + 108;
     var statusWindow = this._statusWindow;
     if (statusWindow.x < statusX) {
         statusWindow.x = Math.min(statusWindow.x + 16, statusX);
@@ -2271,6 +2294,8 @@ Scene_Battle.prototype.refreshStatus = function() {
     if (this._itemWindow.visible)  this._itemWindow.refresh();
     if (this._actorWindow.visible) this._actorWindow.refresh();
     if (this._enemyWindow.visible) this._enemyWindow.refresh();
+    // 【追加】敵名ウィンドウもリフレッシュ
+    if (this._battleEnemyNamesWindow.visible) this._battleEnemyNamesWindow.refresh();
 };
 
 //242

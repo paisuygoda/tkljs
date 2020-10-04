@@ -307,7 +307,7 @@
 	};
 	Sprite_Enemy.prototype.updateReanimate = function() {
 		if (this._effectDuration > 48) {
-			this.blendMode = Graphics.BLEND_MULTIPLY;
+			this.blendMode = Graphics.BLEND_ADD;
 			this.setBlendColor([90, 0, 90, 128]);
 			this.opacity *= (this._effectDuration - 48) / (this._effectDuration - 47);
 		} else if (this._effectDuration > 32) {
