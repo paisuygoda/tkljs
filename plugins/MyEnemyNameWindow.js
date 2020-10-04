@@ -42,13 +42,26 @@
 	Scene_Battle.prototype.updateStatusWindow = function() {
 		if ($gameMessage.isBusy()) {
 			this._statusWindow.close();
-			this._battleEnemyNamesWindow.hide();
+			this._battleEnemyNamesWindow.close();
 			this._partyCommandWindow.close();
 			this._actorCommandWindow.close();
 		} else if (this.isActive() && !this._messageWindow.isClosing()) {
 			this._statusWindow.open();
-			this._battleEnemyNamesWindow.show();
+			this._battleEnemyNamesWindow.open();
 		}
+	};
+
+	Scene_Battle.prototype.stop = function() {
+		Scene_Base.prototype.stop.call(this);
+		if (this.needsSlowFadeOut()) {
+			this.startFadeOut(this.slowFadeSpeed(), false);
+		} else {
+			this.startFadeOut(this.fadeSpeed(), false);
+		}
+		this._statusWindow.close();
+		this._battleEnemyNamesWindow.close();
+		this._partyCommandWindow.close();
+		this._actorCommandWindow.close();
 	};
 
 	// 敵選択用でない、名前表示専用の窓

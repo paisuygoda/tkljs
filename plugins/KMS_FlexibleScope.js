@@ -293,10 +293,7 @@ function processChangingForAll()
     // 全体化切り替え操作を行っているか
     function isChangingForAll()
     {
-        if (Input.isTriggered('pageup') || Input.isTriggered('pagedown'))
-        {
-            return !this.cursorAll();
-        }
+        if (Input.isTriggered('pageup') || Input.isTriggered('pagedown')) return true;
 
         var index    = this.index();
         var maxCols  = this.maxCols();
@@ -446,7 +443,6 @@ Window_BattleEnemy.prototype.setAction = function(action)
 {
     this._action = action;
 };
-
 
 //-----------------------------------------------------------------------------
 // Scene_ItemBase
