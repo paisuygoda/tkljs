@@ -295,34 +295,24 @@ function processChangingForAll()
     {
         if (Input.isTriggered('pageup') || Input.isTriggered('pagedown'))
         {
-            return true;
+            return !this.cursorAll();
         }
 
+        var index    = this.index();
+        var maxCols  = this.maxCols();
         if (this.cursorAll())
         {
             // 全体選択中はカーソル移動またはキャンセルで解除
-            if (Input.isTriggered('left') ||
-                Input.isTriggered('right') ||
-                Input.isTriggered('up') ||
-                Input.isTriggered('down') ||
-                Input.isTriggered('cancel'))
-            {
-                return true;
-            }
+            // カラムが1(味方)の場合は左入力で解除/2以上(敵)の場合は右入力で解除
+            if ((maxCols === 1 && Input.isTriggered('left'))
+                || (maxCols > 1 && Input.isTriggered('right'))) return true;
         }
         else
         {
-            var index    = this.index();
-            var maxItems = this.maxItems();
-            var maxCols  = this.maxCols();
-            var maxRows  = this.maxRows();
             if (maxCols === 1)
             {
-                // 一列表示なら ← or → で全体化
-                if (Input.isTriggered('left') || Input.isTriggered('right'))
-                {
-                    return true;
-                }
+                // 一列表示なら → で全体化
+                if (Input.isTriggered('right')) return true;
             }
             /*  敵選択時の挙動を統一するためにとりあえず無効化
             else if (maxRows === 1)
@@ -336,25 +326,16 @@ function processChangingForAll()
             */
             else
             {
-                if (Input.isTriggered('up') && index < maxCols)
+                // 左端で←
+                if (Input.isTriggered('left'))
                 {
-                    // 最上段で↑
-                    return true;
-                }
-                else if (Input.isTriggered('down') &&
-                    (index + maxCols - 1) / maxCols >= maxRows - 1)
-                {
-                    // 最下段で↓
-                    return true;
-                }
-                else if (Input.isTriggered('left') && index === 0)
-                {
-                    // 先頭で←
-                    return true;
-                }
-                else if (Input.isTriggered('right') && index >= maxItems - 1)
-                {
-                    // 末尾で→
+                    for (var i = 0; i < this._enemies.length; i++) {
+                        if (i != index){
+                            var diffX = this._enemies[index].spritePosX() - this._enemies[i].spritePosX();
+                            var diffY = Math.abs(this._enemies[index].spritePosY() - this._enemies[i].spritePosY());
+                            if (diffX > diffY) return false;
+                        } 
+                    }
                     return true;
                 }
             }

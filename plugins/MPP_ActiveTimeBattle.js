@@ -1926,12 +1926,84 @@ Window_BattleEnemy.prototype.allowedTargets = function() {
 };
 
 Window_BattleEnemy.prototype.sortTargets = function() {
+    // 【追加】どうせ順序が必要な部分は全く異なる処理にしたので消去
+    /*
     this._enemies.sort(function(a, b) {
         if (a.spritePosX() === b.spritePosX()) {
           return a.spritePosY() - b.spritePosY();
         }
         return a.spritePosX() - b.spritePosX();
     });
+    */
+};
+
+// 描画を基準にターゲットを移動するよう変更
+Window_BattleEnemy.prototype.cursorDown = function(wrap) {
+    var index = this.index();
+    var diff = 9999;
+    var target = -1;
+    for (var i = 0; i < this._enemies.length; i++) {
+        if (i != index){
+            var diffX = Math.abs(this._enemies[index].spritePosX() - this._enemies[i].spritePosX());
+            var diffY = this._enemies[i].spritePosY() - this._enemies[index].spritePosY();
+            if (diffY > diffX && diffY < diff)  {
+                diff = diffY;
+                target = i
+            }
+        } 
+    }
+    if (target >= 0) this.select(target);
+};
+
+Window_BattleEnemy.prototype.cursorUp = function(wrap) {
+    var index = this.index();
+    var diff = 9999;
+    var target = -1;
+    for (var i = 0; i < this._enemies.length; i++) {
+        if (i != index){
+            var diffX = Math.abs(this._enemies[index].spritePosX() - this._enemies[i].spritePosX());
+            var diffY = this._enemies[index].spritePosY() - this._enemies[i].spritePosY();
+            if (diffY > diffX && diffY < diff)  {
+                diff = diffY;
+                target = i
+            }
+        } 
+    }
+    if (target >= 0) this.select(target);
+};
+
+Window_BattleEnemy.prototype.cursorRight = function(wrap) {
+    var index = this.index();
+    var diff = 9999;
+    var target = -1;
+    for (var i = 0; i < this._enemies.length; i++) {
+        if (i != index){
+            var diffX = this._enemies[i].spritePosX() - this._enemies[index].spritePosX();
+            var diffY = Math.abs(this._enemies[index].spritePosY() - this._enemies[i].spritePosY());
+            if (diffX > diffY && diffX < diff)  {
+                diff = diffX;
+                target = i
+            }
+        } 
+    }
+    if (target >= 0) this.select(target);
+};
+
+Window_BattleEnemy.prototype.cursorLeft = function(wrap) {
+    var index = this.index();
+    var diff = 9999;
+    var target = -1;
+    for (var i = 0; i < this._enemies.length; i++) {
+        if (i != index){
+            var diffX = this._enemies[index].spritePosX() - this._enemies[i].spritePosX();
+            var diffY = Math.abs(this._enemies[index].spritePosY() - this._enemies[i].spritePosY());
+            if (diffX > diffY && diffX < diff)  {
+                diff = diffX;
+                target = i
+            }
+        } 
+    }
+    if (target >= 0) this.select(target);
 };
 
 Window_BattleEnemy.prototype.autoSelect = function() {
@@ -2449,6 +2521,7 @@ Scene_Battle.prototype.endCommandSelection = function() {
 
 //------------------------------------------
 // Yanfly.BattleCoreEngineからの移植
+// 移植が足りずbattlerからspriteを引く機能が機能してなかったので追加
 //------------------------------------------
 
 BattleManager.getSprite = function(battler) {
@@ -2456,6 +2529,23 @@ BattleManager.getSprite = function(battler) {
   if (battler.isActor()) var id = 100000 + battler.actorId();
   if (battler.isEnemy()) var id = 200000 + battler.index();
   return this._registeredSprites[id];
+};
+
+BattleManager.registerSprite = function(battler, sprite) {
+    if (!this._registeredSprites) this._registeredSprites = {};
+    if (battler.isActor()) var id = 100000 + battler.actorId();
+    if (battler.isEnemy()) var id = 200000 + battler.index();
+    this._registeredSprites[id] = sprite;
+};
+
+Yanfly_BEC_Sprite_Battler_setBattler = Sprite_Battler.prototype.setBattler;
+Sprite_Battler.prototype.setBattler = function(battler) {
+    Yanfly_BEC_Sprite_Battler_setBattler.call(this, battler);
+    if (battler) battler.setBattler(this);
+};
+
+Game_Battler.prototype.setBattler = function(sprite) {
+    BattleManager.registerSprite(this, sprite);
 };
 
 Game_Battler.prototype.battler = function() {

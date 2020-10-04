@@ -109,8 +109,13 @@
     };
     
 	Window_BattleEnemyNames.prototype.sortTargets = function() {
-		Window_BattleEnemy.prototype.sortTargets.call(this);
 		this._enemies = this.allowedTargets();
+		this._enemies.sort(function(a, b) {
+			if (a.spritePosX() === b.spritePosX()) {
+			  return a.spritePosY() - b.spritePosY();
+			}
+			return b.spritePosX() - a.spritePosX();
+		});
 		var displayEnemy = [];
 		var enemyCount = this._enemyCount;
 		this._enemies.forEach(function(enemy) {
