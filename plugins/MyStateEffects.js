@@ -390,7 +390,7 @@
 	};
 
 	Game_Battler.prototype.gainHp = function(value) {
-		this._result.hpDamage = -value;
+		this._result.hpDamage += -value;
 		this._result.hpAffected = true;
 		// ゾンビの時、ダメージ表示はするが実際にダメージは受けない(回復させないため)
 		if (!this.isStateAffected(25)) this.setHp(this.hp + value);
