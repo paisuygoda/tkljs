@@ -2113,6 +2113,12 @@ Window_BattleEnemy.prototype.isMouseOverEnemy = function(enemy) {
 //-----------------------------------------------------------------------------
 // Window_BattleSkill
 
+Alias.WiBaSk_initialize = Window_BattleSkill.prototype.initialize;
+Window_BattleSkill.prototype.initialize = function(x, y, width, height) {
+    Alias.WiBaSk_initialize.call(this, x, y, width, height);
+    this._showHelp = false;
+};
+
 Window_BattleSkill.prototype.setStatusWindow = function(statusWindow) {
     this._statusWindow = statusWindow;
 };
@@ -2130,7 +2136,28 @@ Window_BattleSkill.prototype.show = function() {
         this._statusWindow.refresh();
         this._statusWindow.show();
     }
+    this._helpWindow.show();
     Alias.WiBaSk_show.apply(this, arguments);
+};
+
+// shiftで説明欄の表示/非表示切り替え
+Alias.WiBaSk_processCursorMove = Window_BattleSkill.prototype.processCursorMove;
+Window_BattleSkill.prototype.processCursorMove = function() {
+    Alias.WiBaSk_processCursorMove.call(this);
+    if (this.isCursorMovable()) {
+        if (Input.isTriggered('shift')) {
+            this._showHelp = !this._showHelp;
+            this.showHelpWindow();
+        }
+    }
+};
+
+Window_BattleSkill.prototype.showHelpWindow = function() {
+    if (this._helpWindow && this._showHelp) {
+        this._helpWindow.open();
+    } else {
+        this._helpWindow.close();
+    }
 };
 
 //24
@@ -2139,6 +2166,41 @@ Window_BattleSkill.prototype.hide = function() {
     if (this._statusWindow)
         this._statusWindow.hide();
     Alias.WiBaSk_hide.apply(this, arguments);
+};
+
+//-----------------------------------------------------------------------------
+// Window_BattleItem
+
+Alias.WiBaIt_initialize = Window_BattleItem.prototype.initialize;
+Window_BattleItem.prototype.initialize = function(x, y, width, height) {
+    Alias.WiBaIt_initialize.call(this, x, y, width, height);
+    this._showHelp = false;
+};
+
+// shiftで説明欄の表示/非表示切り替え
+Alias.WiBaIt_processCursorMove = Window_BattleItem.prototype.processCursorMove;
+Window_BattleItem.prototype.processCursorMove = function() {
+    Alias.WiBaSk_processCursorMove.call(this);
+    if (this.isCursorMovable()) {
+        if (Input.isTriggered('shift')) {
+            this._showHelp = !this._showHelp;
+            this.showHelpWindow();
+        }
+    }
+};
+
+Window_BattleItem.prototype.showHelpWindow = function() {
+    if (this._helpWindow && this._showHelp) {
+        this._helpWindow.open();
+    } else {
+        this._helpWindow.close();
+    }
+};
+
+Alias.WiBaIt_show = Window_BattleItem.prototype.show;
+Window_BattleItem.prototype.show = function() {
+    this._helpWindow.show();
+    Alias.WiBaIt_show.apply(this, arguments);
 };
 
 //-----------------------------------------------------------------------------
@@ -2314,6 +2376,7 @@ Scene_Battle.prototype.createActorCommandWindow = function() {
 Scene_Battle.prototype.createHelpWindow = function() {
     if (MPPlugin.helpWindowPos >= 0) {
         this._helpWindow = new Window_Help(MPPlugin.helpWindowRow);
+        this._helpWindow.close();
         this._helpWindow.visible = false;
         if (MPPlugin.helpWindowPos === 1) {
             this._helpWindow.y = this._statusWindow.y - this._helpWindow.height;
