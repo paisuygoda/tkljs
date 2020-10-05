@@ -28,6 +28,7 @@
 	Game_Battler.prototype.initMembers = function() {
 		_Game_Battler_initMembers_Change_Scope.call(this);
 		this._change_scope = false; // 初期化
+		this._changed = true; // 初期化
 	};
 	// ターゲットの配列作成
 	Game_Action.prototype.makeTargets = function() {
@@ -68,12 +69,14 @@
 	// 選択判定
 	var _Scene_Battle_update_Change_Scope = Scene_Battle.prototype.update;
 	Scene_Battle.prototype.update = function() {
-		if (this._actorWindow.visible && Input.isTriggered('shift')) { // 現在：味方
+		if (this._actorWindow.visible && !BattleManager.actor()._changed) { // 現在：味方
+			BattleManager.actor()._changed = true;
 			BattleManager.actor()._change_scope = !BattleManager.actor()._change_scope;
 			this._actorWindow.deactivate(); // 忘れるとエラー
 			this._actorWindow.hide();
 			this.selectEnemySelection(); // 切り替え
-		}else if (this._enemyWindow.visible && Input.isTriggered('shift')) { // 現在：敵
+		}else if (this._enemyWindow.visible && !BattleManager.actor()._changed) { // 現在：敵
+			BattleManager.actor()._changed = true;
 			BattleManager.actor()._change_scope = !BattleManager.actor()._change_scope;
 			this._enemyWindow.deactivate(); // 忘れるとエラー
 			this._enemyWindow.hide();
@@ -81,7 +84,6 @@
 		}
 		_Scene_Battle_update_Change_Scope.call(this);
 	};
-	
 
 	var Ch_Sc_GaAc_initialize = Game_Action.prototype.initialize;
 	Game_Action.prototype.initialize = function(subject, forcing) {

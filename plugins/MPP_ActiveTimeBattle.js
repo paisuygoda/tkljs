@@ -1682,7 +1682,7 @@ Window_BattleActor.prototype.selectForItem = function() {
         this.setCursorAll(true);
         this.select(0);
     } else {
-        this.select(actor.index());
+        this.select(0);
     }
 };
 

@@ -310,6 +310,8 @@ function processChangingForAll()
             {
                 // 一列表示なら → で全体化
                 if (Input.isTriggered('right')) return true;
+                // 一列表示なら ← で敵選択へ移行
+                if (Input.isTriggered('left')) BattleManager.actor()._changed = false;
             }
             /*  敵選択時の挙動を統一するためにとりあえず無効化
             else if (maxRows === 1)
@@ -334,6 +336,19 @@ function processChangingForAll()
                         } 
                     }
                     return true;
+                }
+
+                // 右端で→
+                if (Input.isTriggered('right'))
+                {
+                    for (var i = 0; i < this._enemies.length; i++) {
+                        if (i != index){
+                            var diffX = this._enemies[i].spritePosX() - this._enemies[index].spritePosX();
+                            var diffY = Math.abs(this._enemies[index].spritePosY() - this._enemies[i].spritePosY());
+                            if (diffX > diffY) return false;
+                        } 
+                    }
+                    BattleManager.actor()._changed = false;
                 }
             }
         }
@@ -362,6 +377,27 @@ function processChangingForAll()
 
     return false;
 }
+
+function processChangeScope() {
+    if (this.isOpenAndActive() && !this._cursorFixed && this.maxItems() > 1) {
+        var index    = this.index();
+        var maxCols  = this.maxCols();
+        // 一列表示なら ← で敵選択へ移行
+        if (maxCols === 1 && Input.isTriggered('left')) BattleManager.actor()._changed = false;
+        // 複数列表示なら → で味方選択へ移行
+        else if (maxCols > 1 && Input.isTriggered('right')) {
+            for (var i = 0; i < this._enemies.length; i++) {
+                if (i != index){
+                    var diffX = this._enemies[i].spritePosX() - this._enemies[index].spritePosX();
+                    var diffY = Math.abs(this._enemies[index].spritePosY() - this._enemies[i].spritePosY());
+                    if (diffX > diffY) return;
+                } 
+            }
+            BattleManager.actor()._changed = false;
+        }
+    }
+}
+
 
 var _KMS_Window_MenuActor_processCursorMove = Window_MenuActor.prototype.processCursorMove;
 Window_MenuActor.prototype.processCursorMove = function()
@@ -401,6 +437,7 @@ Window_BattleActor.prototype.processCursorMove = function()
         }
         return;
     }
+    processChangeScope.call(this);
 
     _KMS_Window_BattleActor_processCursorMove.call(this);
 };
@@ -432,6 +469,7 @@ Window_BattleEnemy.prototype.processCursorMove = function()
         }
         return;
     }
+    processChangeScope.call(this);
 
     _KMS_Window_BattleEnemy_processCursorMove.call(this);
 };
