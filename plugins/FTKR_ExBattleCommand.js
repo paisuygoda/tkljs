@@ -266,7 +266,7 @@ FTKR.EBC = FTKR.EBC || {};
         partyCmdList    : paramParse(parameters['Party Command List']),
         partyCmds       : paramParse(parameters['Party Commands']),
         showCommandIcon : paramParse(parameters['Show Command Icon']) || false,
-        showCommandDesc : paramParse(parameters['Show Command Description']) || false,
+        showCommandDesc : paramParse(parameters['Show Command Description']) || true,
     };
 
     Game_BattlerBase.TRAIT_ACTOR_COMMAND = +(paramParse(parameters['TRAIT_ACTOR_COMMAND']));
@@ -407,12 +407,17 @@ FTKR.EBC = FTKR.EBC || {};
 
     Window_Command.prototype.updateEbcSkillHelp = function() {
         var item = this.currentEbcSkill();
-        this.setHelpWindowItem(item);
         if (item && item.description) {
-            this.showHelpWindow();
+            this.setHelpWindowItem(item);
         } else {
-            this.hideHelpWindow();
+            // 各スキルタイプコマンドで表示するヘルプをハードコーディング
+            item = {description : null};
+            if (this.currentData().name == 'アイテム') item.description = 'アイテムを使用';
+            else if (this.currentData().name == '逃げる') item.description = '戦闘から逃げる';
+            else item.description = this.currentData().name;
+            this.setHelpWindowItem(item);
         }
+        this.showHelpWindow();
     };
 
     //=============================================================================

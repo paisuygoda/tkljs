@@ -517,6 +517,7 @@ const MPPlugin = {};
     MPPlugin.atEscapingColor1 = 'rgb(%1)'.format(parameters['AT Escaping Color1'] || '192,192,192');
     MPPlugin.atEscapingColor2 = 'rgb(%1)'.format(parameters['AT Escaping Color2'] || '192,192,255');
     MPPlugin.firstLoop = true;
+    MPPlugin.showHelp = false;
     
 }
 
@@ -1453,6 +1454,32 @@ Window_ActorCommand.prototype.initialize = function() {
     this._actor = null;
 };
 
+// shiftで説明欄の表示/非表示切り替え
+Alias.WiAcCo_processCursorMove = Window_ActorCommand.prototype.processCursorMove;
+Window_ActorCommand.prototype.processCursorMove = function() {
+    Alias.WiAcCo_processCursorMove.call(this);
+    if (this.isCursorMovable()) {
+        if (Input.isTriggered('shift')) {
+            MPPlugin.showHelp = !MPPlugin.showHelp;
+            this.showHelpWindow();
+        }
+    }
+};
+
+Window_ActorCommand.prototype.showHelpWindow = function() {
+    if (this._helpWindow && MPPlugin.showHelp) {
+        this._helpWindow.open();
+    } else {
+        this._helpWindow.close();
+    }
+};
+
+Alias.WiAcCo_setup = Window_ActorCommand.prototype.setup;
+Window_ActorCommand.prototype.setup = function(actor) {
+    Alias.WiAcCo_setup.call(this, actor);
+    this._helpWindow.show();
+};
+
 //-----------------------------------------------------------------------------
 // Window_BattleStatus
 
@@ -2116,7 +2143,6 @@ Window_BattleEnemy.prototype.isMouseOverEnemy = function(enemy) {
 Alias.WiBaSk_initialize = Window_BattleSkill.prototype.initialize;
 Window_BattleSkill.prototype.initialize = function(x, y, width, height) {
     Alias.WiBaSk_initialize.call(this, x, y, width, height);
-    this._showHelp = false;
 };
 
 Window_BattleSkill.prototype.setStatusWindow = function(statusWindow) {
@@ -2146,14 +2172,14 @@ Window_BattleSkill.prototype.processCursorMove = function() {
     Alias.WiBaSk_processCursorMove.call(this);
     if (this.isCursorMovable()) {
         if (Input.isTriggered('shift')) {
-            this._showHelp = !this._showHelp;
+            MPPlugin.showHelp = !MPPlugin.showHelp;
             this.showHelpWindow();
         }
     }
 };
 
 Window_BattleSkill.prototype.showHelpWindow = function() {
-    if (this._helpWindow && this._showHelp) {
+    if (this._helpWindow && MPPlugin.showHelp) {
         this._helpWindow.open();
     } else {
         this._helpWindow.close();
@@ -2174,7 +2200,6 @@ Window_BattleSkill.prototype.hide = function() {
 Alias.WiBaIt_initialize = Window_BattleItem.prototype.initialize;
 Window_BattleItem.prototype.initialize = function(x, y, width, height) {
     Alias.WiBaIt_initialize.call(this, x, y, width, height);
-    this._showHelp = false;
 };
 
 // shiftで説明欄の表示/非表示切り替え
@@ -2183,14 +2208,14 @@ Window_BattleItem.prototype.processCursorMove = function() {
     Alias.WiBaSk_processCursorMove.call(this);
     if (this.isCursorMovable()) {
         if (Input.isTriggered('shift')) {
-            this._showHelp = !this._showHelp;
+            MPPlugin.showHelp = !MPPlugin.showHelp;
             this.showHelpWindow();
         }
     }
 };
 
 Window_BattleItem.prototype.showHelpWindow = function() {
-    if (this._helpWindow && this._showHelp) {
+    if (this._helpWindow && MPPlugin.showHelp) {
         this._helpWindow.open();
     } else {
         this._helpWindow.close();
@@ -2376,7 +2401,7 @@ Scene_Battle.prototype.createActorCommandWindow = function() {
 Scene_Battle.prototype.createHelpWindow = function() {
     if (MPPlugin.helpWindowPos >= 0) {
         this._helpWindow = new Window_Help(MPPlugin.helpWindowRow);
-        this._helpWindow.close();
+        if (!MPPlugin.showHelp) this._helpWindow.close();
         this._helpWindow.visible = false;
         if (MPPlugin.helpWindowPos === 1) {
             this._helpWindow.y = this._statusWindow.y - this._helpWindow.height;
@@ -2476,6 +2501,7 @@ Scene_Battle.prototype.startActorCommandSelection = function() {
     this._actorWindow.hide();
     this._enemyWindow.deactivate();
     this._enemyWindow.hide();
+    this._helpWindow.show();
 };
 
 //265
