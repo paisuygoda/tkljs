@@ -36,21 +36,16 @@ Game_Actor.prototype.isEquipChangeOk = function(slotId) {
 //287
 Game_Actor.prototype.releaseUnequippableItems = function(forcing) {
     
-    console.log("---------------------");
     for (;;) {
         var slots = this.equipSlots();
         var equips = this.equips();
         var changed = false;
         for (var i = 0; i < equips.length; i++) {
             var item = equips[i];
-            console.log(i);
-            console.log(item);
-            var isBareHand = item && item.etypeId == 1 && item.id == 1;
-            console.log(isBareHand);
-            if (item && ((!this.canEquip(item) || item.etypeId !== slots[i])
-                        || this.isSealedSlot(i))
-                    && !isBareHand) {
-                if (!forcing && !isBareHand) {
+            var isBareHand = item && item.id == 1;
+            if (item && (((!this.canEquip(item) || item.etypeId !== slots[i]) && !isBareHand)
+                        || this.isSealedSlot(i))) {
+                if (!forcing) {
                     this.tradeItemWithParty(null, item);
                 }
                 this._equips[i].setObject(null);

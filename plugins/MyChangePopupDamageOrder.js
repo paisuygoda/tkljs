@@ -93,13 +93,15 @@
 			
 			// Actionがたたかう系であることの確認も必要だが、まだ実装できていない（たたかう系に属するスキルIDが定まっていないため）
 	    	if(this._subject.isActor()) {
-		    	if(!this._dualWielding && this._subject.weapons()[1]) {
-		    		this._dualWielding = true;
-		    		this._tempWeapon = this._subject._equips[1];
-		    		this._subject._equips[1] = null;
+				var equips = this._subject.equips();
+				var bareHands = equips[0] && equips[1] && equips[0].id == 1 && equips[1].id == 1;
+		    	if(!this._dualWielding && (this._subject.weapons()[1] || bareHands)) {
+					this._dualWielding = true;
+					this._tempWeapon = this._subject._equips[1];
+					this._subject._equips[1] = null;
 		    		var nextAction = JsonEx.makeDeepCopy(this._action);
 		    		this._action.insert(nextAction);
-		    	} else if (this._dualWielding) {
+		    	} else if (this._dualWielding && !bareHands) {
 		    		this._subject._equips[1] = this._tempWeapon;
 		    		this._tempWeapon = this._subject._equips[0];
 		    		this._subject._equips[0] = null;
@@ -141,12 +143,11 @@
 	};
 
 	BattleManager.updateDamage = function() {
-		// if (this._dualWielding && this._subject.isActor()) console.log(this._subject._equips[0]._itemId);
 		if (this._waitAnim > 0) this._waitAnim--;
 	    if (!(this._logWindow.isBusy() || this._subject._isInMotion)) {
 	    	if(this._dualWielding && this._subject._equips[0]._itemId === 0) {
-	    		this._dualWielding = false;
-	    		this._subject._equips[0] = this._tempWeapon;
+				this._dualWielding = false;
+				this._subject._equips[0] = this._tempWeapon;
 	    	}
 	    	var target = this._targets.shift();
 	    	while(target) {

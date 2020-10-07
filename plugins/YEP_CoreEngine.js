@@ -2774,7 +2774,7 @@ animationId, mirror) {
         targets.forEach(function(target) {
             target.startAnimation(animationId, mirror, 0);
         });
-        BattleManager._waitAnim += $dataAnimations[animationId].frames.length;
+        BattleManager._waitAnim = Math.max($dataAnimations[animationId].frames.length - 5, BattleManager._waitAnim);
       } else {
           var delay = this.animationBaseDelay();
           var nextDelay = this.animationNextDelay();
@@ -2782,7 +2782,7 @@ animationId, mirror) {
               target.startAnimation(animationId, mirror, delay);
               delay += nextDelay;
           });
-          BattleManager._waitAnim += $dataAnimations[animationId].frames.length + delay;
+          BattleManager._waitAnim = Math.max($dataAnimations[animationId].frames.length + delay - 5, BattleManager._waitAnim);
       }
     }
 };
