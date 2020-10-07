@@ -475,8 +475,27 @@ Game_Actor.prototype.equips = function() {
 
 Yanfly.Equip.Game_Actor_changeEquip = Game_Actor.prototype.changeEquip;
 Game_Actor.prototype.changeEquip = function(slotId, item) {
-    if (!this._equips[slotId]) this._equips[slotId] = new Game_Item();
+    // 素手を収納しない
+    if (!this._equips[slotId]
+      || (this._equips[slotId]._dataClass == 'weapon' && this._equips[slotId]._itemId == 1)) this._equips[slotId] = new Game_Item();
     Yanfly.Equip.Game_Actor_changeEquip.call(this, slotId, item);
+    // 両手に何も持っていなければ素手を表示
+    if(this._equips[0]._itemId == 0) {
+      if(this._equips[1]._itemId == 0) {
+        this._equips[0].setEquip(true, 1);
+        this._equips[1].setEquip(true, 1);
+      } else if (this._equips[1]._dataClass == 'weapon' && this._equips[1]._itemId == 1) {
+        this._equips[0].setEquip(true, 1);
+      }
+    } else if (this._equips[0]._dataClass == 'weapon' && this._equips[0]._itemId == 1) {
+      if(this._equips[1]._itemId == 0) {
+        this._equips[1].setEquip(true, 1);
+      } else if (!(this._equips[1]._dataClass == 'weapon' && this._equips[1]._itemId == 1)) {
+        this._equips[0] = new Game_Item();
+      }
+    } else if (this._equips[1]._dataClass == 'weapon' && this._equips[1]._itemId == 1) {
+      this._equips[1] = new Game_Item();
+    }
 };
 
 Yanfly.Equip.Game_Actor_forceChangeEquip =

@@ -34,16 +34,23 @@ Game_Actor.prototype.isEquipChangeOk = function(slotId) {
 };
 
 //287
-var _Game_Actor_releaseUnequippableItems = Game_Actor.prototype.releaseUnequippableItems;
 Game_Actor.prototype.releaseUnequippableItems = function(forcing) {
-    _Game_Actor_releaseUnequippableItems.call(this, forcing);
+    
+    console.log("---------------------");
     for (;;) {
+        var slots = this.equipSlots();
         var equips = this.equips();
         var changed = false;
         for (var i = 0; i < equips.length; i++) {
             var item = equips[i];
-            if (item && this.isSealedSlot(i)) {
-                if (!forcing) {
+            console.log(i);
+            console.log(item);
+            var isBareHand = item && item.etypeId == 1 && item.id == 1;
+            console.log(isBareHand);
+            if (item && ((!this.canEquip(item) || item.etypeId !== slots[i])
+                        || this.isSealedSlot(i))
+                    && !isBareHand) {
+                if (!forcing && !isBareHand) {
                     this.tradeItemWithParty(null, item);
                 }
                 this._equips[i].setObject(null);
