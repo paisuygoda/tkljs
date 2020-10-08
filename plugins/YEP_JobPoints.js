@@ -804,7 +804,7 @@ Window_Base.prototype.drawActorJp = function(actor, id, wx, wy, ww, align) {
     var jobLevel = actor._jobLevel[curClass.id];
 
     var denom = curClass.abilities[jobLevel]['point'];
-    var denomText = " / " + String(denom).padStart(3, ' ');
+    var denomText = " /  " + String(denom).padStart(3, ' ');
     var num = Yanfly.Util.toGroup(jp);
     var numText = String(num).padStart(3, ' ');
 
@@ -814,9 +814,9 @@ Window_Base.prototype.drawActorJp = function(actor, id, wx, wy, ww, align) {
     	var text = "";
     // MASTER時
     } else if (denom === 0) {
-    	var text = "\\c[16]Lv \\c[0]" + jobLevel + "\\c[16]-\\c[0]   MASTER!";
+    	var text = "\\c[16]Lv \\c[0]" + jobLevel + "\\c[16] -\\c[0]   MASTER!";
     } else {
-    	var text = "\\c[16]Lv \\c[0]" + jobLevel + "\\c[16]-\\c[0] " + abp;
+    	var text = "\\c[16]Lv \\c[0]" + jobLevel + "\\c[16] -\\c[0] " + abp;
     }
     if (align === 'left') {
       wx = 0;

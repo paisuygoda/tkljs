@@ -517,7 +517,6 @@ const MPPlugin = {};
     MPPlugin.atEscapingColor1 = 'rgb(%1)'.format(parameters['AT Escaping Color1'] || '192,192,192');
     MPPlugin.atEscapingColor2 = 'rgb(%1)'.format(parameters['AT Escaping Color2'] || '192,192,255');
     MPPlugin.firstLoop = true;
-    MPPlugin.showHelp = false;
     
 }
 
@@ -1454,20 +1453,20 @@ Window_ActorCommand.prototype.initialize = function() {
     this._actor = null;
 };
 
-// aで説明欄の表示/非表示切り替え
+// tabで説明欄の表示/非表示切り替え
 Alias.WiAcCo_processCursorMove = Window_ActorCommand.prototype.processCursorMove;
 Window_ActorCommand.prototype.processCursorMove = function() {
     Alias.WiAcCo_processCursorMove.call(this);
     if (this.isCursorMovable()) {
-        if (Input.isTriggered('a')) {
-            MPPlugin.showHelp = !MPPlugin.showHelp;
+        if (Input.isTriggered('tab')) {
+            BattleManager._showHelp = !BattleManager._showHelp;
             this.showHelpWindow();
         }
     }
 };
 
 Window_ActorCommand.prototype.showHelpWindow = function() {
-    if (this._helpWindow && MPPlugin.showHelp) {
+    if (this._helpWindow && BattleManager._showHelp) {
         this._helpWindow.open();
     } else {
         this._helpWindow.close();
@@ -2166,20 +2165,20 @@ Window_BattleSkill.prototype.show = function() {
     Alias.WiBaSk_show.apply(this, arguments);
 };
 
-// shiftで説明欄の表示/非表示切り替え
+// tabで説明欄の表示/非表示切り替え
 Alias.WiBaSk_processCursorMove = Window_BattleSkill.prototype.processCursorMove;
 Window_BattleSkill.prototype.processCursorMove = function() {
     Alias.WiBaSk_processCursorMove.call(this);
     if (this.isCursorMovable()) {
-        if (Input.isTriggered('a')) {
-            MPPlugin.showHelp = !MPPlugin.showHelp;
+        if (Input.isTriggered('tab')) {
+            BattleManager._showHelp = !BattleManager._showHelp;
             this.showHelpWindow();
         }
     }
 };
 
 Window_BattleSkill.prototype.showHelpWindow = function() {
-    if (this._helpWindow && MPPlugin.showHelp) {
+    if (this._helpWindow && BattleManager._showHelp) {
         this._helpWindow.open();
     } else {
         this._helpWindow.close();
@@ -2191,7 +2190,7 @@ Alias.WiBaSk_hide = Window_BattleSkill.prototype.hide;
 Window_BattleSkill.prototype.hide = function() {
     if (this._statusWindow)
         this._statusWindow.hide();
-    Alias.WiBaSk_hide.apply(this, arguments);
+    Window_SkillList.prototype.hide.call(this);
 };
 
 //-----------------------------------------------------------------------------
@@ -2202,22 +2201,27 @@ Window_BattleItem.prototype.initialize = function(x, y, width, height) {
     Alias.WiBaIt_initialize.call(this, x, y, width, height);
 };
 
-// shiftで説明欄の表示/非表示切り替え
+// tabで説明欄の表示/非表示切り替え
 Alias.WiBaIt_processCursorMove = Window_BattleItem.prototype.processCursorMove;
 Window_BattleItem.prototype.processCursorMove = function() {
+    var lastIndex = this._index;
     Alias.WiBaSk_processCursorMove.call(this);
     if (this.isCursorMovable()) {
-        if (Input.isTriggered('a')) {
-            MPPlugin.showHelp = !MPPlugin.showHelp;
+        if (Input.isTriggered('tab')) {
+            BattleManager._showHelp = !BattleManager._showHelp;
             this.showHelpWindow();
-        } else if (Input.isTriggered('shift')) {
+        } else if (Input.isTriggered('up') && lastIndex == this._index) {
             this.callHandler('equip');
         }
     }
 };
 
+Window_BattleItem.prototype.hide = function() {
+    Window_ItemList.prototype.hide.call(this);
+};
+
 Window_BattleItem.prototype.showHelpWindow = function() {
-    if (this._helpWindow && MPPlugin.showHelp) {
+    if (this._helpWindow && BattleManager._showHelp) {
         this._helpWindow.open();
     } else {
         this._helpWindow.close();
@@ -2403,7 +2407,7 @@ Scene_Battle.prototype.createActorCommandWindow = function() {
 Scene_Battle.prototype.createHelpWindow = function() {
     if (MPPlugin.helpWindowPos >= 0) {
         this._helpWindow = new Window_Help(MPPlugin.helpWindowRow);
-        if (!MPPlugin.showHelp) this._helpWindow.close();
+        if (!BattleManager._showHelp) this._helpWindow.close();
         this._helpWindow.visible = false;
         if (MPPlugin.helpWindowPos === 1) {
             this._helpWindow.y = this._statusWindow.y - this._helpWindow.height;

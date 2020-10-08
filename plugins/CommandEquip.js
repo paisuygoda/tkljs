@@ -80,6 +80,16 @@ Window_BattleEquipSlot.prototype.maxCols = function() {
 Window_BattleEquipSlot.prototype.maxItems = function() {
     return this._actor ? 2 : 0;
 };
+Window_BattleEquipSlot.prototype.processCursorMove = function(){
+    if (this.isCursorMovable()) {
+        if (Input.isTriggered('down')) this.callHandler('cancel');
+        else if (Input.isTriggered('tab')) {
+            BattleManager._showHelp = !BattleManager._showHelp;
+            this.showHelpWindow();
+        }
+    }
+    Window_EquipSlot.prototype.processCursorMove.call(this);
+}
 
 Scene_Battle.prototype.createSlotWindow = function() {
     var wy = this._statusWindow.y;
@@ -99,6 +109,14 @@ Window_BattleEquipItem.prototype = Object.create(Window_EquipItem.prototype);
 Window_BattleEquipItem.prototype.constructor = Window_BattleEquipItem;
 Window_BattleEquipItem.prototype.maxCols = function() {
     return 2;
+};
+// tabで説明欄の表示/非表示切り替え
+Window_BattleEquipItem.prototype.processCursorMove = function() {
+    Window_EquipItem.prototype.processCursorMove.call(this);
+    if (this.isCursorMovable() && Input.isTriggered('tab')) {
+            BattleManager._showHelp = !BattleManager._showHelp;
+            this.showHelpWindow();
+        }
 };
 
 Scene_Battle.prototype.createEquipItemWindow = function() {
@@ -138,12 +156,12 @@ Scene_Battle.prototype.onSlotOk = function() {
 
 Scene_Battle.prototype.onSlotCancel = function() {
     this._slotWindow.deselect();
+    this._slotWindow.deactivate();
     this._slotWindow.hide();
     this._itemWindow.activate();
 };
 
 Scene_Battle.prototype.commandEquipmentCancel = function() {
-    this._helpWindow.hide();
     this._equipCommandWindow.hide();
     this._equipStatusWindow.hide();
     this._equipItemWindow.hide();

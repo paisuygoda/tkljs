@@ -19,6 +19,7 @@
 		this._waitAnim = 0;
 		this._specialSkills = [];
 		this._special = null;
+		this._showHelp = false;
 	};
 
 	// startActionではアクションを呼ばない
