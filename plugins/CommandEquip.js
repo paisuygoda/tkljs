@@ -57,90 +57,55 @@ Window_EquipSlot.prototype.isCurrentItemEnabled = function() {
 
 if (Imported.YEP_EquipCore) {
 
-Window_ActorCommand.prototype.addEquipCommand = function() {
-    this.addCommand(TextManager.equip, 'equip');
-};
-
-Jene.windowActorCommandMakeCommandListYEP = Window_ActorCommand.prototype.makeCommandList;
-
-Window_ActorCommand.prototype.makeCommandList = function() {
-    Jene.windowActorCommandMakeCommandListYEP.call(this);
-    if (this._actor) {
-        this.addEquipCommand();
-    }
-};
-
 Jene.sceneBattleIsAnyInputWindowActiveYEP = Scene_Battle.prototype.isAnyInputWindowActive;
-
 Scene_Battle.prototype.isAnyInputWindowActive = function() {
-    return (Jene.sceneBattleIsAnyInputWindowActiveYEP.call(this) || this._equipCommandWindow.active || this._slotWindow.active || this._equipItemWindow.active);
+    return (Jene.sceneBattleIsAnyInputWindowActiveYEP.call(this) || this._slotWindow.active || this._equipItemWindow.active);
 };
 
 Jene.sceneBattleCreateAllWindowsYEP = Scene_Battle.prototype.createAllWindows;
-
 Scene_Battle.prototype.createAllWindows = function() {
     Jene.sceneBattleCreateAllWindowsYEP.call(this);
-    this.createEquipCommandWindow();
-    this.createEquipStatusWindow();
     this.createSlotWindow();
     this.createEquipItemWindow();
-    this.createCompareWindow();
 }
 
-Jene.sceneBattleCreateActorCommandWindowYEP = Scene_Battle.prototype.createActorCommandWindow;
-
-Scene_Battle.prototype.createActorCommandWindow = function() {
-    Jene.sceneBattleCreateActorCommandWindowYEP.call(this);
-    this._actorCommandWindow.setHandler('equip',  this.commandEquipment.bind(this));
-    this.addWindow(this._actorCommandWindow);
+function Window_BattleEquipSlot() {
+    this.initialize.apply(this, arguments);
+}
+Window_BattleEquipSlot.prototype = Object.create(Window_EquipSlot.prototype);
+Window_BattleEquipSlot.prototype.constructor = Window_BattleEquipSlot;
+Window_BattleEquipSlot.prototype.maxCols = function() {
+    return 2;
 };
-
-Scene_Battle.prototype.createEquipStatusWindow = function() {
-    var wx = this._equipCommandWindow.width;
-    var wy = this._helpWindow.height;
-    var ww = Graphics.boxWidth - wx;
-    var wh = this._equipCommandWindow.height;
-    this._equipStatusWindow = new Window_SkillStatus(wx, wy, ww, wh);
-    $gameParty.members().forEach(function(actor) {
-        ImageManager.loadFace(actor.faceName());
-    }, this._equipStatusWindow);
-    this._equipStatusWindow.hide();
-    this.addWindow(this._equipStatusWindow);
-};
-
-Scene_Battle.prototype.createEquipCommandWindow = function() {
-    var wy = this._helpWindow.height;
-    this._equipCommandWindow = new Window_EquipCommand(0, wy, 240);
-    this._equipCommandWindow.setHelpWindow(this._helpWindow);
-    this._equipCommandWindow.setHandler('equip',    this.commandEquip.bind(this));
-    this._equipCommandWindow.setHandler('optimize', this.commandOptimize.bind(this));
-    this._equipCommandWindow.setHandler('clear',    this.commandClear.bind(this));
-    this._equipCommandWindow.setHandler('cancel',   this.commandEquipmentCancel.bind(this));
-    this._equipCommandWindow.deactivate();
-    this._equipCommandWindow.hide();
-    this.addWindow(this._equipCommandWindow);
+Window_BattleEquipSlot.prototype.maxItems = function() {
+    return this._actor ? 2 : 0;
 };
 
 Scene_Battle.prototype.createSlotWindow = function() {
-    var wy = this._equipCommandWindow.y + this._equipCommandWindow.height;
-    var ww = Graphics.boxWidth / 2;
-    var wh = Graphics.boxHeight - wy;
-    this._slotWindow = new Window_EquipSlot(0, wy, ww, wh);
-    this._slotWindow.setHelpWindow(this._helpWindow);
-    this._slotWindow.setStatusWindow(this._equipStatusWindow);
+    var wy = this._statusWindow.y;
+    var ww = Graphics.boxWidth;
+    var wh = this._statusWindow.height * 2 / 5;
+    this._slotWindow = new Window_BattleEquipSlot(0, wy, ww, wh);
     this._slotWindow.setHandler('ok',       this.onSlotOk.bind(this));
     this._slotWindow.setHandler('cancel',   this.onSlotCancel.bind(this));
     this._slotWindow.hide();
     this.addWindow(this._slotWindow);
 };
 
+function Window_BattleEquipItem() {
+    this.initialize.apply(this, arguments);
+}
+Window_BattleEquipItem.prototype = Object.create(Window_EquipItem.prototype);
+Window_BattleEquipItem.prototype.constructor = Window_BattleEquipItem;
+Window_BattleEquipItem.prototype.maxCols = function() {
+    return 2;
+};
+
 Scene_Battle.prototype.createEquipItemWindow = function() {
-    var wy = this._slotWindow.y;
-    var ww = Graphics.boxWidth / 2;
-    var wh = Graphics.boxHeight - wy;
-    this._equipItemWindow = new Window_EquipItem(0, wy, ww, wh);
-    this._equipItemWindow.setHelpWindow(this._helpWindow);
-    this._equipItemWindow.setStatusWindow(this._equipStatusWindow);
+    var wy = this._slotWindow.y + this._slotWindow.height;
+    var ww = Graphics.boxWidth;
+    var wh = this._statusWindow.height * 3 / 5;
+    this._equipItemWindow = new Window_BattleEquipItem(0, wy, ww, wh);
     this._equipItemWindow.setHandler('ok',     this.onEquipItemOk.bind(this));
     this._equipItemWindow.setHandler('cancel', this.onEquipItemCancel.bind(this));
     this._slotWindow.setItemWindow(this._equipItemWindow);
@@ -148,78 +113,19 @@ Scene_Battle.prototype.createEquipItemWindow = function() {
     this.addWindow(this._equipItemWindow);
 };
 
-Scene_Battle.prototype.createCompareWindow = function() {
-    var wx = this._equipItemWindow.width;
-    var wy = this._equipItemWindow.y;
-    var ww = Graphics.boxWidth - wx;
-    var wh = Graphics.boxHeight - wy;
-    this._compareWindow = new Window_StatCompare(wx, wy, ww, wh);
-    this._slotWindow.setStatusWindow(this._compareWindow);
-    this._equipItemWindow.setStatusWindow(this._compareWindow);
-    this._compareWindow.hide();
-    this.addWindow(this._compareWindow);
-};
-
 Scene_Battle.prototype.refreshActor = function() {
     var actor = BattleManager.actor();
-    this._equipStatusWindow.setActor(actor);
     this._slotWindow.setActor(actor);
     this._equipItemWindow.setActor(actor);
-    this._compareWindow.setActor(actor);
-};
-
-Scene_Battle.prototype.commandEquipment = function() {
-    this.refreshActor();
-    this._helpWindow.show();
-    this._equipCommandWindow.refresh();
-    this._equipCommandWindow.show();
-    this._equipCommandWindow.activate();
-    this._equipStatusWindow.refresh();
-    this._equipStatusWindow.show();
-    this._slotWindow.refresh();
-    this._slotWindow.show();
-    this._compareWindow.refresh();
-    this._compareWindow.show();
-    this._equipItemWindow.refresh();
-    this._equipCommandWindow.select(0);
 };
 
 Scene_Battle.prototype.commandEquip = function() {
+    this.refreshActor();
+    this._itemWindow.deactivate();
     this._slotWindow.refresh();
+    this._slotWindow.show();
     this._slotWindow.activate();
     this._slotWindow.select(0);
-};
-
-Scene_Battle.prototype.commandOptimize = function() {
-    $gameTemp._optimizeEquipments = true;
-    var hpRate = BattleManager.actor().hp / Math.max(1, BattleManager.actor().mhp);
-    var mpRate = BattleManager.actor().mp / Math.max(1, BattleManager.actor().mmp);
-    SoundManager.playEquip();
-    BattleManager.actor().optimizeEquipments();
-    this._equipStatusWindow.refresh();
-    this._slotWindow.refresh();
-    this._equipCommandWindow.activate();
-    $gameTemp._optimizeEquipments = false;
-    BattleManager.actor().setHp(parseInt(BattleManager.actor().mhp * hpRate));
-        BattleManager.actor().setMp(parseInt(BattleManager.actor().mmp * mpRate));
-    this._compareWindow.refresh();
-    this._statusWindow.refresh();
-};
-
-Scene_Battle.prototype.commandClear = function() {
-    $gameTemp._clearEquipments = true;
-    var hpRate = BattleManager.actor().hp / Math.max(1, BattleManager.actor().mhp);
-    var mpRate = BattleManager.actor().mp / Math.max(1, BattleManager.actor().mmp);
-    SoundManager.playEquip();
-    BattleManager.actor().clearEquipments();
-    this._equipStatusWindow.refresh();
-    this._slotWindow.refresh();
-    this._equipCommandWindow.activate();
-    $gameTemp._clearEquipments = false;
-    BattleManager.actor().setHp(parseInt(BattleManager.actor().mhp * hpRate));
-        BattleManager.actor().setMp(parseInt(BattleManager.actor().mmp * mpRate));
-    this._compareWindow.refresh();
-    this._statusWindow.refresh();
 };
 
 Scene_Battle.prototype.onSlotOk = function() {
@@ -232,7 +138,8 @@ Scene_Battle.prototype.onSlotOk = function() {
 
 Scene_Battle.prototype.onSlotCancel = function() {
     this._slotWindow.deselect();
-    this._equipCommandWindow.activate();
+    this._slotWindow.hide();
+    this._itemWindow.activate();
 };
 
 Scene_Battle.prototype.commandEquipmentCancel = function() {
@@ -254,7 +161,6 @@ Scene_Battle.prototype.onEquipItemOk = function() {
     this._equipItemWindow.deselect();
     this._equipItemWindow.refresh();
     this._equipItemWindow.hide();
-    this._equipStatusWindow.refresh();
 };
 
 Scene_Battle.prototype.onEquipItemCancel = function() {
@@ -263,7 +169,7 @@ Scene_Battle.prototype.onEquipItemCancel = function() {
 };
 
 }
-
+/*
 else {
 
 Window_ActorCommand.prototype.addEquipCommand = function() {
@@ -432,4 +338,4 @@ Scene_Battle.prototype.onEquipItemCancel = function() {
     this._slotWindow.activate();
 };
 
-}
+}*/

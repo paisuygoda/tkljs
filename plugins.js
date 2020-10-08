@@ -30,5 +30,6 @@ var $plugins =
 {"name":"MPP_VanishState","status":true,"description":"【ver.1.0】戦闘中、バトラーを半透明化させる特徴が作成できます。","parameters":{}},
 {"name":"KMS_FlexibleScope","status":true,"description":"[v0.2.0] スキル、アイテムに単体 / 全体切り替え機能を追加します。","parameters":{"Switch for-all button":"shift","Damage rate for-all":"0.5","MP cost rate for-all":"1"}},
 {"name":"DirectlyAttackEffect","status":true,"description":"直接攻撃演出プラグイン","parameters":{"フレーム数":"12","高度":"10","アクターに適用":"true","敵キャラに適用":"true","残像不使用":"false","常時残像使用":"false","アクター残像スイッチID":"0","敵キャラ残像スイッチID":"0"}},
-{"name":"WeaponSkill","status":true,"description":"武器ごとに通常攻撃のスキルIDを変更します。","parameters":{}}
+{"name":"WeaponSkill","status":true,"description":"武器ごとに通常攻撃のスキルIDを変更します。","parameters":{}},
+{"name":"CommandEquip","status":true,"description":"Equip Battle Command v1.1.1","parameters":{"Unchangeable Types":""}}
 ];

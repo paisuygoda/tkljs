@@ -1454,12 +1454,12 @@ Window_ActorCommand.prototype.initialize = function() {
     this._actor = null;
 };
 
-// shiftで説明欄の表示/非表示切り替え
+// aで説明欄の表示/非表示切り替え
 Alias.WiAcCo_processCursorMove = Window_ActorCommand.prototype.processCursorMove;
 Window_ActorCommand.prototype.processCursorMove = function() {
     Alias.WiAcCo_processCursorMove.call(this);
     if (this.isCursorMovable()) {
-        if (Input.isTriggered('shift')) {
+        if (Input.isTriggered('a')) {
             MPPlugin.showHelp = !MPPlugin.showHelp;
             this.showHelpWindow();
         }
@@ -2171,7 +2171,7 @@ Alias.WiBaSk_processCursorMove = Window_BattleSkill.prototype.processCursorMove;
 Window_BattleSkill.prototype.processCursorMove = function() {
     Alias.WiBaSk_processCursorMove.call(this);
     if (this.isCursorMovable()) {
-        if (Input.isTriggered('shift')) {
+        if (Input.isTriggered('a')) {
             MPPlugin.showHelp = !MPPlugin.showHelp;
             this.showHelpWindow();
         }
@@ -2207,9 +2207,11 @@ Alias.WiBaIt_processCursorMove = Window_BattleItem.prototype.processCursorMove;
 Window_BattleItem.prototype.processCursorMove = function() {
     Alias.WiBaSk_processCursorMove.call(this);
     if (this.isCursorMovable()) {
-        if (Input.isTriggered('shift')) {
+        if (Input.isTriggered('a')) {
             MPPlugin.showHelp = !MPPlugin.showHelp;
             this.showHelpWindow();
+        } else if (Input.isTriggered('shift')) {
+            this.callHandler('equip');
         }
     }
 };
@@ -2434,6 +2436,7 @@ Scene_Battle.prototype.createItemWindow = function() {
     this._itemWindow.setHelpWindow(this._helpWindow);
     this._itemWindow.setHandler('ok',     this.onItemOk.bind(this));
     this._itemWindow.setHandler('cancel', this.onItemCancel.bind(this));
+    this._itemWindow.setHandler('equip', this.commandEquip.bind(this));
     this.addWindow(this._itemWindow);
 };
 
