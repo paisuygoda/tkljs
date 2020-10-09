@@ -2337,11 +2337,6 @@ Scene_Battle.prototype.start = function() {
 };
 
 Scene_Battle.prototype.isAtbWait = function() {
-    if (!this._partyCommandWindow.isClosed()) {
-        // PAUSE画面の表示制御
-        if (this._pauseWindow.isClosed()) this._pauseWindow.open();
-        return true;
-    } else if (!this._pauseWindow.isClosed()) this._pauseWindow.close();
     var mode = BattleManager.atbMode();
     if (mode === "wait") {
         if (this._skillWindow.visible || this._itemWindow.visible ||
