@@ -412,9 +412,11 @@ FTKR.EBC = FTKR.EBC || {};
         } else {
             // 各スキルタイプコマンドで表示するヘルプをハードコーディング
             item = {description : null};
-            if (this.currentData().name == 'アイテム') item.description = 'アイテムを使用';
-            else if (this.currentData().name == '逃げる') item.description = '戦闘から逃げる';
-            else item.description = this.currentData().name;
+            if (this.currentData()) {
+                if (this.currentData().name == 'アイテム') item.description = 'アイテムを使用';
+                else if (this.currentData().name == '逃げる') item.description = '戦闘から逃げる';
+                else item.description = this.currentData().name;
+            }
             this.setHelpWindowItem(item);
         }
         this.showHelpWindow();

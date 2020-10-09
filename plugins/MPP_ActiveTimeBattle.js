@@ -1423,12 +1423,42 @@ Window_BattleLog.prototype.isFastForward = function() {
 //-----------------------------------------------------------------------------
 // Window_PartyCommand
 
-// 左端に敵名表示のため左に寄せる
 Window_PartyCommand.prototype.initialize = function() {
-    var y = Graphics.boxHeight - this.windowHeight();
-    Window_Command.prototype.initialize.call(this, 108, y);
+    Window_Command.prototype.initialize.call(this, (Graphics.boxWidth - this.windowWidth()) / 2, (Graphics.boxHeight - this.windowHeight() - 100) / 2);
     this.openness = 0;
     this.deactivate();
+};
+
+Window_PartyCommand.prototype.windowWidth = function() {
+    return 180;
+};
+
+Window_PartyCommand.prototype.windowHeight = function() {
+    return this.fittingHeight(2);
+};
+
+Window_PartyCommand.prototype.itemRect = function(index) {
+    var rect = new Rectangle();
+    var maxCols = this.maxCols();
+    rect.width = this.itemWidth();
+    rect.height = this.itemHeight();
+    rect.x = index % maxCols * (rect.width + this.spacing()) - this._scrollX;
+    rect.y = Math.floor(index / maxCols) * rect.height - this._scrollY + this.lineHeight();
+    return rect;
+};
+
+Window_PartyCommand.prototype.setup = function() {
+    this.clearCommandList();
+    this.makeCommandList();
+    this.refresh();
+    this.select(0);
+    this.drawTextEx('- PAUSE -', this.textPadding(), 0);
+    this.activate();
+    this.open();
+};
+
+Window_PartyCommand.prototype.itemTextAlign = function() {
+    return 'center';
 };
 
 //28
@@ -1461,6 +1491,8 @@ Window_ActorCommand.prototype.processCursorMove = function() {
         if (Input.isTriggered('tab')) {
             BattleManager._showHelp = !BattleManager._showHelp;
             this.showHelpWindow();
+        } else if (Input.isTriggered('right')) {
+            this.callHandler('sub');
         }
     }
 };
@@ -2366,7 +2398,7 @@ Scene_Battle.prototype.terminate = function() {
 
 //106
 Scene_Battle.prototype.updateWindowPositions = function() {
-    var statusX = this._partyCommandWindow.width + 108;
+    var statusX = 192 + 108;
     var statusWindow = this._statusWindow;
     if (statusWindow.x < statusX) {
         statusWindow.x = Math.min(statusWindow.x + 16, statusX);
@@ -2401,6 +2433,69 @@ Scene_Battle.prototype.createActorCommandWindow = function() {
     Alias.ScBa_createActorCommandWindow.apply(this, arguments);
     this._actorCommandWindow.setHandler('cancel', this.startPartyCommandSelection.bind(this));
     this._statusWindow.setActorCmdWindow(this._actorCommandWindow);
+    // 防御などのサブコマンドウィンドウ追加
+    this._actorCommandSubWindow = new Window_ActorSubCommand(58 + this._actorCommandWindow.width, this._actorCommandWindow.y);
+    this._actorCommandSubWindow.setHandler('cancel',  this.subToCommand.bind(this));
+    this._actorCommandSubWindow.setHandler('guard',  this.commandGuard.bind(this));
+    this._actorCommandWindow.setHandler('sub', this.commandToSub.bind(this));
+    this._actorCommandWindow.setHelpWindow(this._helpWindow);
+    this.addWindow(this._actorCommandSubWindow);
+
+};
+
+Scene_Battle.prototype.commandToSub = function() {
+    this._actorCommandSubWindow._lastIndex = this._actorCommandWindow._index;
+    this._actorCommandWindow.deselect();
+    this._actorCommandWindow.deactivate();
+    this._actorCommandSubWindow.select(0);
+    this._actorCommandSubWindow.activate();
+    this._actorCommandSubWindow.show();
+};
+Scene_Battle.prototype.subToCommand = function() {
+    this._actorCommandSubWindow.deselect();
+    this._actorCommandSubWindow.deactivate();
+    this._actorCommandSubWindow.hide();
+    this._actorCommandWindow.select(this._actorCommandSubWindow._lastIndex);
+    this._actorCommandWindow.activate();
+};
+
+function Window_ActorSubCommand() {
+    this.initialize.apply(this, arguments);
+}
+Window_ActorSubCommand.prototype = Object.create(Window_ActorCommand.prototype);
+Window_ActorSubCommand.prototype.constructor = Window_ActorSubCommand;
+Window_ActorSubCommand.prototype.initialize = function(x, y) {
+    Window_Command.prototype.initialize.call(this, x, y);
+    this.deactivate();
+    this.hide();
+    this._actor = null;
+    this._lastIndex = 0;
+};
+Window_ActorSubCommand.prototype.makeCommandList = function() {
+    if (this._actor) {
+        this.addGuardCommand();
+    }
+};
+Window_ActorSubCommand.prototype.processCursorMove = function() {
+    Alias.WiAcCo_processCursorMove.call(this);
+    if (this.isCursorMovable()) {
+        if (Input.isTriggered('left')) {
+            this.callHandler('cancel');
+        }
+    }
+};
+Window_ActorSubCommand.prototype.setup = function(actor) {
+    Alias.WiAcCo_setup.call(this, actor);
+    this.deactivate();
+    this.hide();
+    this._lastIndex = 0;
+};
+Window_ActorSubCommand.prototype.windowWidth = function() {
+    return 100;
+};
+
+Window_ActorSubCommand.prototype.windowHeight = function() {
+    return this.fittingHeight(1);
 };
 
 //184
@@ -2466,9 +2561,13 @@ Scene_Battle.prototype.refreshStatus = function() {
 };
 
 //242
-Alias.ScBa_startPartyCommandSelection = Scene_Battle.prototype.startPartyCommandSelection;
 Scene_Battle.prototype.startPartyCommandSelection = function() {
-    Alias.ScBa_startPartyCommandSelection.apply(this, arguments);
+    this.refreshStatus();
+    this._statusWindow.deselect();
+    this._statusWindow.open();
+    this._actorCommandWindow.deactivate();
+    this._actorCommandWindow.close();
+    this._partyCommandWindow.setup();
     this._actor = null;
 };
 
@@ -2500,6 +2599,7 @@ Alias.ScBa_startActorCommandSelection = Scene_Battle.prototype.startActorCommand
 Scene_Battle.prototype.startActorCommandSelection = function() {
     AudioManager.playStaticSe(MPPlugin.ActiveSE);
     Alias.ScBa_startActorCommandSelection.apply(this, arguments);
+    this._actorCommandSubWindow.setup(BattleManager.actor());
     this._skillWindow.deactivate();
     this._skillWindow.hide();
     this._itemWindow.deactivate();
@@ -2509,6 +2609,7 @@ Scene_Battle.prototype.startActorCommandSelection = function() {
     this._enemyWindow.deactivate();
     this._enemyWindow.hide();
     this._helpWindow.show();
+    MPPATB_Variable.commandPause = Math.max(MPPATB_Variable.commandPause, 8);
 };
 
 //265
@@ -2601,6 +2702,8 @@ Alias.ScBa_endCommandSelection = Scene_Battle.prototype.endCommandSelection;
 Scene_Battle.prototype.endCommandSelection = function() {
     this._actor = null;
     Alias.ScBa_endCommandSelection.apply(this, arguments);
+    this._actorCommandSubWindow.deactivate();
+    this._actorCommandSubWindow.hide();
     this._skillWindow.deactivate();
     this._skillWindow.hide();
     this._itemWindow.deactivate();

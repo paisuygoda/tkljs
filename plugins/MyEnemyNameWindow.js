@@ -16,7 +16,7 @@
 	
 	Scene_Battle.prototype.createPauseWindow = function() {
 		this._pauseWindow = new Window_Pause();
-		this.addWindow(this._pauseWindow);
+		// this.addWindow(this._pauseWindow);
 		this._pauseWindow.close();
 	};
 	
