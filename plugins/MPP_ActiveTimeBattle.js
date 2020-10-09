@@ -2337,6 +2337,9 @@ Scene_Battle.prototype.start = function() {
 };
 
 Scene_Battle.prototype.isAtbWait = function() {
+    if (!this._partyCommandWindow.isClosed()) {
+        return true;
+    }
     var mode = BattleManager.atbMode();
     if (mode === "wait") {
         if (this._skillWindow.visible || this._itemWindow.visible ||
