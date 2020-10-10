@@ -1924,7 +1924,17 @@ Window_BattleEnemy.prototype.selectForItem = function() {
     this.setCursorAll(false);
     if (action.isForAll())
         this.setCursorAll(true);
-    this.select(0);
+    // 敵選択時、x座標が一番大きい敵から選ぶ
+    var index = 0;
+    var posX = 0;
+    var enemies = $gameTroop.aliveMembers();
+    for (var i = 0; i < enemies.length; i++){
+        if (enemies[i].spritePosX() > posX) {
+            posX = enemies[i].spritePosX();
+            index = i;
+        }
+    }
+    this.select(index);
 };
 
 if (Window_BattleEnemy.prototype.hasOwnProperty('hitTest')) {
