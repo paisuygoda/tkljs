@@ -607,11 +607,11 @@ Game_Interpreter.prototype.command319 = function() {
 //=============================================================================
 
 Window_EquipCommand.prototype.windowWidth = function() {
-    return 240;
+    return Graphics.boxWidth * 2 / 3;
 };
 
 Window_EquipCommand.prototype.maxCols = function() {
-    return 1;
+    return 3;
 };
 
 Window_EquipCommand.prototype.windowHeight = function() {
@@ -619,7 +619,7 @@ Window_EquipCommand.prototype.windowHeight = function() {
 };
 
 Window_EquipCommand.prototype.numVisibleRows = function() {
-    return 4;
+    return 1;
 };
 
 Window_EquipCommand.prototype.itemTextAlign = function() {
@@ -631,15 +631,9 @@ Yanfly.Equip.Window_EquipCommand_makeCommandList =
 Window_EquipCommand.prototype.makeCommandList = function() {
     Yanfly.Equip.Window_EquipCommand_makeCommandList.call(this);
     this.addCustomCommand();
-    this.addFinishCommand();
 };
 
 Window_EquipCommand.prototype.addCustomCommand = function() {
-};
-
-Window_EquipCommand.prototype.addFinishCommand = function() {
-    if (Yanfly.Param.EquipFinishCmd === '') return;
-    this.addCommand(Yanfly.Param.EquipFinishCmd, 'cancel');
 };
 
 //=============================================================================
@@ -713,12 +707,21 @@ Window_EquipSlot.prototype.updateHelp = function() {
     }
 };
 
+Window_EquipSlot.prototype.processCursorMove = function() {
+  Window_Selectable.prototype.processCursorMove.call(this);
+  if(this._itemWindow) {
+    this._itemWindow._slotId = -1;
+    var slotId = this.index();
+    Yanfly.Equip.Window_EquipItem_setSlotId.call(this._itemWindow, slotId);
+  }
+}
+
 //=============================================================================
 // Window_EquipItem
 //=============================================================================
 
 Window_EquipItem.prototype.maxCols = function() {
-    return 1;
+    return 2;
 };
 
 Yanfly.Equip.Window_EquipItem_setSlotId = Window_EquipItem.prototype.setSlotId;
@@ -728,6 +731,7 @@ Window_EquipItem.prototype.setSlotId = function(slotId) {
 
 Yanfly.Equip.Window_EquipItem_includes = Window_EquipItem.prototype.includes;
 Window_EquipItem.prototype.includes = function(item) {
+    if(this._slotId < 0) return false;
     if (item === null && this._actor && this._data.length > 0) {
       var typeId = this._actor.equipSlots()[this._slotId];
       if (Yanfly.Param.EquipNonRemove.contains(typeId)) return false;
@@ -799,21 +803,17 @@ Window_StatCompare.prototype.initialize = function(wx, wy, ww, wh) {
 };
 
 Window_StatCompare.prototype.createWidths = function() {
-    this._paramNameWidth = 0;
+    this._paramNameWidth = this.textWidth('あああ');
     this._paramValueWidth = 0;
     this._arrowWidth = this.textWidth('\u2192' + ' ');
     var buffer = this.textWidth(' ');
     for (var i = 0; i < 8; ++i) {
-      var value1 = this.textWidth(TextManager.param(i));
       var value2 = this.textWidth(Yanfly.Util.toGroup(this._actor.paramMax(i)));
-      this._paramNameWidth = Math.max(value1, this._paramNameWidth);
       this._paramValueWidth = Math.max(value2, this._paramValueWidth);
     }
     this._bonusValueWidth = this._paramValueWidth;
-    this._bonusValueWidth += this.textWidth('(+)') + buffer;
     this._paramNameWidth += buffer;
-    this._paramValueWidth;
-    if (this._paramNameWidth + this._paramValueWidth * 2 + this._arrowWidth +
+    if (this._paramNameWidth + this._paramValueWidth + this._arrowWidth +
       this._bonusValueWidth > this.contents.width) this._bonusValueWidth = 0;
 };
 
@@ -827,9 +827,35 @@ Window_StatCompare.prototype.setActor = function(actor) {
 Window_StatCompare.prototype.refresh = function() {
     this.contents.clear();
     if (!this._actor) return;
-    for (var i = 0; i < 8; ++i) {
-        this.drawItem(0, this.lineHeight() * i, i);
+
+    // statusWindowの情報もここに入れる
+    this.drawActorSimpleStatus(this._actor, 0, 0, this.width);
+    this.drawCharacter(120, 50);
+
+    var statorder = [0, 1, 7, 4, 6, 2, 3, 5, 9, 12];
+    var step = 130;
+    for (var i = 0; i < statorder.length; ++i) {
+      if ([2, 5].contains(i)) step += 10;
+      this.drawItem(0, this.lineHeight() * i + step, statorder[i]);
     }
+};
+
+Window_StatCompare.prototype.drawActorSimpleStatus = function(actor, x, y, width) {
+  var lineHeight = this.lineHeight();
+  var x2 = x + 100;
+  this.drawActorName(actor, x, y);
+  this.drawActorLevel(actor, x, y + lineHeight * 1);
+  this.drawActorClass(actor, x2, y);
+};
+
+Window_StatCompare.prototype.drawCharacter = function(x, y) {
+  var characterName = this._actor.battlerName();
+  var bitmap = ImageManager.loadSvActor(characterName);
+  var pw = bitmap.width / 9;
+  var ph = bitmap.height / 6;
+  var sx = 0;
+  var sy = 0;
+  this.contents.blt(bitmap, sx, sy, pw, ph, x, y);
 };
 
 Window_StatCompare.prototype.setTempActor = function(tempActor) {
@@ -842,7 +868,7 @@ Window_StatCompare.prototype.drawItem = function(x, y, paramId) {
     // this.drawDarkRect(x, y, this.contents.width, this.lineHeight());
     this.drawParamName(y, paramId);
     this.drawCurrentParam(y, paramId);
-    this.drawRightArrow(y);
+    this.drawRightArrow(y, paramId);
     if (!this._tempActor) return;
     this.drawNewParam(y, paramId);
     this.drawParamDifference(y, paramId);
@@ -858,28 +884,29 @@ Window_StatCompare.prototype.drawDarkRect = function(dx, dy, dw, dh) {
 Window_StatCompare.prototype.drawParamName = function(y, paramId) {
     var x = this.textPadding();
     this.changeTextColor(this.systemColor());
-    this.drawText(TextManager.param(paramId), x, y, this._paramNameWidth);
+    if (paramId < 2) this.drawText(TextManager.param(paramId).substring(2), x, y, this.textWidth('ああ '));
+    else this.drawText(TextManager.param(paramId), x, y, this._paramNameWidth);
 };
 
 Window_StatCompare.prototype.drawCurrentParam = function(y, paramId) {
-    var x = this.contents.width - this.textPadding();
-    x -= this._paramValueWidth * 2 + this._arrowWidth + this._bonusValueWidth;
+    var x = this.contents.width - this.textPadding() ;
+    x -= this._paramValueWidth + this._arrowWidth + this._bonusValueWidth + 35 + (paramId < 2 ? this.textWidth('0') : 0);
     this.resetTextColor();
     var actorparam = Yanfly.Util.toGroup(this._actor.param(paramId));
     this.drawText(actorparam, x, y, this._paramValueWidth, 'right');
 };
 
-Window_StatCompare.prototype.drawRightArrow = function(y) {
+Window_StatCompare.prototype.drawRightArrow = function(y, paramId) {
     var x = this.contents.width - this.textPadding();
-    x -= this._paramValueWidth + this._arrowWidth + this._bonusValueWidth;
+    x -= this._arrowWidth + this._bonusValueWidth + 42 + (paramId < 2 ? this.textWidth('0') : 0);
     var dw = this.textWidth('\u2192' + ' ');
     this.changeTextColor(this.systemColor());
-    this.drawText('\u2192', x, y, dw, 'center');
+    this.drawText('\u2192', x, y, dw, 'right');
 };
 
 Window_StatCompare.prototype.drawNewParam = function(y, paramId) {
     var x = this.contents.width - this.textPadding();
-    x -= this._paramValueWidth + this._bonusValueWidth;
+    x -= this._bonusValueWidth + 50;
     var newValue = this._tempActor.param(paramId);
     var diffvalue = newValue - this._actor.param(paramId);
     var actorparam = Yanfly.Util.toGroup(newValue);
@@ -905,6 +932,24 @@ Window_StatCompare.prototype.drawParamDifference = function(y, paramId) {
 };
 
 //=============================================================================
+// Window_EquipHelp
+//=============================================================================
+
+function Window_EquipHelp() {
+  this.initialize.apply(this, arguments);
+}
+
+Window_EquipHelp.prototype = Object.create(Window_Help.prototype);
+Window_EquipHelp.prototype.constructor = Window_EquipHelp;
+
+Window_EquipHelp.prototype.initialize = function(numLines) {
+  var width = Graphics.boxWidth;
+  var height = this.fittingHeight(1);
+  Window_Base.prototype.initialize.call(this, 0, 0, width, height);
+  this._text = '';
+};
+
+//=============================================================================
 // Scene_Equip
 //=============================================================================
 
@@ -921,9 +966,15 @@ Scene_Equip.prototype.create = function() {
     this.refreshActor();
 };
 
+Scene_Equip.prototype.createHelpWindow = function() {
+  this._helpWindow = new Window_EquipHelp();
+  this.addWindow(this._helpWindow);
+};
+
 Scene_Equip.prototype.createCommandWindow = function() {
+    var wx = Graphics.boxWidth / 3;
     var wy = this._helpWindow.height;
-    this._commandWindow = new Window_EquipCommand(0, wy, 240);
+    this._commandWindow = new Window_EquipCommand(wx, wy, 240);
     this._commandWindow.setHelpWindow(this._helpWindow);
     this._commandWindow.setHandler('equip', this.commandEquip.bind(this));
     this._commandWindow.setHandler('optimize', this.commandOptimize.bind(this));
@@ -935,19 +986,20 @@ Scene_Equip.prototype.createCommandWindow = function() {
 };
 
 Scene_Equip.prototype.createStatusWindow = function() {
-    var wx = this._commandWindow.width;
-    var wy = this._helpWindow.height;
-    var ww = Graphics.boxWidth - wx;
-    var wh = this._commandWindow.height;
-    this._statusWindow = new Window_SkillStatus(wx, wy, ww, wh);
+    var wy = this._commandWindow.y + this._commandWindow.height;
+    var ww = Graphics.boxWidth / 3;
+    var wh = this._helpWindow.fittingHeight(5);
+    this._statusWindow = new Window_SkillStatus(0, wy, ww, wh);
     this.addWindow(this._statusWindow);
+    this._statusWindow.hide();
 };
 
 Scene_Equip.prototype.createSlotWindow = function() {
-    var wy = this._commandWindow.y + this._commandWindow.height;
-    var ww = Graphics.boxWidth / 2;
-    var wh = Graphics.boxHeight - wy;
-    this._slotWindow = new Window_EquipSlot(0, wy, ww, wh);
+    var wx = Graphics.boxWidth / 3;
+    var wy = this._statusWindow.y;
+    var ww = Graphics.boxWidth - wx;
+    var wh = this._statusWindow.height;
+    this._slotWindow = new Window_EquipSlot(wx, wy, ww, wh);
     this._slotWindow.setHelpWindow(this._helpWindow);
     this._slotWindow.setHandler('ok',       this.onSlotOk.bind(this));
     this._slotWindow.setHandler('cancel',   this.onSlotCancel.bind(this));
@@ -955,25 +1007,25 @@ Scene_Equip.prototype.createSlotWindow = function() {
 };
 
 Scene_Equip.prototype.createItemWindow = function() {
-    var wy = this._slotWindow.y;
-    var ww = Graphics.boxWidth / 2;
+    var wx = this._slotWindow.x;
+    var wy = this._slotWindow.y + this._slotWindow.height;
+    var ww = Graphics.boxWidth - wx;
     var wh = Graphics.boxHeight - wy;
-    this._itemWindow = new Window_EquipItem(0, wy, ww, wh);
+    this._itemWindow = new Window_EquipItem(wx, wy, ww, wh);
     this._itemWindow.setHelpWindow(this._helpWindow);
     this._itemWindow.setHandler('ok',     this.onItemOk.bind(this));
     this._itemWindow.setHandler('cancel', this.onItemCancel.bind(this));
     this._slotWindow.setItemWindow(this._itemWindow);
+    this._itemWindow._slotId = -1;
     this.addWindow(this._itemWindow);
-    this._itemWindow.hide();
 };
 
 Scene_Equip.prototype.createCompareWindow = function() {
     this._lowerRightWindows = [];
-    var wx = this._itemWindow.width;
-    var wy = this._itemWindow.y;
-    var ww = Graphics.boxWidth - wx;
+    var wy = this._commandWindow.y;
+    var ww = this._statusWindow.width;
     var wh = Graphics.boxHeight - wy;
-    this._compareWindow = new Window_StatCompare(wx, wy, ww, wh);
+    this._compareWindow = new Window_StatCompare(0, wy, ww, wh);
     this._slotWindow.setStatusWindow(this._compareWindow);
     this._itemWindow.setStatusWindow(this._compareWindow);
     this.addWindow(this._compareWindow);
@@ -1048,6 +1100,8 @@ Scene_Equip.prototype.onSlotCancel = function() {
     Yanfly.Equip.Scene_Equip_onSlotCancel.call(this);
     if (this._infoWindow) this._infoWindow.setItem(null);
     this._compareWindow.setTempActor(null);
+    this._itemWindow._slotId = -1;
+    this._itemWindow.refresh();
 };
 
 Yanfly.Equip.Scene_Equip_onItemOk = Scene_Equip.prototype.onItemOk;
@@ -1059,7 +1113,6 @@ Scene_Equip.prototype.onItemOk = function() {
     var hpAmount = Math.max(max, parseInt(this.actor().mhp * hpRate));
     this.actor().setHp(hpAmount);
     this.actor().setMp(parseInt(this.actor().mmp * mpRate));
-    this._itemWindow.hide();
     this._statusWindow.refresh();
 };
 
@@ -1067,7 +1120,6 @@ Yanfly.Equip.Scene_Equip_onItemCancel = Scene_Equip.prototype.onItemCancel;
 Scene_Equip.prototype.onItemCancel = function() {
     Yanfly.Equip.Scene_Equip_onItemCancel.call(this);
     this._compareWindow.setTempActor(null);
-    this._itemWindow.hide();
 };
 
 Scene_Equip.prototype.update = function() {

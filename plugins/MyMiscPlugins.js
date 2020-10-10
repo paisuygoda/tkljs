@@ -314,5 +314,133 @@
 			this.applyItemUserEffect(target);
 		}
 	};
+	
+	// jsonロード時に勝手に追加
+	MiMi_DaMa_isDatabaseLoaded = DataManager.isDatabaseLoaded;
+	DataManager.isDatabaseLoaded = function() {
+		if (MiMi_DaMa_isDatabaseLoaded.call(this)) {
+			// $dataSystem.terms.paramsの11番目(i = 10)の値に魔法回避率の名前を設定
+			$dataSystem.terms.params.push("魔法回避率");
+			return true;
+		}
+		return false;
+	};
+
+	// paramからxparamにアクセス
+	Game_BattlerBase.prototype.param = function(paramId) {
+		if (paramId > 7) return this.xparam(paramId - 8) * 100;
+		var value = this.paramBase(paramId) + this.paramPlus(paramId);
+		value *= this.paramRate(paramId) * this.paramBuffRate(paramId);
+		// 攻撃/防御/魔法防御は装備の値のみで計算する
+		if ([2, 3, 5].contains(paramId)) {
+			if (value > 1) value--;
+			else return 0;
+		}
+		var maxValue = this.paramMax(paramId);
+		var minValue = this.paramMin(paramId);
+		return Math.round(value.clamp(minValue, maxValue));
+	};
+
+	// svActorの画像はあらかじめ読み込む
+	Scene_Boot.loadSystemImages = function() {
+		ImageManager.reserveSvActor('bertz_blackmagi');
+		ImageManager.reserveSvActor('bertz_bluemagi');
+		ImageManager.reserveSvActor('bertz_dancer');
+		ImageManager.reserveSvActor('bertz_darkknight');
+		ImageManager.reserveSvActor('bertz_dragonknight');
+		ImageManager.reserveSvActor('bertz_gradiator');
+		ImageManager.reserveSvActor('bertz_hunter');
+		ImageManager.reserveSvActor('bertz_knight');
+		ImageManager.reserveSvActor('bertz_machinary');
+		ImageManager.reserveSvActor('bertz_monk');
+		ImageManager.reserveSvActor('bertz_monomane');
+		ImageManager.reserveSvActor('bertz_gradiator');
+		ImageManager.reserveSvActor('bertz_ninja');
+		ImageManager.reserveSvActor('bertz_oracle');
+		ImageManager.reserveSvActor('bertz_pharmacist');
+		ImageManager.reserveSvActor('bertz_pirates');
+		ImageManager.reserveSvActor('bertz_samurai');
+		ImageManager.reserveSvActor('bertz_summoner');
+		ImageManager.reserveSvActor('bertz_suppin');
+		ImageManager.reserveSvActor('bertz_swordmagi');
+		ImageManager.reserveSvActor('bertz_thief');
+		ImageManager.reserveSvActor('bertz_timemagi');
+		ImageManager.reserveSvActor('bertz_whitemagi');
+
+		
+		ImageManager.reserveSvActor('faris_blackmagi');
+		ImageManager.reserveSvActor('faris_bluemagi');
+		ImageManager.reserveSvActor('faris_dancer');
+		ImageManager.reserveSvActor('faris_darkknight');
+		ImageManager.reserveSvActor('faris_dragonknight');
+		ImageManager.reserveSvActor('faris_gradiator');
+		ImageManager.reserveSvActor('faris_hunter');
+		ImageManager.reserveSvActor('faris_knight');
+		ImageManager.reserveSvActor('faris_machinary');
+		ImageManager.reserveSvActor('faris_monk');
+		ImageManager.reserveSvActor('faris_monomane');
+		ImageManager.reserveSvActor('faris_gradiator');
+		ImageManager.reserveSvActor('faris_ninja');
+		ImageManager.reserveSvActor('faris_oracle');
+		ImageManager.reserveSvActor('faris_pharmacist');
+		ImageManager.reserveSvActor('faris_pirates');
+		ImageManager.reserveSvActor('faris_samurai');
+		ImageManager.reserveSvActor('faris_summoner');
+		ImageManager.reserveSvActor('faris_suppin');
+		ImageManager.reserveSvActor('faris_swordmagi');
+		ImageManager.reserveSvActor('faris_thief');
+		ImageManager.reserveSvActor('faris_timemagi');
+		ImageManager.reserveSvActor('faris_whitemagi');
+
+		
+		ImageManager.reserveSvActor('garaf_blackmagi');
+		ImageManager.reserveSvActor('garaf_bluemagi');
+		ImageManager.reserveSvActor('garaf_dancer');
+		ImageManager.reserveSvActor('garaf_darkknight');
+		ImageManager.reserveSvActor('garaf_dragonknight');
+		ImageManager.reserveSvActor('garaf_gradiator');
+		ImageManager.reserveSvActor('garaf_hunter');
+		ImageManager.reserveSvActor('garaf_knight');
+		ImageManager.reserveSvActor('garaf_machinary');
+		ImageManager.reserveSvActor('garaf_monk');
+		ImageManager.reserveSvActor('garaf_monomane');
+		ImageManager.reserveSvActor('garaf_gradiator');
+		ImageManager.reserveSvActor('garaf_ninja');
+		ImageManager.reserveSvActor('garaf_oracle');
+		ImageManager.reserveSvActor('garaf_pharmacist');
+		ImageManager.reserveSvActor('garaf_pirates');
+		ImageManager.reserveSvActor('garaf_samurai');
+		ImageManager.reserveSvActor('garaf_summoner');
+		ImageManager.reserveSvActor('garaf_suppin');
+		ImageManager.reserveSvActor('garaf_swordmagi');
+		ImageManager.reserveSvActor('garaf_thief');
+		ImageManager.reserveSvActor('garaf_timemagi');
+		ImageManager.reserveSvActor('garaf_whitemagi');
+
+		
+		ImageManager.reserveSvActor('lena_blackmagi');
+		ImageManager.reserveSvActor('lena_bluemagi');
+		ImageManager.reserveSvActor('lena_dancer');
+		ImageManager.reserveSvActor('lena_darkknight');
+		ImageManager.reserveSvActor('lena_dragonknight');
+		ImageManager.reserveSvActor('lena_gradiator');
+		ImageManager.reserveSvActor('lena_hunter');
+		ImageManager.reserveSvActor('lena_knight');
+		ImageManager.reserveSvActor('lena_machinary');
+		ImageManager.reserveSvActor('lena_monk');
+		ImageManager.reserveSvActor('lena_monomane');
+		ImageManager.reserveSvActor('lena_gradiator');
+		ImageManager.reserveSvActor('lena_ninja');
+		ImageManager.reserveSvActor('lena_oracle');
+		ImageManager.reserveSvActor('lena_pharmacist');
+		ImageManager.reserveSvActor('lena_pirates');
+		ImageManager.reserveSvActor('lena_samurai');
+		ImageManager.reserveSvActor('lena_summoner');
+		ImageManager.reserveSvActor('lena_suppin');
+		ImageManager.reserveSvActor('lena_swordmagi');
+		ImageManager.reserveSvActor('lena_thief');
+		ImageManager.reserveSvActor('lena_timemagi');
+		ImageManager.reserveSvActor('lena_whitemagi');
+	};
 
 })();

@@ -2796,12 +2796,16 @@ Yanfly.Util = Yanfly.Util || {};
 if (Utils.RPGMAKER_VERSION && Utils.RPGMAKER_VERSION >= '1.5.0') {
 
 Yanfly.Util.toGroup = function(inVal) {
+  if (typeof inVal !== 'string') { inVal = String(inVal); }
+  return inVal;
+  /* "1000"を"1,000"に変換する処理は要らないので消す
   if (typeof inVal === 'string') return inVal;
   if (!Yanfly.Param.DigitGroup) return inVal;
   return inVal.toLocaleString('en');
   return inVal.replace(/(^|[^\w.])(\d{4,})/g, function($0, $1, $2) {
     return $1 + $2.replace(/\d(?=(?:\d\d\d)+(?!\d))/g, "$&,");
   });
+  */
 };
 
 } else {
