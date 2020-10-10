@@ -4695,6 +4695,16 @@ Window_MenuCommand.prototype.numVisibleRows = function() {
     return eval(Yanfly.Param.MMMCmdRows);
 };
 
+Window_MenuCommand.prototype.processCursorMove = function() {
+    Window_Selectable.prototype.processCursorMove.call(this);
+    if (this.isCursorMovable()) {
+        if (Input.isRepeated('left')) {
+            this._lastCommandSymbol = 'formation';
+            this.callHandler('formation');
+        }
+    }
+};
+
 //=============================================================================
 // Window_MenuStatus
 //=============================================================================
@@ -4708,6 +4718,15 @@ Window_MenuStatus.prototype.initialize = function(wx, wy) {
 
 Window_MenuStatus.prototype.windowWidth = function() {
     return Graphics.boxWidth - this._initX;
+};
+
+Window_MenuStatus.prototype.processCursorMove = function() {
+    Window_Selectable.prototype.processCursorMove.call(this);
+    if (this.isCursorMovable()) {
+        if (Input.isRepeated('right') && this._formationMode) {
+            this.callHandler('cancel');
+        }
+    }
 };
 
 //=============================================================================
@@ -4786,6 +4805,27 @@ Scene_Menu.prototype.onPersonalOk = function() {
     var actorBind = this._actorBinds[symbol];
     if (!actorBind) return;
     eval(actorBind);
+};
+
+Scene_Menu.prototype.commandFormation = function() {
+    this._commandWindow.select(6);
+    this._commandWindow.deactivate();
+    this._statusWindow.setFormationMode(true);
+    this._statusWindow.selectLast();
+    this._statusWindow.activate();
+    this._statusWindow.setHandler('ok',     this.onFormationOk.bind(this));
+    this._statusWindow.setHandler('cancel', this.onFormationCancel.bind(this));
+};
+
+Scene_Menu.prototype.onFormationCancel = function() {
+    if (this._statusWindow.pendingIndex() >= 0) {
+        this._statusWindow.setPendingIndex(-1);
+        this._statusWindow.activate();
+    } else {
+        this._statusWindow.deselect();
+        this._statusWindow.deactivate();
+        this._commandWindow.activate();
+    }
 };
 
 Yanfly.MMM.Scene_Menu_onPersonalCancel = Scene_Menu.prototype.onPersonalCancel;
