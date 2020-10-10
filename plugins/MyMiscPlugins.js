@@ -341,6 +341,37 @@
 		return Math.round(value.clamp(minValue, maxValue));
 	};
 
+	// 全滅時は全滅シーンには行かず最新のチェックポイントへ飛ばすだけ
+	BattleManager.updateBattleEnd = function() {
+		if (this.isBattleTest()) {
+			AudioManager.stopBgm();
+			SceneManager.exit();
+		} else if (!this._escaped && $gameParty.isAllDead()) {
+			if (this._canLose) {
+				$gameParty.reviveBattleMembers();
+				SceneManager.pop();
+			} else {
+				if ($gamePlayer._resumeMapId != null) $gamePlayer.reserveTransfer($dataSystem._resumeMapId, $dataSystem._resumeX, $dataSystem._resumeY);
+				else $gamePlayer.reserveTransfer($dataSystem.startMapId, $dataSystem.startX, $dataSystem.startY);
+				$gameParty.reviveBattleMembers();
+				$gameSwitches.setValue(1,true);
+				SceneManager.pop();
+			}
+		} else {
+			SceneManager.pop();
+		}
+		this._phase = null;
+	};
+
+	// 全滅時復活用チェックポイントをメンバーに登録
+	MyMi_GaCh_initMembers = Game_Character.prototype.initMembers;
+	Game_Character.prototype.initMembers = function() {
+		MyMi_GaCh_initMembers.call(this);
+		this._resumeMapId = null;
+		this._resumeX = null;
+		this._resumeY = null;
+	};
+
 	// svActorの画像はあらかじめ読み込む
 	Scene_Boot.loadSystemImages = function() {
 		ImageManager.reserveSvActor('bertz_blackmagi');
