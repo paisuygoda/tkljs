@@ -4612,6 +4612,30 @@ Window_MenuCommand.prototype.makeCommandList = function() {
     }
 };
 
+YEP_WiMeCo_refresh = Window_MenuCommand.prototype.refresh;
+Window_MenuCommand.prototype.refresh = function() {
+    YEP_WiMeCo_refresh.call(this);
+    this.drawHorzLine(2 * this.lineHeight());
+};
+
+Window_MenuCommand.prototype.itemRect = function(index) {
+    var posIndex = index > 1 ? index + 1 : index
+    var rect = new Rectangle();
+    var maxCols = this.maxCols();
+    rect.width = this.itemWidth();
+    rect.height = this.itemHeight();
+    rect.x = index % maxCols * (rect.width + this.spacing()) - this._scrollX;
+    rect.y = Math.floor(posIndex / maxCols) * rect.height - this._scrollY;
+    return rect;
+};
+
+Window_MenuCommand.prototype.drawHorzLine = function(y) {
+    var lineY = y + this.lineHeight() / 2 - 1;
+    this.contents.paintOpacity = 48;
+    this.contents.fillRect(0, lineY, this.contentsWidth(), 2, this.normalColor());
+    this.contents.paintOpacity = 255;
+};
+
 Window_MenuCommand.prototype.addMainCommands = function() {
 };
 
@@ -4700,6 +4724,7 @@ Scene_Menu.prototype.createCommandWindow = function() {
     this._commandWindow = new Window_MenuCommand(0, 0);
     this.createCommandWindowBinds();
     this._commandWindow.setHandler('cancel',    this.popScene.bind(this));
+    this._commandWindow.select(2);
     this.addWindow(this._commandWindow);
 };
 
