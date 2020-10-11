@@ -2630,11 +2630,12 @@ Window_EquipStatus.prototype.drawNewParam = function(x, y, paramId) {
 Window_SkillType.prototype.makeCommandList = function() {
     if (this._actor) {
         var skillTypes = this._actor.addedSkillTypes();
-        skillTypes.sort(function(a, b){return a-b});
-        skillTypes.forEach(function(stypeId) {
-            var name = $dataSystem.skillTypes[stypeId];
-            this.addCommand(name, 'skill', true, stypeId);
-        }, this);
+        // スキル画面に全部表示
+        for (var stypeId = 1; stypeId < 15; stypeId++) {
+          var name = $dataSystem.skillTypes[stypeId];
+          var usable = skillTypes.contains(stypeId);
+          this.addCommand(name, 'skill', usable, stypeId);
+        }
     }
 };
 

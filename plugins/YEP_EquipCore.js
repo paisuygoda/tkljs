@@ -838,10 +838,16 @@ Window_StatCompare.prototype.refresh = function() {
 
 Window_StatCompare.prototype.drawActorSimpleStatus = function(actor, x, y, width) {
   var lineHeight = this.lineHeight();
-  var x2 = x + 100;
+  var x2 = x + 120;
   this.drawActorName(actor, x, y);
   this.drawActorLevel(actor, x, y + lineHeight * 1);
   this.drawActorClass(actor, x2, y);
+};
+
+Window_StatCompare.prototype.drawActorClass = function(actor, x, y) {
+  width =  this.textWidth('ああああ');
+  this.resetTextColor();
+  this.drawText(actor.currentClass().name, x, y, width);
 };
 
 Window_StatCompare.prototype.drawCharacter = function(x, y) {

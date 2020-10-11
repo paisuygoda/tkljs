@@ -314,6 +314,43 @@
 			this.applyItemUserEffect(target);
 		}
 	};
+
+	// Helpは基本一行
+	Window_Help.prototype.initialize = function(numLines) {
+		var width = Graphics.boxWidth;
+		var height = this.fittingHeight(numLines || 1);
+		Window_Base.prototype.initialize.call(this, 0, 0, width, height);
+		this._text = '';
+	};
+
+	// スキル画面レイアウト変更
+	Window_SkillType.prototype.windowWidth = function() {
+		return 165 + this.standardPadding() * 2;
+	};
+	Window_SkillType.prototype.windowHeight = function() {
+		return Graphics.boxHeight - this.fittingHeight(1);
+	};
+	Scene_Skill.prototype.createStatusWindow = function() {
+		var wx = this._skillTypeWindow.width;
+		var wy = this._helpWindow.height;
+		var ww = Graphics.boxWidth - wx;
+		var wh = this._skillTypeWindow.fittingHeight(4);
+		this._statusWindow = new Window_SkillStatus(wx, wy, ww, wh);
+		this._statusWindow.reserveFaceImages();
+		this.addWindow(this._statusWindow);
+	};
+	Scene_Skill.prototype.createItemWindow = function() {
+		var wx = this._statusWindow.x;
+		var wy = this._statusWindow.y + this._statusWindow.height;
+		var ww = Graphics.boxWidth - wx;
+		var wh = Graphics.boxHeight - wy;
+		this._itemWindow = new Window_SkillList(wx, wy, ww, wh);
+		this._itemWindow.setHelpWindow(this._helpWindow);
+		this._itemWindow.setHandler('ok',     this.onItemOk.bind(this));
+		this._itemWindow.setHandler('cancel', this.onItemCancel.bind(this));
+		this._skillTypeWindow.setSkillWindow(this._itemWindow);
+		this.addWindow(this._itemWindow);
+	};
 	
 	// jsonロード時に勝手に追加
 	MiMi_DaMa_isDatabaseLoaded = DataManager.isDatabaseLoaded;
