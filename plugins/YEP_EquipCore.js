@@ -731,7 +731,7 @@ Window_EquipItem.prototype.setSlotId = function(slotId) {
 
 Yanfly.Equip.Window_EquipItem_includes = Window_EquipItem.prototype.includes;
 Window_EquipItem.prototype.includes = function(item) {
-    if(this._slotId < 0) return false;
+    if(this._slotId < 0 || this._actor.isSealedSlot(this._slotId)) return false;
     if (item === null && this._actor && this._data.length > 0) {
       var typeId = this._actor.equipSlots()[this._slotId];
       if (Yanfly.Param.EquipNonRemove.contains(typeId)) return false;
@@ -805,16 +805,12 @@ Window_StatCompare.prototype.initialize = function(wx, wy, ww, wh) {
 Window_StatCompare.prototype.createWidths = function() {
     this._paramNameWidth = this.textWidth('あああ');
     this._paramValueWidth = 0;
-    this._arrowWidth = this.textWidth('\u2192' + ' ');
-    var buffer = this.textWidth(' ');
+    this._arrowWidth = this.textWidth('\u2192');
     for (var i = 0; i < 8; ++i) {
       var value2 = this.textWidth(Yanfly.Util.toGroup(this._actor.paramMax(i)));
       this._paramValueWidth = Math.max(value2, this._paramValueWidth);
     }
-    this._bonusValueWidth = this._paramValueWidth;
-    this._paramNameWidth += buffer;
-    if (this._paramNameWidth + this._paramValueWidth + this._arrowWidth +
-      this._bonusValueWidth > this.contents.width) this._bonusValueWidth = 0;
+    this._bonusValueWidth = 0;
 };
 
 Window_StatCompare.prototype.setActor = function(actor) {
@@ -871,7 +867,7 @@ Window_StatCompare.prototype.drawItem = function(x, y, paramId) {
     this.drawRightArrow(y, paramId);
     if (!this._tempActor) return;
     this.drawNewParam(y, paramId);
-    this.drawParamDifference(y, paramId);
+    // this.drawParamDifference(y, paramId);
 };
 
 Window_StatCompare.prototype.drawDarkRect = function(dx, dy, dw, dh) {
@@ -884,7 +880,7 @@ Window_StatCompare.prototype.drawDarkRect = function(dx, dy, dw, dh) {
 Window_StatCompare.prototype.drawParamName = function(y, paramId) {
     var x = this.textPadding();
     this.changeTextColor(this.systemColor());
-    if (paramId < 2) this.drawText(TextManager.param(paramId).substring(2), x, y, this.textWidth('ああ '));
+    if (paramId < 2) this.drawText(TextManager.param(paramId), x, y, this.textWidth('ああ '));
     else this.drawText(TextManager.param(paramId), x, y, this._paramNameWidth);
 };
 
@@ -898,8 +894,8 @@ Window_StatCompare.prototype.drawCurrentParam = function(y, paramId) {
 
 Window_StatCompare.prototype.drawRightArrow = function(y, paramId) {
     var x = this.contents.width - this.textPadding();
-    x -= this._arrowWidth + this._bonusValueWidth + 42 + (paramId < 2 ? this.textWidth('0') : 0);
-    var dw = this.textWidth('\u2192' + ' ');
+    x -= this._arrowWidth + this._bonusValueWidth + 28 + (paramId < 2 ? this.textWidth('0') : 0);
+    var dw = this.textWidth('\u2192');
     this.changeTextColor(this.systemColor());
     this.drawText('\u2192', x, y, dw, 'right');
 };

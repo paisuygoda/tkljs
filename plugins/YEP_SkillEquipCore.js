@@ -968,71 +968,31 @@ function Window_SkillStatCompare() {
     this.initialize.apply(this, arguments);
 }
 
-Window_SkillStatCompare.prototype = Object.create(Window_Base.prototype);
+Window_SkillStatCompare.prototype = Object.create(Window_StatCompare.prototype);
 Window_SkillStatCompare.prototype.constructor = Window_SkillStatCompare;
 
-Window_SkillStatCompare.prototype.initialize = function(wx, wy, ww, wh) {
-    Window_Base.prototype.initialize.call(this, wx, wy, ww, wh);
-    this._actor = null;
-    this._tempActor = null;
-    this.refresh();
-};
-
-Window_SkillStatCompare.prototype.createWidths = function() {
-    this._paramNameWidth = 0;
+Window_StatCompare.prototype.createWidths = function() {
+    this._paramNameWidth = this.textWidth('あああ');
     this._paramValueWidth = 0;
     this._arrowWidth = this.textWidth('\u2192' + ' ');
     var buffer = this.textWidth(' ');
     for (var i = 0; i < 8; ++i) {
-      var value1 = this.textWidth(TextManager.param(i));
       var value2 = this.textWidth(Yanfly.Util.toGroup(this._actor.paramMax(i)));
-      this._paramNameWidth = Math.max(value1, this._paramNameWidth);
       this._paramValueWidth = Math.max(value2, this._paramValueWidth);
     }
-    this._bonusValueWidth = this._paramValueWidth;
-    this._bonusValueWidth += this.textWidth('(+)') + buffer;
+    this._bonusValueWidth = 0;
     this._paramNameWidth += buffer;
-    this._paramValueWidth;
-    if (this._paramNameWidth + this._paramValueWidth * 2 + this._arrowWidth +
-      this._bonusValueWidth > this.contents.width) this._bonusValueWidth = 0;
-};
-
-Window_SkillStatCompare.prototype.setActor = function(actor) {
-    if (this._actor === actor) return;
-    this._actor = actor;
-    this.createWidths();
-    this.refresh();
 };
 
 Window_SkillStatCompare.prototype.refresh = function() {
     this.contents.clear();
     if (!this._actor) return;
-    for (var i = 0; i < 8; ++i) {
-        this.drawItem(0, this.lineHeight() * i, i);
+    var statorder = [0, 1, 7, 4, 6];
+    var step = 0;
+    for (var i = 0; i < statorder.length; ++i) {
+      if (i == 2) step += 10;
+      this.drawItem(0, this.lineHeight() * i + step, statorder[i]);
     }
-};
-
-Window_SkillStatCompare.prototype.setTempActor = function(tempActor) {
-    if (this._tempActor === tempActor) return;
-    this._tempActor = tempActor;
-    this.refresh();
-};
-
-Window_SkillStatCompare.prototype.drawItem = function(x, y, paramId) {
-    // this.drawDarkRect(x, y, this.contents.width, this.lineHeight());
-    this.drawParamName(y, paramId);
-    this.drawCurrentParam(y, paramId);
-    this.drawRightArrow(y);
-    if (!this._tempActor) return;
-    this.drawNewParam(y, paramId);
-    this.drawParamDifference(y, paramId);
-};
-
-Window_SkillStatCompare.prototype.drawDarkRect = function(dx, dy, dw, dh) {
-    var color = this.gaugeBackColor();
-    this.changePaintOpacity(false);
-    this.contents.fillRect(dx + 1, dy + 1, dw - 2, dh - 2, color);
-    this.changePaintOpacity(true);
 };
 
 Window_SkillStatCompare.prototype.drawParamName = function(y, paramId) {
@@ -1042,46 +1002,29 @@ Window_SkillStatCompare.prototype.drawParamName = function(y, paramId) {
 };
 
 Window_SkillStatCompare.prototype.drawCurrentParam = function(y, paramId) {
-    var x = this.contents.width - this.textPadding();
-    x -= this._paramValueWidth * 2 + this._arrowWidth + this._bonusValueWidth;
+    var x = this.contents.width - this.textPadding() ;
+    x -= this._paramValueWidth + this._arrowWidth + this._bonusValueWidth + 80;
     this.resetTextColor();
     var actorparam = Yanfly.Util.toGroup(this._actor.param(paramId));
     this.drawText(actorparam, x, y, this._paramValueWidth, 'right');
 };
 
-Window_SkillStatCompare.prototype.drawRightArrow = function(y) {
+Window_SkillStatCompare.prototype.drawRightArrow = function(y, paramId) {
     var x = this.contents.width - this.textPadding();
-    x -= this._paramValueWidth + this._arrowWidth + this._bonusValueWidth;
-    var dw = this.textWidth('\u2192' + '  ');
+    x -= this._arrowWidth + this._bonusValueWidth + 75;
+    var dw = this.textWidth('\u2192' + ' ');
     this.changeTextColor(this.systemColor());
     this.drawText('\u2192', x, y, dw, 'right');
 };
 
 Window_SkillStatCompare.prototype.drawNewParam = function(y, paramId) {
     var x = this.contents.width - this.textPadding();
-    x -= this._paramValueWidth + this._bonusValueWidth;
+    x -= this._bonusValueWidth + 60;
     var newValue = this._tempActor.param(paramId);
     var diffvalue = newValue - this._actor.param(paramId);
     var actorparam = Yanfly.Util.toGroup(newValue);
     this.changeTextColor(this.paramchangeTextColor(diffvalue));
     this.drawText(actorparam, x, y, this._paramValueWidth, 'right');
-};
-
-Window_SkillStatCompare.prototype.drawParamDifference = function(y, paramId) {
-    var x = this.contents.width - this.textPadding();
-    x -= this._bonusValueWidth;
-    var newValue = this._tempActor.param(paramId);
-    var diffvalue = newValue - this._actor.param(paramId);
-    if (diffvalue === 0) return;
-    var actorparam = Yanfly.Util.toGroup(newValue);
-    this.changeTextColor(this.paramchangeTextColor(diffvalue));
-    var text = Yanfly.Util.toGroup(diffvalue);
-    if (diffvalue > 0) {
-      text = ' (+' + text + ')';
-    } else {
-      text = ' (' + text + ')';
-    }
-    this.drawText(text, x, y, this._bonusValueWidth, 'left');
 };
 
 //=============================================================================
