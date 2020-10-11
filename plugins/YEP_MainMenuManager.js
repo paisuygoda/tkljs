@@ -4844,6 +4844,56 @@ Scene_Menu.prototype.commandDebug = function() {
     SceneManager.push(Scene_Debug);
 };
 
+Scene_Menu.prototype.createGoldWindow = function() {
+    this._goldWindow = new Window_MenuGold(this._commandWindow.x, this._commandWindow.height);
+    this.addWindow(this._goldWindow);
+};
+
+function Window_MenuGold() {
+    this.initialize.apply(this, arguments);
+}
+Window_MenuGold.prototype = Object.create(Window_Gold.prototype);
+Window_MenuGold.prototype.constructor = Window_MenuGold;
+Window_MenuGold.prototype.initialize = function(x, y) {
+    var width = this.windowWidth();
+    var height = Graphics.boxHeight - y;
+    Window_Base.prototype.initialize.call(this, x, y, width, height);
+    this.refresh();
+};
+
+Window_MenuGold.prototype.refresh = function() {
+    var x = this.textPadding();
+    var width = this.contents.width - this.textPadding() * 2;
+    this.contents.clear();
+    this.drawCurrencyValue(this.value(), this.currencyUnit(), x, 0, width);
+    this.drawTimeValue(x, this.lineHeight() + 20, width - this.textWidth('  G'));
+    this.drawWalkValue(x, this.lineHeight() * 2 + 40, width);
+};
+
+Window_Base.prototype.drawTimeValue = function(wx, wy, ww) {
+    this.resetTextColor();
+    this.contents.fontSize = Yanfly.Param.GoldFontSize;
+    var time = $gameSystem.playtime();
+    var hour = ( '00' + (time / 3600 | 0) ).slice( -2 );
+    var min = ( '00' + (time / 60 | 0) ).slice( -2 );
+    var sec = ( '00' + time % 60 ).slice( -2 );
+    if (time >= 1000 * 3600) {hour = "999"; min = "59"; sec = "59";}
+    this.drawText(hour + ':' + min + ':' + sec, wx, wy, ww, 'right');
+    this.drawIcon(220, wx, wy + 2);
+    this.resetFontSettings();
+};
+
+Window_Base.prototype.drawWalkValue = function(wx, wy, ww) {
+    this.resetTextColor();
+    this.contents.fontSize = Yanfly.Param.GoldFontSize;
+    var step = this.putComma($gameParty.steps());
+    this.drawText(step, wx, wy, ww - this.textWidth('  G'), 'right');
+    this.drawIcon(82, wx, wy + 2);
+    this.changeTextColor(this.systemColor());
+    this.drawText('歩', wx, wy, ww, 'right');
+    this.resetFontSettings();
+};
+
 //=============================================================================
 // End of File
 //=============================================================================

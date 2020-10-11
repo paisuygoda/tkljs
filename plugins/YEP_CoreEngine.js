@@ -2497,28 +2497,23 @@ Window_Base.prototype.drawActorSimpleStatus = function(actor, x, y, width) {
 Window_Base.prototype.drawCurrencyValue = function(value, unit, wx, wy, ww) {
     this.resetTextColor();
     this.contents.fontSize = Yanfly.Param.GoldFontSize;
-    if (this.usingGoldIcon(unit)) {
-      var cx = Window_Base._iconWidth;
-    } else {
-      var cx = this.textWidth(unit);
-    }
-    var text = Yanfly.Util.toGroup(value);
-    if (this.textWidth(text) > ww - cx) {
-      text = Yanfly.Param.GoldOverlap;
-    }
-    this.drawText(text, wx, wy, ww - cx - 4, 'right');
-    if (this.usingGoldIcon(unit)) {
-      this.drawIcon(Yanfly.Icon.Gold, wx + ww - Window_Base._iconWidth, wy + 2);
-    } else {
-      this.changeTextColor(this.systemColor());
-      this.drawText(unit, wx, wy, ww, 'right');
-    }
+    var text = this.putComma(value);
+    this.drawText(text, wx, wy, ww - this.textWidth('  G'), 'right');
+    this.drawIcon(Yanfly.Icon.Gold, wx, wy + 2);
+    this.changeTextColor(this.systemColor());
+    this.drawText(unit, wx, wy, ww, 'right');
     this.resetFontSettings();
 };
 
 Window_Base.prototype.usingGoldIcon = function(unit) {
     if (unit !== TextManager.currencyUnit) return false;
     return Yanfly.Icon.Gold > 0;
+};
+
+Window_Base.prototype.putComma = function(inVal) {
+  if (typeof inVal !== 'number') return inVal;
+  if (!Yanfly.Param.DigitGroup) return inVal;
+  return inVal.toLocaleString('en');
 };
 
 //=============================================================================
