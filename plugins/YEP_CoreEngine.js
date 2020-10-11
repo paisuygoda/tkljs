@@ -2656,18 +2656,76 @@ Window_ActorCommand.prototype.addSkillCommands = function() {
 // Window_Status
 //=============================================================================
 
+YEP_CoEn_Sc_St_create = Scene_Status.prototype.create;
+Scene_Status.prototype.create = function() {
+  Scene_MenuBase.prototype.create.call(this);
+  YEP_CoEn_Sc_St_create.call(this);
+  this._statusWindow = new Window_Status();
+  this._statusWindow.setHandler('cancel',   this.popScene.bind(this));
+  this._statusWindow.setHandler('pagedown', this.nextActor.bind(this));
+  this._statusWindow.setHandler('pageup',   this.previousActor.bind(this));
+  this._statusWindow.reserveFaceImages();
+  this.addWindow(this._statusWindow);
+};
+
+Scene_Status.prototype.refreshActor = function() {
+  var actor = this.actor();
+  this._statusWindow.setActor(actor);
+  var abHeight = this._actor.skillEquips().length > 4 ? this._actor.skillEquips().length : 4;
+  // ついでにコマンドも表示
+  this._command = new Window_SkillEquipSlot(32, Graphics.boxHeight / 2 - 50, Graphics.boxWidth / 3 - 50, this._statusWindow.fittingHeight(abHeight));
+  this.addWindow(this._command);
+  this._command.setActor(actor);
+  this._command.deselect();
+};
+
+Window_Base.prototype.drawActorClassOneLine = function(actor, wx, wy, ww) {
+  ww = ww || 200;
+  Yanfly.JP.Window_Base_drawActorClass.call(this, actor, wx, wy, ww);
+  var classId = actor.currentClass().id;
+  this.drawActorJp(actor, classId, wx + ww, wy, ww, 'right');
+};
+
+Window_Status.prototype.drawBlock1 = function(y) {
+  this.drawActorName(this._actor, 6, y);
+  this.drawActorClassOneLine(this._actor, 192, y);
+  this.drawActorNickname(this._actor, 432, y);
+};
+
+Window_Status.prototype.refresh = function() {
+  this.contents.clear();
+  if (this._actor) {
+      var lineHeight = this.lineHeight();
+      this.drawBlock1(lineHeight * 0);
+      this.drawHorzLine(lineHeight * 1);
+      this.drawBlock2(lineHeight * 2);
+      this.drawHorzLine(lineHeight * 6);
+      this.drawBlock3(lineHeight * 7);
+  }
+};
+
 Window_Status.prototype.drawParameters = function(x, y) {
+    x += Graphics.boxWidth * 2 / 3 - 50
     var lineHeight = this.lineHeight();
-    for (var i = 0; i < 6; i++) {
-      var paramId = i + 2;
-      var y2 = y + lineHeight * i;
+    var statorder = [7, 4, 6, 2, 3, 5, 9, 12];
+    for (var i = 0; i < statorder.length; i++) {
+      var paramId = statorder[i];
+      var y2 = y + lineHeight * i + (i > 2 ? 15 : 0);
       this.changeTextColor(this.systemColor());
-      this.drawText(TextManager.param(paramId), x, y2, 160);
+      this.drawText(TextManager.param(paramId), x, y2, 120);
       this.resetTextColor();
       var actorParam = Yanfly.Util.toGroup(this._actor.param(paramId));
-      var dw = this.textWidth(Yanfly.Util.toGroup(this._actor.paramMax(i + 2)));
-      this.drawText(actorParam, x + 160, y2, dw, 'right');
+      var dw = this.textWidth(Yanfly.Util.toGroup(this._actor.paramMax(paramId + 2)));
+      this.drawText(actorParam, x + 140, y2, dw, 'right');
     }
+};
+
+Window_Status.prototype.drawEquipments = function(x, y) {
+  var equips = this._actor.equips();
+  var count = Math.min(equips.length, this.maxEquipmentLines());
+  for (var i = 0; i < count; i++) {
+      this.drawItemName(equips[i], x - 160 , y + this.lineHeight() * i, this.textWidth('ああああああああ'));
+  }
 };
 
 Window_Status.prototype.drawExpInfo = function(x, y) {
