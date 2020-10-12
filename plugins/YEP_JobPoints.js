@@ -496,7 +496,9 @@ BattleManager.gainJp = function() {
 				
 				// 同じ名前のアビリティを持っていたら下位互換なので捨てる
 			    var abilityList = $gameParty.allItems().filter(function(ability) { 
-			    	return ability.atypeId === actor._actorId + 6 && ability.name === item.name;});
+            return ability.atypeId === actor._actorId + 6 
+                  && ability.name.slice(0, ability.name.length - 3) === item.name.slice(0, item.name.length - 3)
+                  && ability.name.slice(-3, -1) === "Lv";});
 			    if (abilityList.length > 0) $gameParty.loseItem(abilityList[0], 1);
 
 			    $gameParty.gainItem(item, 1);
