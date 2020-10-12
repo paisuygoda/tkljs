@@ -105,6 +105,7 @@
 	// counterTypeでカウンター設定呼び出し
 	Game_Actor.prototype.counters = function() {
 		var counters = [];
+		var actor = this;
 		this.skillEquips().forEach(function(equip) {
 			if (equip && equip._counterType !== 0) {
 				counters.push({
@@ -112,7 +113,7 @@
 						hit 	: 	equip._counterType,
 						att 	: 	0,
 						skill 	: 	0,
-						action 	: 	1
+						action 	: 	actor.attackSkillId()
 					});
 			}
 		})

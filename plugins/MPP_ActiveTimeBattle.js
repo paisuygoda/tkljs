@@ -826,7 +826,7 @@ BattleManager.addActionBattler = function(battler) {
 
 BattleManager.deleteDeactiveBattler = function() {
     this._actionBattlers = this._actionBattlers.filter(function(battler) {
-        if (battler.atRate() === 1) {
+        if (battler.atRate() === 1 || battler._isCounter) {
             return true;
         } else {
             battler.setDecided(0);

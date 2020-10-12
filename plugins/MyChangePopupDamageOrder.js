@@ -24,7 +24,7 @@
 
 	// startActionではアクションを呼ばない
 	BattleManager.startAction = function() {
-	    var action = this._subject.currentAction();
+		var action = this._subject.currentAction();
 	    this._action = action;
 	    this._action.splitActions();
 	    this._subject.useItem(action.item());
@@ -92,7 +92,7 @@
 			// ._targetsと._reflecTargetsに対象を詰める
 			this.substituteBeforeAnim();
 			
-			// Actionがたたかう系であることの確認も必要だが、まだ実装できていない（たたかう系に属するスキルIDが定まっていないため）
+			// Actionがたたかう派生系であることの確認も必要だが、まだ実装できていない（たたかう系に属するスキルIDが定まっていないため）
 	    	if(this._subject.isActor()) {
 				var equips = this._subject.equips();
 				var bareHands = equips[0] && equips[1] && equips[0].id == 1 && equips[1].id == 1;
@@ -107,7 +107,7 @@
 		    		this._tempWeapon = this._subject._equips[0];
 		    		this._subject._equips[0] = null;
 		    	}
-		    }
+			}
 	    	this._logWindow.startAction(this._subject, this._action, this._targets, this._reflectTargets);
 		    this._phase = 'damage';
     	}
