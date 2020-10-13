@@ -60,7 +60,11 @@
     }
     var weapon = this.weapons()[0];  // at plural weapon, one's first skill.
     var id = weapon.meta.skill_id;
-    return id ? Number(id) : normalId;
+    var newId = id ? Number(id) : normalId;
+
+    // かくとう所持状態で素手攻撃の時格闘攻撃に切り替え
+    if (newId == 11 && this.isStateAffected(43)) newId = 12;
+    return newId;
   };
 
   Game_Action.prototype.isAttackSkill = function() {
