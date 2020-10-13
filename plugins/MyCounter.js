@@ -100,6 +100,10 @@
 		this._isCounter = false;
 		this._counterActions = [];
 		this._charmTo = null;
+
+		this._level = 1;
+		this.rat = 1;
+		this.mrt = 1;
 	};
 
 	// counterTypeでカウンター設定呼び出し
@@ -113,7 +117,7 @@
 						hit 	: 	equip._counterType,
 						att 	: 	0,
 						skill 	: 	0,
-						action 	: 	actor.attackSkillId()
+						action 	: 	1
 					});
 			}
 		})

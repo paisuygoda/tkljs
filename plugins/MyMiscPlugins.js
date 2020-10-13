@@ -72,6 +72,8 @@
 	    this._screenX = x;
 	    this._screenY = y;
 	    this._level = $dataEnemies[enemyId].level;
+	    this.rat = $dataEnemies[enemyId].rate;
+	    this.mrt = $dataEnemies[enemyId].mrate;
 	    this.cursorX = $dataEnemies[enemyId].cursorX;
 	    this.cursorY = $dataEnemies[enemyId].cursorY;
 	    this.recoverAll();

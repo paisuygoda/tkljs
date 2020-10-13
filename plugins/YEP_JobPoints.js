@@ -373,18 +373,27 @@ DataManager.processJPNotetags2 = function(group) {
 	}
 };
 
+// モンスターにレベルと倍率を設定
 DataManager.processJPNotetagsLevel = function(group) {
   var note1 = /<(?:Level):[ ](\d+)>/i;
+  var note2 = /<(?:Rate):[ ](\d+)>/i;
+  var note3 = /<(?:MRate):[ ](\d+)>/i;
 	for (var n = 1; n < group.length; n++) {
 		var obj = group[n];
 		var notedata = obj.note.split(/[\r\n]+/);
 
-    	obj.level = 1;
+      obj.level = 1;
+      obj.rate = 1;
+      obj.mrate = 1;
 
 		for (var i = 0; i < notedata.length; i++) {
 			var line = notedata[i];
 			if (line.match(note1)) {
 				obj.level = parseInt(RegExp.$1);
+			} else if (line.match(note2)) {
+				obj.rate = parseInt(RegExp.$1);
+			} else if (line.match(note3)) {
+				obj.mrate = parseInt(RegExp.$1);
 			}
 		}
 	}

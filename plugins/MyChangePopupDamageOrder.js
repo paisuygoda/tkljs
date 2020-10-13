@@ -108,6 +108,7 @@
 		    		this._subject._equips[0] = null;
 		    	}
 			}
+			if (this._action.isAttackSkill()) this._action.setAttack();
 	    	this._logWindow.startAction(this._subject, this._action, this._targets, this._reflectTargets);
 		    this._phase = 'damage';
     	}

@@ -63,6 +63,12 @@
     return id ? Number(id) : normalId;
   };
 
+  Game_Action.prototype.isAttackSkill = function() {
+    item = this._item;
+    var ids = [1, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
+    return ids.contains(item._itemId) && item._dataClass === 'skill';
+  };
+
   //
   // for command at battle
   //
