@@ -317,6 +317,12 @@
 		}
 	};
 
+	// ものまね対象スキルか、なければ戦うを返す
+	Game_Action.prototype.traceSkill = function(skillId) {
+		if (skillId) this.setSkill(skillId);
+		else this.setAttack();
+	};
+
 	// Helpは基本一行
 	Window_Help.prototype.initialize = function(numLines) {
 		var width = Graphics.boxWidth;

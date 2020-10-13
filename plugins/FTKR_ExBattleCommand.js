@@ -316,13 +316,15 @@ FTKR.EBC = FTKR.EBC || {};
             return a - b;
         });
 
+        /* これいる？
         // 【追加スクリプト】　priorityの整数部が等しいスキルは同質のスキルであり、小数点以下が高いほど上位互換であるという前提を置く
         // 小数部が0.5未満に収まるものとして、下位互換スキルを削除
         for( var i=0; i<rawCommands.length - 1; i++) {
 		  if (rawCommands[i]['priority'] - rawCommands[i+1]['priority'] < 0.5) {
 		  	rawCommands.splice(i, 1);
 		  }
-		}
+        }
+        */
 
 		return rawCommands;
     };

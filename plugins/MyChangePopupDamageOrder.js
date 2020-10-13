@@ -13,19 +13,32 @@
 	var BaMa_initMembers = BattleManager.initMembers;
 	BattleManager.initMembers = function() {
 		BaMa_initMembers.call(this);
-		this._turnCount = 0;
-		this._dualWielding = false;
-		this._tempWeapon = null;
-		this._waitAnim = 0;
-		this._specialSkills = [];
-		this._special = null;
 		this._showHelp = false;
 	};
 
 	// startActionではアクションを呼ばない
 	BattleManager.startAction = function() {
 		var action = this._subject.currentAction();
-	    this._action = action;
+		this._action = action;
+		if (this._action._item._dataClass === 'skill') {
+			// たたかうが設定されていたら武器に応じたたたかうに切り替え
+			if (this._action.isAttackSkill()) this._action.setAttack();
+			else {
+				var id = this._action._item._itemId;
+				// ものまね系だったらものまね対象に切り替え
+				if (id == 21) this._action.traceSkill($gameParty._lastSkillId);
+				if (id == 22) this._action.traceSkill($gameTroop._lastSkillId);
+				if (id == 23) this._action.traceSkill(BattleManager._lastSkillId);
+				if (id == 24) this._action.traceSkill(this._subject._lastSkillId);
+			}
+		}
+		// ものまねスロットに登録
+		var id = this._action._item._itemId;
+		BattleManager._lastSkillId = id;
+		if (this._subject.isActor()) {
+			$gameParty._lastSkillId = id;
+			this._subject._lastSkillId = id;
+		} else $gameTroop._lastSkillId = id;
 	    this._action.splitActions();
 	    this._subject.useItem(action.item());
 	    this._action.applyGlobal();
@@ -108,7 +121,6 @@
 		    		this._subject._equips[0] = null;
 		    	}
 			}
-			if (this._action.isAttackSkill()) this._action.setAttack();
 	    	this._logWindow.startAction(this._subject, this._action, this._targets, this._reflectTargets);
 		    this._phase = 'damage';
     	}

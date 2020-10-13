@@ -717,6 +717,20 @@ BattleManager.setup = function(troopId, canEscape, canLose) {
     this._escaping = false;
     this._atbFast = false;
     this._quick = false;
+    this._turnCount = 0;
+    this._dualWielding = false;
+    this._tempWeapon = null;
+    this._waitAnim = 0;
+    this._specialSkills = [];
+    this._special = null;
+    
+	// ものまね用スロットを初期化
+    this._lastSkillId = null;
+    $gameTroop._lastSkillId = null;
+    $gameParty._lastSkillId = null;
+    $gameParty.allMembers().forEach(function(actor){
+        actor._lastSkillId = null;
+    });
 };
 
 BattleManager.atbMode = function() {
