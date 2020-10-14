@@ -728,12 +728,12 @@
         var actor = this._actor;
 		var motionGuard = Sprite_Actor.MOTIONS['guard'];
 		if (actor) {
+			// かばう移動量リセット
+			actor._substitutePosition = 0;
 			actor._isInMotion = false;
 			if ((this._motion === motionGuard) && !BattleManager.isInputting()) {
 					return;
 			}
-			// かばう移動量リセット
-			actor._substitutePosition = 0;
 			var stateMotion = actor.stateMotionIndex();
 			if (actor.isInputting() || actor.isActing()) {
 				this.startMotion('walk');
