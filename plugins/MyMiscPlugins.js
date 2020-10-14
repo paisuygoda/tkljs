@@ -268,6 +268,18 @@
 				(this.hasItemAnyValidEffects(target))));
 	};
 
+	Game_Action.prototype.isGuard = function() {
+		return this.item() === $dataSkills[this.subject().guardSkillId()]
+				// 防御だけでなく守りでも防御アクションを表示
+				|| this.item() === $dataSkills[25]
+				|| this.subject().isStateAffected(39);
+	};	
+	Game_BattlerBase.prototype.isGuard = function() {
+		return this.canMove() && (this.specialFlag(Game_BattlerBase.FLAG_ID_GUARD)
+		// 防御だけでなく守りでも防御モーションを表示
+		|| this.isStateAffected(39));
+	};
+
 	// 敵消滅を早く
 	Sprite_Enemy.prototype.startCollapse = function() {
 		this._effectDuration = 16;
