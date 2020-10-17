@@ -33,17 +33,19 @@
 			}
 		}
 		// ものまねスロットに登録
-		var id = this._action._item._itemId;
-		BattleManager._lastSkillId = id;
-		if (this._subject.isActor()) {
-			$gameParty._lastSkillId = id;
-			this._subject._lastSkillId = id;
-		} else $gameTroop._lastSkillId = id;
+		if (!this._action.item().isSubSkill) {
+			var id = this._action._item._itemId;
+			BattleManager._lastSkillId = id;
+			if (this._subject.isActor()) {
+				$gameParty._lastSkillId = id;
+				this._subject._lastSkillId = id;
+			} else $gameTroop._lastSkillId = id;
+		}
 	    this._action.splitActions();
 	    this._subject.useItem(action.item());
 	    this._action.applyGlobal();
 	    this.refreshStatus();
-	    this._logWindow.displayAction(this._subject, action.item());
+		this._logWindow.displayAction(this._subject, action.item());
 	};
 
 	// actionとdamageは完全に分ける
@@ -98,6 +100,12 @@
 	};
 	*/
 
+	// Actionがたたかう派生系であることの確認
+	Game_Action.prototype.applyDualWield = function() {
+		var attackskills = [1, 11, 12, 13, 14, 15, 16, 17, 18, 19, 27];
+		return this._item._dataClass == 'skill' && attackskills.contains(this._item._itemId);
+	}
+
 	// 二刀流の場合にはこのタイミングでアクションを分割
 	BattleManager.updateAction = function() {
 		if (!this._logWindow.isBusy()) {
@@ -105,8 +113,8 @@
 			// ._targetsと._reflecTargetsに対象を詰める
 			this.substituteBeforeAnim();
 			
-			// Actionがたたかう派生系であることの確認も必要だが、まだ実装できていない（たたかう系に属するスキルIDが定まっていないため）
-	    	if(this._subject.isActor()) {
+			// Actionがたたかう派生系であることの確認
+	    	if(this._subject.isActor() && this._action.applyDualWield()) {
 				var equips = this._subject.equips();
 				var bareHands = equips[0] && equips[1] && equips[0].id == 1 && equips[1].id == 1;
 		    	if(!this._dualWielding && (this._subject.weapons()[1] || bareHands)) {
@@ -167,10 +175,20 @@
 	    	while(target) {
 		        this.invokeAction(this._subject, target);
 		        target = this._targets.shift();
-		    }
+			}
+			
+			var subject = this._subject;
+			// 二段階スキルなら二段階目のスキルをpushしsubjectを行動前待機状態に戻す
+			if (this._action.item().isSerialSkill) {
+				var secondAction = JsonEx.makeDeepCopy(this._action);
+				secondAction.setSkill(this._action._item._itemId + 1);
+				this._subject._actions.push(secondAction);
+				this._subject.onMadeActionSubSkill(secondAction);
+				this._subject = null;
+			}
 	        this._action = this._action.pop();
 	        if (this._action) this._phase = 'action';
-	    	else this.endAction();
+	    	else this.endAction(subject);
 	    }
 	};
 
@@ -335,7 +353,7 @@
 	Game_Actor.prototype.performAction = function(action) {
 	    Game_Battler.prototype.performAction.call(this, action);
 	    this._isInMotion = true;
-	    if (action.isAttack()) {
+	    if (action.isAttackSkill()) {
 	        this.performAttack();
 	    } else if (action.isGuard()) {
 	        this.requestMotion('guard');

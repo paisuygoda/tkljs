@@ -67,6 +67,7 @@
     return newId;
   };
 
+  // 武器によって変更されるたたかうコマンド
   Game_Action.prototype.isAttackSkill = function() {
     var ids = [1, 11, 12, 13, 14, 15, 16, 17, 18, 19];
     return ids.contains(this._item._itemId);

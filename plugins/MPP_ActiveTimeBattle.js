@@ -1124,6 +1124,20 @@ Game_BattlerBase.prototype.onMadeAction = function() {
     }
 };
 
+// SubSkillに対してonMadeActionを呼ぶと起点のアクションを見てCTを決めてしまうし、起点アクションをこのタイミングで消すわけにもいかないので別途作った
+Game_BattlerBase.prototype.onMadeActionSubSkill = function(secondAction) {
+    this.setDecided(1);
+    this._ct = 0;
+    this._maxCt = 0;
+    if (secondAction) {
+        var item = secondAction.item();
+        if (item) {
+            var rate = (MppOptions.atbSpeed - 7) * 3;
+            this._maxCt = Math.max(item.speed * rate, 0);
+        }
+    }
+};
+
 Game_BattlerBase.prototype.setDecided = function(decided) {
     this._decided = decided;
 };

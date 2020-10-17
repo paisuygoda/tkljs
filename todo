@@ -54,8 +54,8 @@ animationは一マス192pixel四方
 命中タイプ必中は極力使わずに(波動砲とかの対策不能攻撃でだけ使う)、基本命中率0のスキルを必中として扱う
 各安全地帯で$gamePlayer._resumeMapId, $gamePlayer._resumeX, $gamePlayer._resumeYを設定し全滅時に戻ってこれるようにする
 接地技リストをハードコーディング(MyMiscPlugins: L251)
-二刀流アクションが反映されるたたかう派生系スキルをハードコーディングする (MyChangePopUpDamageOrder: L94)
-技名を表示しないたたかう系スキルもハードコーディングする (MyChangePopUpDamageOrder: L94)
+二刀流アクションが反映されるたたかう派生系スキルをハードコーディングする (Game_Action.prototype.applyDualWield)
+技名を表示しないたたかう系スキルもハードコーディングする (Game_Action.prototype.isAttackSkill)
 各スキルタイプコマンドで表示するヘルプをハードコーディング (Window_Command.prototype.updateEbcSkillHelp)
 Window_SkillType.prototype.makeCommandList にジョブ取得状況に応じて使えるコマンドを表示する処理あったほうがよさそう
 
@@ -65,6 +65,7 @@ Window_SkillType.prototype.makeCommandList にジョブ取得状況に応じて�
 実装要スキル
 	ものまね
 	ためる
+		ツールの計算式で通常攻撃ダメージを変数から扱えるようにする
 	チャクラ
 	ばくれつけん
 	オーラキャノン

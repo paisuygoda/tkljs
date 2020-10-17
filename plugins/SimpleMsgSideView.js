@@ -60,13 +60,16 @@
     this.wait();
   };
 
-// たたかうに属する、技名を表示しないスキルたち TODO: たたかうスキルをハードコーディング
-  var attackSkills = [1, 11, 12, 13, 14, 15, 16];
+  // たたかうに属する、技名を表示しないスキルたち TODO: たたかうスキルをハードコーディング
+  Window_BattleLog.prototype.notShownSkills = function() {
+    return [1, 11, 12, 13, 14, 15, 16, 27];
+  }
+
   var _Window_BattleLog_displayAction = Window_BattleLog.prototype.displayAction;
   Window_BattleLog.prototype.displayAction = function(subject, item) {
     if($gameSystem.isSideView()){
       if(displayAttack ||
-       !(DataManager.isSkill(item) && (attackSkills.indexOf(item.id) >= 0 || item.id == subject.guardSkillId()))) {
+       !(DataManager.isSkill(item) && (this.notShownSkills().contains(item.id) || item.id == subject.guardSkillId()))) {
 　　    this.push('addItemNameText', item.name);  // display item/skill name
       } else {
         this.push('wait');

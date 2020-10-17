@@ -21,16 +21,26 @@
 	DataManager.processNotetagsAbilityLevel = function(group) {
 		// 要求アビリティレベル(記述がなければ0)
 		var noteAbLevelCondition = /<(?:RequireAbilityLevel):[ ](\d+)>/i;
+		// ジャンプなどの二段階コマンドか否か(記述がなければfalse)
+		var noteSerialSkillCondition = /<(?:SerialSkill)>/i;
+		// 二段階目か否か(記述がなければfalse)
+		var noteSubSkillCondition = /<(?:SubSkill)>/i;
 		for (var n = 1; n < group.length; n++) {
 			var obj = group[n];
 			var notedata = obj.note.split(/[\r\n]+/);
 
 			obj.abilityLevel = 0;
+			obj.isSerialSkill = false;
+			obj.isSubSkill = false;
 
 			for (var i = 0; i < notedata.length; i++) {
 				var line = notedata[i];
 				if (line.match(noteAbLevelCondition)) {
 					obj.abilityLevel = parseInt(RegExp.$1);
+				} else if (line.match(noteSerialSkillCondition)) {
+					obj.isSerialSkill = true;
+				} if (line.match(noteSubSkillCondition)) {
+					obj.isSubSkill = true;
 				}
 			}
 		}

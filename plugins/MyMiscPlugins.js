@@ -280,6 +280,30 @@
 		|| this.isStateAffected(39));
 	};
 
+	// 行動を決定したとき、既に入っているアクション内容は消さない
+	// ジャンプ→着地などの二段階スキルのため
+	Game_Battler.prototype.makeActions = function() {
+		if (this.canMove()) {
+			var actionTimes = this.makeActionTimes();
+			for (var i = 0; i < actionTimes; i++) {
+				this._actions.push(new Game_Action(this));
+			}
+		}
+	};
+
+	// endActionはthis._subjectではなく引数に入ったsubjectを入れる
+	// subSkillの文脈ではどうしてもupdateturnで次アクションを選び始める前（この処理が走る前）にthis._subjectがnullであってほしいため
+	BattleManager.endAction = function(subject) {
+		this._logWindow.endAction(subject);
+		this._phase = 'turn';
+	};
+
+	// SerialSkillの時点で回避されたりバニシュが消えたりしても困るのでどこも対象にしない
+	Game_Action.prototype.checkItemScope = function(list) {
+		var scope = this.item().isSerialSkill ? 0 : this.item().scope;
+		return list.contains(scope);
+	};
+
 	// 敵消滅を早く
 	Sprite_Enemy.prototype.startCollapse = function() {
 		this._effectDuration = 16;

@@ -677,7 +677,8 @@ function Sprite_Dummy() {
         }
         var customMotion = getMetaValues(this._actionForMotion.item(), tagNames);
         if (customMotion) {
-            this.requestMotion(getArgString(customMotion).toLowerCase());
+            if (customMotion == "normalAttack") this.performAttack();
+            else this.requestMotion(getArgString(customMotion).toLowerCase());
         }
         return !!customMotion;
     };
