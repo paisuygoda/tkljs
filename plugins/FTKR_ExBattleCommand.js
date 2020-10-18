@@ -645,6 +645,7 @@ FTKR.EBC = FTKR.EBC || {};
 
     // 【追加スクリプト】customコマンドでキャンセルを押して呼ぶ先の関数がcustomに対応していないので対応させる
     Scene_Battle.prototype.onEnemyCancel = function() {
+        BattleManager.actor()._change_scope = false;
         this._enemyWindow.hide();
         switch (this._actorCommandWindow.currentSymbol()) {
         case 'attack':
@@ -664,6 +665,7 @@ FTKR.EBC = FTKR.EBC || {};
         }
     };
     Scene_Battle.prototype.onActorCancel = function() {
+        BattleManager.actor()._change_scope = false;
         this._actorWindow.hide();
         switch (this._actorCommandWindow.currentSymbol()) {
         case 'skill':

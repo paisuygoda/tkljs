@@ -23,7 +23,8 @@
 
 	// HP高い順にかばう、ただしにおうだち>かばうの優先順位はある
 	Game_Unit.prototype.substituteBattler = function() {
-	    var members = this.members().sort(function(a, b) {
+		var members = JsonEx.makeDeepCopy(this.members());
+	    members.sort(function(a, b) {
 	        var p1 = a.hp / a.mhp;
 	        var p2 = b.hp / b.mhp;
 	        if (p1 !== p2) {
@@ -40,7 +41,8 @@
 
 	// HP高い順にかばう、ただしにおうだち>かばうの優先順位はある
 	Game_Unit.prototype.wallBattler = function() {
-	    var members = this.members().sort(function(a, b) {
+		var members = JsonEx.makeDeepCopy(this.members());
+	    members.sort(function(a, b) {
 	        var p1 = a.hp / a.mhp;
 	        var p2 = b.hp / b.mhp;
 	        if (p1 !== p2) {

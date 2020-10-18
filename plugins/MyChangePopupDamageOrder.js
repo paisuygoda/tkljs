@@ -112,7 +112,6 @@
 			
 			// ._targetsと._reflecTargetsに対象を詰める
 			this.substituteBeforeAnim();
-			
 			// Actionがたたかう派生系であることの確認
 	    	if(this._subject.isActor() && this._action.applyDualWield()) {
 				var equips = this._subject.equips();

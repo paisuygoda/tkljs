@@ -48,5 +48,20 @@
 		}, 1);
 	};
 	
+	// たたかうのダメージをX倍するスキル用に、計算式から戦うダメージを引けるようにする
+	Game_Action.prototype.attackDamage = function(target) {
+		try {
+			var item =$dataSkills[this.subject().attackSkillId()];
+			var a = this.subject();
+			var b = target;
+			var v = $gameVariables._data;
+			var sign = ([3, 4].contains(item.damage.type) ? -1 : 1);
+			var value = Math.max(eval(item.damage.formula), 0) * sign;
+			if (isNaN(value)) value = 0;
+			return value;
+		} catch (e) {
+			return 0;
+		}
+	};
 
 })();

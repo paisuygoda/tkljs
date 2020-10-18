@@ -33,7 +33,9 @@
 	// ターゲットの配列作成
 	Game_Action.prototype.makeTargets = function() {
 		var rawTargets;
-		if (this.isForUser()) {
+		// SerialSkillの時点で回避されたりバニシュが消えたりしても困るのでどこも対象にしない
+		if (this.item().isSerialSkill) return [];
+		else if (this.isForUser()) {
 			rawTargets = [this.subject()];
 		} else if (this._change_scope) {
 			var targets = [];

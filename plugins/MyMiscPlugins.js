@@ -298,12 +298,6 @@
 		this._phase = 'turn';
 	};
 
-	// SerialSkillの時点で回避されたりバニシュが消えたりしても困るのでどこも対象にしない
-	Game_Action.prototype.checkItemScope = function(list) {
-		var scope = this.item().isSerialSkill ? 0 : this.item().scope;
-		return list.contains(scope);
-	};
-
 	// 敵消滅を早く
 	Sprite_Enemy.prototype.startCollapse = function() {
 		this._effectDuration = 16;
