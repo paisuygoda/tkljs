@@ -820,7 +820,8 @@ BattleManager.atbRealRate = function() {
 };
 
 BattleManager.updateCmdActor = function() {
-    if (this.isEvantWait()) {
+    // evantWaitのうち、イベントが走っているだけの分にはアクターコマンドを閉じない
+    if ($gameMessage.isBusy()) {
         return this.clearActor();
     } else if (!this.isAtbWait() && !this.actor()) {
         var members = $gameParty.battleMembers();

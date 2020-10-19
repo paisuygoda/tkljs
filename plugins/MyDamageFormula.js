@@ -64,4 +64,25 @@
 		}
 	};
 
+	//　成功率が0の時、必中に読み替える
+	Game_Action.prototype.itemHit = function(target) {
+		if (this.item().successRate == 0) return 1;
+		if (this.isPhysical()) {
+			return this.item().successRate * 0.01 * this.subject().hit;
+		} else {
+			return this.item().successRate * 0.01;
+		}
+	};
+	
+	Game_Action.prototype.itemEva = function(target) {
+		if (this.item().successRate == 0) return 0;
+		if (this.isPhysical()) {
+			return target.eva;
+		} else if (this.isMagical()) {
+			return target.mev;
+		} else {
+			return 0;
+		}
+	};
+
 })();
