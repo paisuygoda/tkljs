@@ -2641,10 +2641,27 @@ Window_SkillType.prototype.makeCommandList = function() {
         // スキル画面に全部表示
         for (var stypeId = 1; stypeId < 15; stypeId++) {
           var name = $dataSystem.skillTypes[stypeId];
-          var usable = skillTypes.contains(stypeId);
+          var usable = this.containType(skillTypes, stypeId);
           this.addCommand(name, 'skill', usable, stypeId);
         }
     }
+};
+
+Window_SkillType.prototype.containType = function(skillTypes, stypeId) {
+  if (stypeId == 1) return skillTypes.contains(1) || skillTypes.contains(15) || skillTypes.contains(16);
+  else if (stypeId == 2) return skillTypes.contains(2) || skillTypes.contains(17) || skillTypes.contains(18);
+  else if (stypeId == 3) return skillTypes.contains(3) || skillTypes.contains(19) || skillTypes.contains(20);
+  else if (stypeId == 4) return skillTypes.contains(4) || skillTypes.contains(21) || skillTypes.contains(22);
+  else if (stypeId == 5) return skillTypes.contains(5);
+  else if (stypeId == 6) return skillTypes.contains(6) || skillTypes.contains(23) || skillTypes.contains(24);
+  else if (stypeId == 7) return skillTypes.contains(7);
+  else if (stypeId == 8) return skillTypes.contains(8);
+  else if (stypeId == 9) return skillTypes.contains(9) || skillTypes.contains(33) ;
+  else if (stypeId == 10) return skillTypes.contains(10) || skillTypes.contains(25) || skillTypes.contains(26);
+  else if (stypeId == 11) return skillTypes.contains(11) || skillTypes.contains(27) || skillTypes.contains(28);
+  else if (stypeId == 12) return skillTypes.contains(12);
+  else if (stypeId == 13) return skillTypes.contains(13) || skillTypes.contains(29) || skillTypes.contains(30);
+  else if (stypeId == 14) return skillTypes.contains(14) || skillTypes.contains(31) || skillTypes.contains(32);
 };
 
 //=============================================================================

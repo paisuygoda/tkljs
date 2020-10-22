@@ -29,7 +29,7 @@
 			var obj = group[n];
 			var notedata = obj.note.split(/[\r\n]+/);
 
-			obj.abilityLevel = 0;
+			obj.abilityLevel = 2;
 			obj.isSerialSkill = false;
 			obj.isSubSkill = false;
 
@@ -44,6 +44,45 @@
 				}
 			}
 		}
+	};
+	
+	Game_BattlerBase.prototype.canPaySkillCost = function(skill) {
+		return this._tp >= this.skillTpCost(skill) 
+			&& this._mp >= this.skillMpCost(skill) 
+			&& this.haveSatisfyingSkill(skill.stypeId, skill.abilityLevel);
+	};
+
+	Game_BattlerBase.prototype.haveSatisfyingSkill = function(skillType, abilityLevel) {
+		var level2 = abilityLevel > 1 ? this.addedSkillTypes().contains(skillType) : true;
+		var level1 = abilityLevel > 0 ? this.addedSkillTypes().contains(this.convertBackSkillType(skillType, 1)) : true;
+		var level0 = this.addedSkillTypes().contains(this.convertBackSkillType(skillType, 0));
+		return level0 && level1 && level2;
+	};
+
+	Game_BattlerBase.prototype.convertBackSkillType = function(skillType, abilityLevel) {
+		if (abilityLevel == 0) {
+			if (skillType == 1) return 15;
+			else if (skillType == 2) return 17;
+			else if (skillType == 3) return 19;
+			else if (skillType == 4) return 21;
+			else if (skillType == 6) return 23;
+			else if (skillType == 10) return 25;
+			else if (skillType == 11) return 27;
+			else if (skillType == 13) return 29;
+			else if (skillType == 14) return 31;
+			else if (skillType == 9) return 33;
+		}
+		if (abilityLevel == 1) {
+			if (skillType == 1) return 16;
+			else if (skillType == 2) return 18;
+			else if (skillType == 3) return 20;
+			else if (skillType == 4) return 22;
+			else if (skillType == 6) return 24;
+			else if (skillType == 10) return 26;
+			else if (skillType == 11) return 28;
+			else if (skillType == 13) return 30;
+			else if (skillType == 14) return 32;
+		} 
 	};
 
 	MyAbLe_WiSkLi_initialize = Window_SkillList.prototype.initialize;
