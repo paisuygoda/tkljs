@@ -48,7 +48,7 @@
 
 	MyAbLe_WiSkLi_initialize = Window_SkillList.prototype.initialize;
     Window_SkillList.prototype.initialize = function(x, y, width, height) {
-		MyAbLe_WiSkLi_initialize.call(this, arguments);
+		MyAbLe_WiSkLi_initialize.call(this, x, y, width, height);
 		this._skillLevel = 3;
 	};
 	
