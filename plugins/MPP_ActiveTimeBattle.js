@@ -1433,6 +1433,7 @@ Game_Party.prototype.removeActor = function(actorId) {
 // Game_Troop
 
 //152
+/* おそらく逃走ATBが必要な場合の逃走中にイベントが走ったらキャンセルする処理、即逃げするので要らない
 Alias.GaTr_setupBattleEvent = Game_Troop.prototype.setupBattleEvent;
 Game_Troop.prototype.setupBattleEvent = function() {
     var lastRunning = this._interpreter.isRunning();
@@ -1441,6 +1442,7 @@ Game_Troop.prototype.setupBattleEvent = function() {
         BattleManager.setEscaping(false);
     }
 };
+*/
 
 //-----------------------------------------------------------------------------
 // Window_BattleLog
