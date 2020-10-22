@@ -784,9 +784,12 @@
 			substituteY = 0;
 		}
 
+		// むげんとうぶ用
+        this.getRotation();
+
 		// 直接攻撃分の移動距離も追加
-		this.x = this._homeX + this._offsetX + substituteX + this._attackX;
-		this.y = this._homeY + this._offsetY + substituteY + this._attackY - this.getAttackAltitude() - this._levitateOffset;
+		this.x = this._homeX + this._offsetX + substituteX + this._attackX + this._rotateX;
+		this.y = this._homeY + this._offsetY + substituteY + this._attackY + this._rotateY - this.getAttackAltitude() - this._levitateOffset;
 
 		if (this.isVisibleAfterimage()) {
             this.updateAfterimages();

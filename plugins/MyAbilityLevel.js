@@ -81,11 +81,11 @@
 		if (stypeId < 17) return 1;
 		else if (stypeId < 19) return 2;
 		else if (stypeId < 21) return 3;
-		else if (stypeId < 23) return 6;
-		else if (stypeId < 25) return 10;
-		else if (stypeId < 27) return 13;
-		else if (stypeId < 29) return 4;
-		else if (stypeId < 31) return 11;
+		else if (stypeId < 23) return 4;
+		else if (stypeId < 25) return 6;
+		else if (stypeId < 27) return 10;
+		else if (stypeId < 29) return 11;
+		else if (stypeId < 31) return 13;
 		else if (stypeId < 33) return 14;
 		else if (stypeId < 34) return 9;
 		// ありえん

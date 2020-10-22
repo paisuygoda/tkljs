@@ -678,6 +678,10 @@ function Sprite_Dummy() {
         var customMotion = getMetaValues(this._actionForMotion.item(), tagNames);
         if (customMotion) {
             if (customMotion == "normalAttack") this.performAttack();
+            else if (customMotion == "rotate") {
+                BattleManager.getSprite(this)._rotateDuration = 79;
+                this.requestMotion("thrust");
+            }
             else this.requestMotion(getArgString(customMotion).toLowerCase());
         }
         return !!customMotion;
@@ -739,11 +743,11 @@ function Sprite_Dummy() {
         if (!attackInfo) return;
         if (attackInfo.subjectAnimationId > 0) {
             this.push('showAnimation', subject, [subject], attackInfo.subjectAnimationId);
-            this.push('waitForAnimation');
+            // this.push('waitForAnimation');
         }
         if (attackInfo.targetAnimationId > 0) {
             this.push('showAnimation', subject, targets, attackInfo.targetAnimationId);
-            this.push('waitForAnimation');
+            // this.push('waitForAnimation');
         }
     };
 
@@ -765,7 +769,7 @@ function Sprite_Dummy() {
         var attackInfo = subject.getDirectoryAddition();
         if (attackInfo && attackInfo.attackAnimationId > 0) {
             this.showAnimation(subject, [subject], attackInfo.attackAnimationId);
-            this.waitForAnimation();
+            // this.waitForAnimation();
         }
     };
 
@@ -808,10 +812,13 @@ function Sprite_Dummy() {
         _Sprite_Battler_initMembers.apply(this, arguments);
         this._attackX                  = 0;
         this._attackY                  = 0;
+        this._rotateX                  = 0;
+        this._rotateY                  = 0;
         this._attackZ                  = 0;
         this._afterimageSprites        = [];
         this._afterimageLocus          = [];
         this._afterimageViaibleCounter = 0;
+        this._rotateDuration = 0;
         this.setVisibleAfterImage(false);
     };
 
@@ -1004,6 +1011,23 @@ function Sprite_Dummy() {
         var t = this._attackDurationTime;
         var d = this._attackDuration;
         return this._originalOpacity * Math.pow(this.getDaTimeLine(d, t), 4);
+    };
+
+    Sprite_Battler.prototype.getRotation = function() {
+        if (!this._rotateDuration) return;
+        var mod = this._rotateDuration % 20;
+        var X = this._targetSprite.width / 2 + this._targetSprite.width / 2 * Math.cos(mod / 20 * Math.PI);
+        var Y = -30 * Math.sin(mod / 20 * Math.PI);
+
+        this._rotateX = - X;
+        this._rotateY = - Y;
+
+
+        this._rotateDuration--;
+        if (!this._rotateDuration) {
+            this._rotateX = 0;
+            this._rotateY = 0;
+        }
     };
 
     var _Sprite_Battler_updatePosition      = Sprite_Battler.prototype.updatePosition;

@@ -294,7 +294,7 @@
 		switch (methodName) {
 			case 'addText':
 			case 'pushBaseLine':
-			// case 'waitForNewLine':
+			case 'waitForNewLine':
 			case 'popBaseLine':
 				break;
 			case 'popupDamage':
