@@ -73,16 +73,20 @@
 	Scene_Battle.prototype.update = function() {
 		if (this._actorWindow.visible && !BattleManager.actor()._changed) { // 現在：味方
 			BattleManager.actor()._changed = true;
-			BattleManager.actor()._change_scope = !BattleManager.actor()._change_scope;
-			this._actorWindow.deactivate(); // 忘れるとエラー
-			this._actorWindow.hide();
-			this.selectEnemySelection(); // 切り替え
+			if (BattleManager.inputtingAction().item().isReversible) {
+				BattleManager.actor()._change_scope = !BattleManager.actor()._change_scope;
+				this._actorWindow.deactivate(); // 忘れるとエラー
+				this._actorWindow.hide();
+				this.selectEnemySelection(); // 切り替え
+			}
 		}else if (this._enemyWindow.visible && !BattleManager.actor()._changed) { // 現在：敵
 			BattleManager.actor()._changed = true;
-			BattleManager.actor()._change_scope = !BattleManager.actor()._change_scope;
-			this._enemyWindow.deactivate(); // 忘れるとエラー
-			this._enemyWindow.hide();
-			this.selectActorSelection(); // 切り替え
+			if (BattleManager.inputtingAction().item().isReversible) {
+				BattleManager.actor()._change_scope = !BattleManager.actor()._change_scope;
+				this._enemyWindow.deactivate(); // 忘れるとエラー
+				this._enemyWindow.hide();
+				this.selectActorSelection(); // 切り替え
+			}
 		}
 		_Scene_Battle_update_Change_Scope.call(this);
 	};

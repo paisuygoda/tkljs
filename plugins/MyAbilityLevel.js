@@ -27,6 +27,8 @@
 		var noteSubSkillCondition = /<(?:SubSkill)>/i;
 		// 盗むスキルか否か(記述がなければfalse)
 		var noteStealSkillCondition = /<(?:StealSkill)>/i;
+		// 盗むスキルか否か(記述がなければfalse)
+		var noteReversibleCondition = /<(?:Reversible)>/i;
 		for (var n = 1; n < group.length; n++) {
 			var obj = group[n];
 			var notedata = obj.note.split(/[\r\n]+/);
@@ -35,6 +37,7 @@
 			obj.isSerialSkill = false;
 			obj.isSubSkill = false;
 			obj.isStealSkill = false;
+			obj.isReversible = false;
 
 			for (var i = 0; i < notedata.length; i++) {
 				var line = notedata[i];
@@ -46,6 +49,8 @@
 					obj.isSubSkill = true;
 				} else if (line.match(noteStealSkillCondition)) {
 					obj.isStealSkill = true;
+				} else if (line.match(noteReversibleCondition)) {
+					obj.isReversible = true;
 				}
 			}
 		}
