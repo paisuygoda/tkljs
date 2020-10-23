@@ -1,5 +1,5 @@
 /*:
- * @plugindesc 盗むシステム
+ * @plugindesc 盗むやライブラなどの特殊スキルシステム
  * @author paisuygoda
  */
 

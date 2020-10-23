@@ -419,6 +419,7 @@
 				target._charmTo = this.subject();
 				BattleManager._logWindow.push('clear');
 				BattleManager._logWindow.push('addItemNameText', '死ぬまで味方を殴りなさい');
+				BattleManager._waitAnim = 30;
 			}
 
 			// 宣告カウント・内容設定追加

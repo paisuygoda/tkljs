@@ -61,8 +61,8 @@
 		rawTargets.forEach(function(target){
 			// 瀕死耐性がついているとき、割合&瀕死ダメージが当たらない
 			if (!(target.isStateAffected(35) && item.damage.elementId === 12)
-				// かくれる状態の時は自身の「あらわれる」以外当たらない TODO: あらわれるスキルIDのハードコーディング
-				&& !(target.isStateAffected(32) && item.id != 20)) {
+				// かくれる状態の時は自身の「あらわれる」以外当たらない DONE: あらわれるスキルIDのハードコーディング
+				&& !(target.isStateAffected(32) && item.id != 35)) {
 					targets.push(target);
 				}
 		});

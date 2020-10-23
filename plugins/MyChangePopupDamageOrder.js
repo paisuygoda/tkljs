@@ -64,6 +64,9 @@
 	        case 'damage':
 	            this.updateDamage();
 	            break;
+			case 'postDamage':
+				this.updatePostDamage();
+				break;
 			case 'specialDamage':
 				this.updateSpecialDamage();
 				break;
@@ -176,7 +179,7 @@
 		        target = this._targets.shift();
 			}
 			
-			var subject = this._subject;
+			this._resettingSubject = this._subject;
 			// 二段階スキルなら二段階目のスキルをpushしsubjectを行動前待機状態に戻す
 			if (this._action.item().isSerialSkill) {
 				var secondAction = JsonEx.makeDeepCopy(this._action);
@@ -185,9 +188,13 @@
 				this._subject.onMadeActionSubSkill(secondAction);
 				this._subject = null;
 			}
+
+			// 描画時間の引き延ばし(ぬすむ系で盗んだアイテムを見る時間猶予)
+			if (this._action.item().isStealSkill) this._waitAnim = 30;
+
 	        this._action = this._action.pop();
 	        if (this._action) this._phase = 'action';
-	    	else this.endAction(subject);
+			else this._phase = 'postDamage';
 	    }
 	};
 
@@ -201,6 +208,14 @@
 			targets.forEach(function(target) {
 				BattleManager.updateIndividualSpecialDamage(target, oracleSkill);
 			});
+			this._phase = 'turn';
+	    }
+	};
+
+	BattleManager.updatePostDamage = function() {
+		if (this._waitAnim > 0) this._waitAnim--;
+	    else if (!(this._logWindow.isBusy())) {
+			this.endAction();
 			this._phase = 'turn';
 	    }
 	};

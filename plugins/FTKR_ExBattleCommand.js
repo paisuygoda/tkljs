@@ -582,13 +582,13 @@ FTKR.EBC = FTKR.EBC || {};
     };
 
     Window_ActorCommand.prototype.addCustomCommand = function(cmd) {
-        // 隠れているときのコマンド変更 TODO: かくれる・あらわれるスキルIDのハードコーディング
-        if (cmd.skillId === 19 && this._actor.isStateAffected(32)) cmd = {
+        // 隠れているときのコマンド変更 DONE: かくれる・あらわれるスキルIDのハードコーディング
+        if (cmd.skillId === 34 && this._actor.isStateAffected(32)) cmd = {
             code     : cmd.code,
             dataId   : cmd.dataId,
             ext      : cmd.ext,
             enabled  : cmd.enabled,
-            skillId  : 20,
+            skillId  : 35,
             priority : cmd.priority,
         };
         var skill = this.ebcDataSkill(cmd.skillId);

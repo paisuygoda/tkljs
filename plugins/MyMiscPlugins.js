@@ -293,8 +293,8 @@
 
 	// endActionはthis._subjectではなく引数に入ったsubjectを入れる
 	// subSkillの文脈ではどうしてもupdateturnで次アクションを選び始める前（この処理が走る前）にthis._subjectがnullであってほしいため
-	BattleManager.endAction = function(subject) {
-		this._logWindow.endAction(subject);
+	BattleManager.endAction = function() {
+		this._logWindow.endAction(this._resettingSubject);
 		this._phase = 'turn';
 	};
 
