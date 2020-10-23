@@ -11,6 +11,7 @@ var $plugins =
 {"name":"MySubstitute","status":true,"description":"かばう発動条件や、かばう時のアニメーションをFF仕様にする","parameters":{}},
 {"name":"MyEnemyNameWindow","status":true,"description":"敵の名前表示窓追加","parameters":{}},
 {"name":"MyAbilityLevel","status":true,"description":"アビリティレベルによって使えるスキルが変わる処理","parameters":{}},
+{"name":"MySteal","status":true,"description":"盗むシステム","parameters":{}},
 {"name":"Change_Scope","status":true,"description":"スキルを「敵<=>味方」に変更可能になります。","parameters":{}},
 {"name":"Community_Basic","status":true,"description":"基本的なパラメーターを設定するプラグインです。","parameters":{"cacheLimit":"20","screenWidth":"816","screenHeight":"624","changeWindowWidthTo":"","changeWindowHeightTo":"","renderingMode":"auto","alwaysDash":"on"}},
 {"name":"EnemyBook","status":true,"description":"モンスター図鑑です。敵キャラの詳細なステータスを表示します。","parameters":{"Unknown Data":"？？？？？？"}},

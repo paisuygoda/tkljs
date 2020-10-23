@@ -344,6 +344,9 @@
 				this.applyItemEffect(target, effect);
 			}, this);
 			this.applyItemUserEffect(target);
+			
+			// ダメージ処理時にぬすむ判定も行う
+			this.applySteal(target);
 		}
 	};
 

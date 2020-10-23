@@ -25,6 +25,8 @@
 		var noteSerialSkillCondition = /<(?:SerialSkill)>/i;
 		// 二段階目か否か(記述がなければfalse)
 		var noteSubSkillCondition = /<(?:SubSkill)>/i;
+		// 盗むスキルか否か(記述がなければfalse)
+		var noteStealSkillCondition = /<(?:StealSkill)>/i;
 		for (var n = 1; n < group.length; n++) {
 			var obj = group[n];
 			var notedata = obj.note.split(/[\r\n]+/);
@@ -32,6 +34,7 @@
 			obj.abilityLevel = 2;
 			obj.isSerialSkill = false;
 			obj.isSubSkill = false;
+			obj.isStealSkill = false;
 
 			for (var i = 0; i < notedata.length; i++) {
 				var line = notedata[i];
@@ -39,8 +42,10 @@
 					obj.abilityLevel = parseInt(RegExp.$1);
 				} else if (line.match(noteSerialSkillCondition)) {
 					obj.isSerialSkill = true;
-				} if (line.match(noteSubSkillCondition)) {
+				} else if (line.match(noteSubSkillCondition)) {
 					obj.isSubSkill = true;
+				} else if (line.match(noteStealSkillCondition)) {
+					obj.isStealSkill = true;
 				}
 			}
 		}
@@ -53,9 +58,10 @@
 	};
 
 	Game_BattlerBase.prototype.haveSatisfyingSkill = function(skillType, abilityLevel) {
+		if (skillType == 0) return true;
 		var level2 = abilityLevel > 1 ? this.addedSkillTypes().contains(skillType) : true;
-		var level1 = abilityLevel > 0 ? this.addedSkillTypes().contains(this.convertBackSkillType(skillType, 1)) : true;
-		var level0 = this.addedSkillTypes().contains(this.convertBackSkillType(skillType, 0));
+		var level1 = level2 || (abilityLevel > 0 ? this.addedSkillTypes().contains(this.convertBackSkillType(skillType, 1)) : true);
+		var level0 = level1 || (this.addedSkillTypes().contains(this.convertBackSkillType(skillType, 0)));
 		return level0 && level1 && level2;
 	};
 

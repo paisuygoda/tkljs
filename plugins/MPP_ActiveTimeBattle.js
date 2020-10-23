@@ -877,6 +877,9 @@ BattleManager.startBattle = function() {
         actor.blv = actor._level;
         actor.clearResult();
     });
+    $gameTroop._enemies.forEach(function(enemy) { 
+        enemy.haveItem = [true, true, true];
+    });
     this.setupAllBattlerAt();
     this._phase = 'turn';
     this.startTurn();
