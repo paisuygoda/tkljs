@@ -63,7 +63,6 @@ Window_SkillType.prototype.makeCommandList にジョブ取得状況に応じて�
 シナリオ
 
 実装要スキル
-	ライブラ
 	ポイゾナ
 	サイレス
 	プロテス

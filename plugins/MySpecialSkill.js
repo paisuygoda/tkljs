@@ -47,9 +47,10 @@
 
 	// ライブラ処理
 	Game_Action.prototype.applyLibrary = function(target) {
-		if(this.item().libraryLevel > 0) {
-			BattleManager._logWindow.addItemNameText("ＨＰ " + target.hp + "／" + target.mhp + "  ＭＰ " + target.mp + "／" + target.mmp);
-			BattleManager._waitAnim = 60;
+		console.log(this.item());
+		if(this.item().isLibrary) {
+			BattleManager._logWindow.addItemNameText("レベル" + target.blv + "  ＨＰ " + target.hp + "／" + target.mhp + "  ＭＰ " + target.mp + "／" + target.mmp);
+			BattleManager._waitAnim = 90;
 
 			var weakness = "";
 			// var noEffect = "";
