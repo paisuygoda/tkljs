@@ -860,6 +860,7 @@
 			var prefix = this._isInverted ? -1 : 1;
 			var size = this._isSmall ? 0.3 : 1;
 			this.scale.x = prefix * size;
+			this.scale.y = size;
 		}
 		this._oracleCountSprite.y = this.countOffsetY();
 	};
