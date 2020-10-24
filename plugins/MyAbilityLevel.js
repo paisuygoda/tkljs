@@ -29,6 +29,8 @@
 		var noteStealSkillCondition = /<(?:StealSkill)>/i;
 		// 盗むスキルか否か(記述がなければfalse)
 		var noteReversibleCondition = /<(?:Reversible)>/i;
+		// 要求アビリティレベル(記述がなければ0)
+		var noteLibraryLevelCondition = /<(?:LibraryLevel):[ ](\d+)>/i;
 		for (var n = 1; n < group.length; n++) {
 			var obj = group[n];
 			var notedata = obj.note.split(/[\r\n]+/);
@@ -38,6 +40,7 @@
 			obj.isSubSkill = false;
 			obj.isStealSkill = false;
 			obj.isReversible = false;
+			obj.libraryLevel = 0;
 
 			for (var i = 0; i < notedata.length; i++) {
 				var line = notedata[i];
@@ -51,6 +54,8 @@
 					obj.isStealSkill = true;
 				} else if (line.match(noteReversibleCondition)) {
 					obj.isReversible = true;
+				} else if (line.match(noteLibraryLevelCondition)) {
+					obj.libraryLevel = parseInt(RegExp.$1);
 				}
 			}
 		}

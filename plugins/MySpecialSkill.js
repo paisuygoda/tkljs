@@ -5,6 +5,13 @@
 
 (function() {
 
+	Game_Action.prototype.applySpecialSkills = function(target) {
+		// ダメージ処理時にぬすむ判定も行う
+		this.applySteal(target);
+		// ライブラ処理も行う
+		this.applyLibrary(target);
+	}
+
 	// 盗み処理
 	Game_Action.prototype.applySteal = function(target) {
 		if(this.item().isStealSkill) {
@@ -37,6 +44,33 @@
 			}
 		}
 	};
+
+	// ライブラ処理
+	Game_Action.prototype.applyLibrary = function(target) {
+		if(this.item().libraryLevel > 0) {
+			BattleManager._logWindow.addItemNameText("ＨＰ " + target.hp + "／" + target.mhp + "  ＭＰ " + target.mp + "／" + target.mmp);
+			BattleManager._waitAnim = 60;
+
+			var weakness = "";
+			// var noEffect = "";
+			// var drain = "";
+			for (var elementId = 2; elementId < 11; elementId++) {
+				var rate = target.traitsWithId(Game_BattlerBase.TRAIT_ELEMENT_RATE, elementId).reduce(function(r, trait) {
+					if (trait.value > 2 || r > 2) return 2.01; 
+					else if (trait.value === 0) return -1;
+					else if (trait.value === 0.01) return Math.min(r, 0);
+					else return r != 1 ? Math.min(r, trait.value) : trait.value;
+				}, 1);
+				if (rate >= 2) weakness += $dataSystem.elements[elementId] + " ";
+				// else if (rate == 0) noEffect += $dataSystem.elements[elementId] + " ";
+				// else if (rate <= -1) drain += $dataSystem.elements[elementId] + " ";
+			}
+			if (weakness != "") {
+				BattleManager._logWindow.addItemNameText(weakness + "の力に弱い");
+				BattleManager._waitAnim += 30;
+			}
+		}
+	}
 
 	// 敵がそのスロットにアイテムを持っているか
 	Game_Enemy.prototype.itemAvailable = function(i) {

@@ -42,9 +42,11 @@
 		// 生存者に蘇生技が当たっていたら回復量を無効化する
 		if (this.isAlive() && elementId === 13) return 0;
 		return this.traitsWithId(Game_BattlerBase.TRAIT_ELEMENT_RATE, elementId).reduce(function(r, trait) {
-			if (trait.value === 0) return -1;
-			if (trait.value === 0.01) return Math.min(r, 0);
-			else return Math.min(r, trait.value);
+			// ウィークメーカーによる弱点(2.01)は絶対
+			if (trait.value > 2 || r > 2) return 2.01; 
+			else if (trait.value === 0) return -1;
+			else if (trait.value === 0.01) return Math.min(r, 0);
+			else return r != 1 ? Math.min(r, trait.value) : trait.value;
 		}, 1);
 	};
 	

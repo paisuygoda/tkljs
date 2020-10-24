@@ -345,8 +345,8 @@
 			}, this);
 			this.applyItemUserEffect(target);
 			
-			// ダメージ処理時にぬすむ判定も行う
-			this.applySteal(target);
+			// 特殊スキルの効果処理(MySpecialSkill)
+			this.applySpecialSkills(target);
 		}
 	};
 
