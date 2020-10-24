@@ -364,6 +364,57 @@
 		this._text = '';
 	};
 
+	// Reversibleな敵向けスキルはメニュー画面で使えるようにする(ミニマム・トード用)
+	Scene_ItemBase.prototype.determineItem = function() {
+		var action = new Game_Action(this.user());
+		var item = this.item();
+		action.setItemObject(item);
+		if (action.isForFriend() || item.isReversible) {
+			this.showSubWindow(this._actorWindow);
+			this._actorWindow.selectForItem(this.item());
+		} else {
+			this.useItem();
+			this.activateItemWindow();
+		}
+	};
+	Scene_ItemBase.prototype.itemTargetActors = function() {
+		var action = new Game_Action(this.user());
+		action.setItemObject(this.item());
+		if (!(action.isForFriend() || this.item().isReversible)) {
+			return [];
+		} else if (action.isForAll()) {
+			return $gameParty.members();
+		} else {
+			return [$gameParty.members()[this._actorWindow.index()]];
+		}
+	};
+
+	// 非戦闘時のアクション処理をapplyとは別に用意
+	Scene_ItemBase.prototype.applyItem = function() {
+		var action = new Game_Action(this.user());
+		action.setItemObject(this.item());
+		this.itemTargetActors().forEach(function(target) {
+			for (var i = 0; i < action.numRepeats(); i++) {
+				action.applyNotBattle(target);
+			}
+		}, this);
+		action.applyGlobal();
+	};
+	Game_Action.prototype.applyNotBattle = function(target) {
+		var result = target.result();
+		this.subject().clearResult();
+		result.clear();
+		if (this.item().damage.type > 0) {
+			result.critical = (Math.random() < this.itemCri(target));
+			var value = this.makeDamageValue(target, result.critical);
+			this.executeDamage(target, value);
+		}
+		this.item().effects.forEach(function(effect) {
+			this.applyItemEffect(target, effect);
+		}, this);
+		this.applyItemUserEffect(target);
+	};
+
 	// スキル画面レイアウト変更
 	Window_SkillType.prototype.windowWidth = function() {
 		return 165 + this.standardPadding() * 2;
