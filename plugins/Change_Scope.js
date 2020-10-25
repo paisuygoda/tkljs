@@ -125,7 +125,19 @@
 
 	// 敵は混乱中も通常のルーティーンで技を出し、その対象を敵にする
 	Game_Action.prototype.setConfusion = function() {
-		if (this.subject().isActor()) this.setAttack();
-		this._change_scope = true;
+		if (this.subject().isActor()) {
+			switch (this.subject().confusionLevel()) {
+				case 2:
+					if (Math.randomInt(2) === 1) {
+						this._change_scope = true;
+					}
+				case 3:
+					this._change_scope = true;
+				default:
+					this._change_scope = false;
+				}
+			this.setAttack();
+		}
+		else this._change_scope = true;
 	};
 })();
