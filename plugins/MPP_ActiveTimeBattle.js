@@ -2020,7 +2020,7 @@ WindowLayer.prototype._webglMaskWindow = function(renderSession, win) {
 Alias.WiBaEn_maxCols =
     Window_BattleEnemy.prototype.maxCols;
 Window_BattleEnemy.prototype.maxCols = function() {
-    return this._enemies.length;
+    return Math.max(this._enemies.length, 2);
 };
 
 Window_BattleEnemy.prototype.allowedTargets = function() {

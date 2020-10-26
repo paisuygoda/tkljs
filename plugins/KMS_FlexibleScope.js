@@ -379,7 +379,7 @@ function processChangingForAll()
 }
 
 function processChangeScope() {
-    if (this.isOpenAndActive() && !this._cursorFixed && this.maxItems() > 1) {
+    if (this.isOpenAndActive() && !this._cursorFixed && this.maxItems() > 0) {
         var index    = this.index();
         var maxCols  = this.maxCols();
         // 一列表示なら ← で敵選択へ移行
