@@ -184,6 +184,7 @@
 					var nonStoneStates = [4,5,6,7,8,9,15,16,17,18,19,20,21,22,23,27,28,29,30,31,34];
 					var actor = this;
 					nonStoneStates.forEach(function(tempstate){actor.removeState(tempstate);});
+					BattleManager.getSprite(this).alterSpriteByState();
 				}
 				// ストップor凍結した場合分身削除
 				else if (stateId === 17 || stateId === 30) {
@@ -454,7 +455,7 @@
 			}
 			// 毒
 			if (this.activating(4, 20)){
-				var value = Math.floor(this.mhp * -this._poisonProgress++ / 20);
+				var value = Math.floor(this.mhp * -this._poisonProgress++ / 40);
 				value = Math.min(value, -1) * this.elementRate(10);
 				if (value !== 0) {
 					this.result().clear();
@@ -699,18 +700,18 @@
 		if (!this._actor) return;
         // 石化
         if (this._actor.isStateAffected(24)) {
-			this._mainSprite._colorTone = [0,0,0,255];
+			this._mainSprite.setColorTone([0,0,0,255]);
 		// ゾンビ
 		} else if (this._actor.isStateAffected(25)) {
-			this._mainSprite._colorTone = [-150,-100,-180,90];
+			this._mainSprite.setColorTone([-150,-100,-180,90]);
 		// 凍結
 		} else if (this._actor.isStateAffected(30)) {
-			this._mainSprite._colorTone = [0,50,255,0];
+			this._mainSprite.setColorTone([0,50,255,0]);
 		// バーサク
 		} else if (this._actor.isStateAffected(7)) {
-			this._mainSprite._colorTone = [100,-60,-60, 0];
+			this._mainSprite.setColorTone([100,-60,-60, 0]);
         } else {
-            this._mainSprite._colorTone = [0,0,0,0];
+            this._mainSprite.setColorTone([0,0,0,0]);
 		}
 		
 		// 小人処理

@@ -2364,7 +2364,7 @@ Sprite_Actor.prototype.refreshMotion = function() {
     if (MPPlugin.escapeAnime) {
         var actor = this._actor;
         if (BattleManager.isEscaping() && actor && !actor.isActing() &&
-            actor.stateMotionIndex() < 2) {
+            actor.stateMotionIndex() < 2 && actor.canMove()) {
             return this.startMotion('escape');
         }
     }

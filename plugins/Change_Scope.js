@@ -128,11 +128,12 @@
 		if (this.subject().isActor()) {
 			switch (this.subject().confusionLevel()) {
 				case 2:
-					if (Math.randomInt(2) === 1) {
-						this._change_scope = true;
-					}
+					if (Math.random() < 0.5) this._change_scope = true;
+					else this._change_scope = false;
+					break;
 				case 3:
 					this._change_scope = true;
+					break;
 				default:
 					this._change_scope = false;
 				}
