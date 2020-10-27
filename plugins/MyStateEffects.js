@@ -157,7 +157,6 @@
 
 	// 持続ターン数を決めてからステート付与(持続ターン決めでステートにかかっているかを参照するため)
 	Game_Battler.prototype.addState = function(stateId, forced = false) {
-		
 	    if (this.isStateAddable(stateId, forced)) {
 			this.resetStateCounts(stateId);
 			
@@ -385,7 +384,11 @@
 	};
 
 	Game_Battler.prototype.refresh = function() {
-		Game_BattlerBase.prototype.refresh.call(this);
+		// Game_BattlerBase.prototype.refreshから耐性持ってるのに付与されてるステートを削除する処理を消したもの
+		this._hp = this._hp.clamp(0, this.mhp);
+		this._mp = this._mp.clamp(0, this.mmp);
+		this._tp = this._tp.clamp(0, this.maxTp());
+
 		// HP0で死後ゾンビならゾンビにする
 		if (this.hp === 0 && this.isStateAffected(36) && !this.isStateAffected(25) ) {
 			this.removeState(this.deathStateId());

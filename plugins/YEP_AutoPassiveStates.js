@@ -555,9 +555,9 @@ Game_BattlerBase.prototype.isPassiveStateAffected = function(stateId) {
 //=============================================================================
 
 Yanfly.APS.Game_Battler_isStateAddable = Game_Battler.prototype.isStateAddable;
-Game_Battler.prototype.isStateAddable = function(stateId) {
+Game_Battler.prototype.isStateAddable = function(stateId, forced = false) {
     if (this.isPassiveStateAffected(stateId)) return false;
-    return Yanfly.APS.Game_Battler_isStateAddable.call(this, stateId);
+    return Yanfly.APS.Game_Battler_isStateAddable.call(this, stateId, forced);
 };
 
 Yanfly.APS.Game_Battler_removeState = Game_Battler.prototype.removeState;
