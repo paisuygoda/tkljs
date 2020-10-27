@@ -31,6 +31,8 @@
 		var noteReversibleCondition = /<(?:Reversible)>/i;
 		// 要求アビリティレベル(記述がなければ0)
 		var noteLibraryLevelCondition = /<(?:LibrarySkill)>/i;
+		// レベル系青魔法(記述がなければ0)
+		var noteLevelSkillCondition = /<(?:LevelSkill):[ ](\d+)>/i;
 		for (var n = 1; n < group.length; n++) {
 			var obj = group[n];
 			var notedata = obj.note.split(/[\r\n]+/);
@@ -41,6 +43,7 @@
 			obj.isStealSkill = false;
 			obj.isReversible = false;
 			obj.isLibrary = false;
+			obj.levelSkill = 0;
 
 			for (var i = 0; i < notedata.length; i++) {
 				var line = notedata[i];
@@ -56,6 +59,8 @@
 					obj.isReversible = true;
 				} else if (line.match(noteLibraryLevelCondition)) {
 					obj.isLibrary = true;
+				} else if (line.match(noteLevelSkillCondition)) {
+					obj.levelSkill = parseInt(RegExp.$1);
 				}
 			}
 		}

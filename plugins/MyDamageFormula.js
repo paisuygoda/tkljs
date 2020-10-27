@@ -68,7 +68,17 @@
 
 	//　成功率が0の時、必中に読み替える
 	Game_Action.prototype.itemHit = function(target) {
-		if (this.item().successRate == 0) return 1;
+		if (this.item().successRate == 0) {
+			var level = this.item().levelSkill;
+			if (level == 0) return 1;
+			else if (level < 6) {
+				if (target.blv % level == 0) return 1;
+			} else if (level == 6) {
+				var gil = $gameParty % 10;
+				if (gil == 0) return 0;
+				else if (target.blv % gil == 0) return 1;
+			} 
+		}
 		if (this.isPhysical()) {
 			return this.item().successRate * 0.01 * this.subject().hit;
 		} else {
