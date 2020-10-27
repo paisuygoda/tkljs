@@ -142,17 +142,23 @@
 
 	// 石化状態にはステート付与させない
 	// ゾンビなら死んでても付与する
-	var MStEf_GaBa_isStateAddable = Game_Battler.prototype.isStateAddable;
-	Game_Battler.prototype.isStateAddable = function(stateId) {
+	// 耐性無視で付与できる条件を追加
+	Game_Battler.prototype.isStateAddable = function(stateId, forced = false) {
 		if (stateId === 25) {
 			return !this.isStateResist(stateId) && !this._result.isStateRemoved(stateId) && !this.isStateAffected(24);
 		}
-		else return MStEf_GaBa_isStateAddable.call(this, stateId) && !this.isStateAffected(24);
+		else return (this.isAlive() 
+						&& $dataStates[stateId] 
+						&& (!this.isStateResist(stateId) || forced) 
+						&& !this._result.isStateRemoved(stateId) 
+						&& !this.isStateRestrict(stateId)) 
+				&& !this.isStateAffected(24);
 	};
 
 	// 持続ターン数を決めてからステート付与(持続ターン決めでステートにかかっているかを参照するため)
-	Game_Battler.prototype.addState = function(stateId) {
-	    if (this.isStateAddable(stateId)) {
+	Game_Battler.prototype.addState = function(stateId, forced = false) {
+		
+	    if (this.isStateAddable(stateId, forced)) {
 			this.resetStateCounts(stateId);
 			
 	        if (!this.isStateAffected(stateId)) {
@@ -400,6 +406,11 @@
 		if (!this.isStateAffected(25)) this.setHp(this.hp + value);
 	};
 
+	// 耐性無視で状態付与される条件
+	Game_Action.prototype.forceAddState = function() {
+		return this.item().levelSkill > 0;
+	}
+
 	// 宣告カウント・内容設定追加
 	Game_Action.prototype.itemEffectAddNormalState = function(target, effect) {
 		var chance = effect.value1;
@@ -416,7 +427,8 @@
 		else if (effect.dataId === 14 && this.item()._oracleResist > 0) chance *= target.stateRate(this.item()._oracleResist);
 
 		if (Math.random() < chance) {
-			target.addState(effect.dataId);
+			// 耐性無視で付与
+			target.addState(effect.dataId, this.forceAddState());
 
 			// 魅了の場合魅了対象を設定
 			if (effect.dataId === 9) {

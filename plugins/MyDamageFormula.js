@@ -74,7 +74,7 @@
 			else if (level < 6) {
 				if (target.blv % level == 0) return 1;
 			} else if (level == 6) {
-				var gil = $gameParty % 10;
+				var gil = $gameParty.gold() % 10;
 				if (gil == 0) return 0;
 				else if (target.blv % gil == 0) return 1;
 			} 
