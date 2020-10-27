@@ -204,6 +204,9 @@
 				else if (this.isStateAffected(25) && stateId === 11) {
 					this.removeState(25);
 					this.addNewState(stateId);
+				} else if (stateId === 47) {
+					this._transed = true;
+					this.addNewState(stateId);
 				}
 				else {
 					this.addNewState(stateId);}
@@ -710,6 +713,9 @@
 		// バーサク
 		} else if (this._actor.isStateAffected(7)) {
 			this._mainSprite.setColorTone([100,-60,-60, 0]);
+		// トランス
+		} else if (this._actor.isStateAffected(47)) {
+			this._mainSprite.setColorTone([150,60,100, 0]);
         } else {
             this._mainSprite.setColorTone([0,0,0,0]);
 		}

@@ -10,6 +10,8 @@
 		this.applySteal(target);
 		// ライブラ処理も行う
 		this.applyLibrary(target);
+		// ラーニング処理
+		this.applyLearning(target);
 	}
 
 	// 盗み処理
@@ -81,6 +83,32 @@
 	Game_Enemy.prototype.makeDropItems = function() {
 		var di = this.enemy().dropItems[0];
 		return (di.kind > 0 && Math.random() * di.denominator < this.dropItemRate()) ? [this.itemObject(di.kind, di.dataId)] : [];
+	};
+
+	// ラーニング処理
+	Game_Action.prototype.applyLearning = function(target) {
+		var item = this.item();
+		if(target.isActor() 
+				&& item.stypeId == 5 
+				&& (target.isStateAffected(48) || $gameParty.allMembers().some(actor => actor.isStateAffected(49)))
+				&& !target.isLearnedSkill(item.id)
+				&& !BattleManager._learnedSkill.contains(item.id)) {
+			BattleManager._learnedSkill.push(item.id);
+		}
+	}
+
+	BattleManager.displayLearned = function() {
+		if (BattleManager._learnedSkill.length > 0) {
+			$gameMessage.newPage();
+			BattleManager._learnedSkill.forEach(function(skillId) {
+				var item = $dataSkills[skillId];
+				$gameParty.allMembers().forEach(function(actor) {
+					actor.learnSkill(skillId);
+				});
+				$gameMessage.add('\\>「' + item.name + '」をラーニング！');
+			});
+		}
+		BattleManager._learnedSkill = [];
 	};
 
 })();

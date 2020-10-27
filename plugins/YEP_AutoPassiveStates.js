@@ -579,6 +579,10 @@ Game_Actor.prototype.passiveStatesRaw = function() {
       var equip = this.equips()[i];
       array = array.concat(this.getPassiveStateData(equip));
     }
+    for (var i = 0; i < this.skillEquips().length; ++i) {
+      var equip = this.skillEquips()[i];
+      array = array.concat(this.getPassiveStateData(equip));
+    }
     for (var i = 0; i < this._skills.length; ++i) {
       var skill = $dataSkills[this._skills[i]];
       array = array.concat(this.getPassiveStateData(skill));

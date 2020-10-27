@@ -527,7 +527,8 @@ BattleManager.displayRewards = function() {
     // Yanfly.JP.BattleManager_displayRewards.call(this);
         this.displayExp();
         this.displayJpGain();
-	    this.displayGold();
+      this.displayGold();
+      this.displayLearned();
 		this.displayAbilities();
 		this.displayDropItems();
 };

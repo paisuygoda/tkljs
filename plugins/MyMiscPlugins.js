@@ -291,6 +291,16 @@
 		}
 	};
 
+	// 戦闘ごとにリセットされるステータス
+	Scene_Battle.prototype.start = function() {
+		Scene_Base.prototype.start.call(this);
+		$gameParty.members().forEach(function(actor){actor._transed = false;});
+		this.startFadeIn(this.fadeSpeed(), false);
+		BattleManager.playBattleBgm();
+		BattleManager.startBattle();
+		BattleManager._learnedSkill = [];
+	};
+
 	// endActionはthis._subjectではなく引数に入ったsubjectを入れる
 	// subSkillの文脈ではどうしてもupdateturnで次アクションを選び始める前（この処理が走る前）にthis._subjectがnullであってほしいため
 	BattleManager.endAction = function() {
