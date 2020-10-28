@@ -127,8 +127,6 @@
 			var obj = group[n];
 			var notedata = obj.note.split(/[\r\n]+/);
 
-			obj.counterType = 0;
-
 			obj._damagePopUp = true;
 			for (var i = 0; i < notedata.length; i++) {
 				var line = notedata[i];
@@ -162,8 +160,7 @@
 			if (target.result().addedStateObjects().indexOf($dataStates[1]) >= 0){
 				target.performCollapse();
 			}
-			target.clearDamagePopup();
-			target.clearResult();
+			target.result().hpAffected = false;
 		}
 		this._logWindow.displayActionResults(subject, target);
 	};
@@ -261,11 +258,13 @@
 		if (target.isStateAffected(22) && surfaceSkills.contains(this._item._itemId)) return false;
 		return (
 				// 戦闘不能者対象の技が生存者にもあたる（アンデッドに蘇生技を当てるため）
-				(this.isForDeadFriend() === target.isDead() || this.isForDeadFriend()) &&
-				($gameParty.inBattle() || this.isForOpponent() ||
-				(this.isHpRecover() && target.hp < target.mhp) ||
-				(this.isMpRecover() && target.mp < target.mmp) ||
-				(this.hasItemAnyValidEffects(target))));
+				(this.isForDeadFriend() === target.isDead() 
+						|| this.isForDeadFriend())
+				&& ($gameParty.inBattle() 
+						|| this.isForOpponent() 
+						|| (this.isHpRecover() && target.hp < target.mhp) 
+						|| (this.isMpRecover() && target.mp < target.mmp) 
+						|| (this.hasItemAnyValidEffects(target))));
 	};
 
 	Game_Action.prototype.isGuard = function() {

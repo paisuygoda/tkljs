@@ -12,6 +12,9 @@
 		this.applyLibrary(target);
 		// ラーニング処理
 		this.applyLearning(target);
+		// レベル操作
+		this.applyManipulateLevel(target);
+		console.log(target);
 	}
 
 	// 盗み処理
@@ -110,5 +113,18 @@
 		}
 		BattleManager._learnedSkill = [];
 	};
+
+	// レベル操作
+	Game_Action.prototype.applyManipulateLevel = function(target) {
+		var item = this.item();
+		console.log(item);
+		if (item.manipulateLevel == 91) {
+			target.blv = Math.floor(Math.max(1, target.blv / 2));
+			BattleManager._logWindow.addItemNameText("レベル半減！");
+			BattleManager._waitAnim += 30;
+		} else if(item.manipulateLevel > 0) {
+			target.blv += item.manipulateLevel;
+		}
+	}
 
 })();

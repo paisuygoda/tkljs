@@ -143,9 +143,10 @@
 			rawTargets = this._action.makeTargets();
 			this._targets = [];
 			this._reflectTargets = [];
+			var item = this._action.item();
 			rawTargets.forEach(function(rawTarget) {
 				var target = BattleManager.applySubstitute(rawTarget);
-				if (target.isStateAffected(21)) BattleManager._reflectTargets.push(target);
+				if (target.isStateAffected(21) && !item.passReflec) BattleManager._reflectTargets.push(target);
 				else BattleManager._targets.push(target);
 			});
 			

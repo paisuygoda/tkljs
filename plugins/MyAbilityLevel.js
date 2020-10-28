@@ -33,6 +33,10 @@
 		var noteLibraryLevelCondition = /<(?:LibrarySkill)>/i;
 		// レベル系青魔法(記述がなければ0)
 		var noteLevelSkillCondition = /<(?:LevelSkill):[ ](\d+)>/i;
+		// リフレク貫通
+		var notePassReflecCondition = /<(?:PassReflec)>/i;
+		// レベル操作
+		var noteManipLevelCondition = /<(?:ManipLevel):[ ](\d+)>/i;
 		for (var n = 1; n < group.length; n++) {
 			var obj = group[n];
 			var notedata = obj.note.split(/[\r\n]+/);
@@ -44,6 +48,7 @@
 			obj.isReversible = false;
 			obj.isLibrary = false;
 			obj.levelSkill = 0;
+			obj.manipulateLevel = 0;
 
 			for (var i = 0; i < notedata.length; i++) {
 				var line = notedata[i];
@@ -61,6 +66,10 @@
 					obj.isLibrary = true;
 				} else if (line.match(noteLevelSkillCondition)) {
 					obj.levelSkill = parseInt(RegExp.$1);
+				} else if (line.match(notePassReflecCondition)) {
+					obj.passReflec = true;
+				} else if (line.match(noteManipLevelCondition)) {
+					obj.manipulateLevel = parseInt(RegExp.$1);
 				}
 			}
 		}
