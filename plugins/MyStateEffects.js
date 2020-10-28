@@ -209,9 +209,20 @@
 				else if (this.isStateAffected(25) && stateId === 11) {
 					this.removeState(25);
 					this.addNewState(stateId);
+				// 凍結
+				} else if (this.isStateAffected(30)) {
+					this.addNewState(stateId);
+					BattleManager._logWindow.addItemNameText("氷漬けになるがいい！");
+					BattleManager._waitAnim += 30;
+				// トランス
 				} else if (stateId === 47) {
 					this._transed = true;
 					this.addNewState(stateId);
+				// ガードオファ時メッセージ表示
+				} else if (stateId === 50) {
+					this.addNewState(stateId);
+					BattleManager._logWindow.addItemNameText("防御力ダウン！");
+					BattleManager._waitAnim += 30;
 				}
 				else {
 					this.addNewState(stateId);}
