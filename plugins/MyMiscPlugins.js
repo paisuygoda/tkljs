@@ -161,6 +161,7 @@
 				target.performCollapse();
 			}
 			target.result().hpAffected = false;
+			target.result().mpDamage = 0;
 		}
 		this._logWindow.displayActionResults(subject, target);
 	};

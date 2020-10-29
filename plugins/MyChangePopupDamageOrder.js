@@ -193,6 +193,11 @@
 			// 描画時間の引き延ばし(ぬすむ系で盗んだアイテムを見る時間猶予)
 			if (this._action.item().isStealSkill) this._waitAnim = 30;
 
+			// マダンテのMP枯渇処理は最後にしないと敵全体にダメージが行かない
+			if (this._action.item().sacrificeLevel == 2) {
+				this._subject.setMp(0);
+			}
+
 	        this._action = this._action.pop();
 	        if (this._action) this._phase = 'action';
 			else this._phase = 'postDamage';

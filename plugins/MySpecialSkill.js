@@ -14,7 +14,8 @@
 		this.applyLearning(target);
 		// レベル操作
 		this.applyManipulateLevel(target);
-		console.log(target);
+		// 自己犠牲スキル
+		this.applySacrifice(target);
 	}
 
 	// 盗み処理
@@ -117,13 +118,19 @@
 	// レベル操作
 	Game_Action.prototype.applyManipulateLevel = function(target) {
 		var item = this.item();
-		console.log(item);
 		if (item.manipulateLevel == 91) {
 			target.blv = Math.floor(Math.max(1, target.blv / 2));
 			BattleManager._logWindow.addItemNameText("レベル半減！");
 			BattleManager._waitAnim += 30;
 		} else if(item.manipulateLevel > 0) {
 			target.blv += item.manipulateLevel;
+		}
+	}
+
+	// 自己犠牲処理(sacrificeLevelが1:HPを0にする2:MPを0にする)
+	Game_Action.prototype.applySacrifice = function(target) {
+		if (this.item().sacrificeLevel == 1) {
+			this.subject().addState(1);
 		}
 	}
 
