@@ -877,9 +877,12 @@ BattleManager.startBattle = function() {
         actor.blv = actor._level;
         actor.clearResult();
     });
+    // 敵のアイテム所持状況をセット
     $gameTroop._enemies.forEach(function(enemy) { 
         enemy.haveItem = [true, true, true];
     });
+    // フォースフィルド状況をセット
+    this._forceField = [];
     this.setupAllBattlerAt();
     this._phase = 'turn';
     this.startTurn();

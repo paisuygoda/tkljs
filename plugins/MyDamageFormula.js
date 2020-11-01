@@ -41,6 +41,8 @@
 		if (this.isStateAffected(30) && elementId === 2) this.removeState(30);
 		// 生存者に蘇生技が当たっていたら回復量を無効化する
 		if (this.isAlive() && elementId === 13) return 0;
+		// フォースフィルドによる無効処理
+		if (BattleManager._forceField.contains(elementId)) return 0;
 		return this.traitsWithId(Game_BattlerBase.TRAIT_ELEMENT_RATE, elementId).reduce(function(r, trait) {
 			// ウィークメーカーによる弱点(2.01)は絶対
 			if (trait.value > 2 || r > 2) return 2.01; 
@@ -67,16 +69,22 @@
 	};
 
 	//　成功率が0の時、必中に読み替える
+	// レベル系などの条件付きスキルの命中処理
 	Game_Action.prototype.itemHit = function(target) {
 		if (this.item().successRate == 0) {
 			var level = this.item().levelSkill;
 			if (level == 0) return 1;
+			// レベル系スキル
 			else if (level < 6) {
 				if (target.blv % level == 0) return 1;
+			// レベル？ホーリー
 			} else if (level == 6) {
 				var gil = $gameParty.gold() % 10;
 				if (gil == 0) return 0;
 				else if (target.blv % gil == 0) return 1;
+			// リフレク？？？？
+			}  else if (level == 7) {
+				if (target.isStateAffected(21)) return 1;
 			} 
 		}
 		if (this.isPhysical()) {

@@ -39,6 +39,8 @@
 		var noteManipLevelCondition = /<(?:ManipLevel):[ ](\d+)>/i;
 		// 自己犠牲スキル
 		var noteSacrificeSkillCondition = /<(?:Sacrifice):[ ](\d+)>/i;
+		// 動的MPスキル
+		var noteDynamicMp = /<(?:DynamicMp):[ ](\d+)>/i;
 		for (var n = 1; n < group.length; n++) {
 			var obj = group[n];
 			var notedata = obj.note.split(/[\r\n]+/);
@@ -52,6 +54,7 @@
 			obj.levelSkill = 0;
 			obj.manipulateLevel = 0;
 			obj.sacrificeLevel = 0;
+			obj.dynamicMp = 0;
 
 			for (var i = 0; i < notedata.length; i++) {
 				var line = notedata[i];
@@ -75,6 +78,8 @@
 					obj.manipulateLevel = parseInt(RegExp.$1);
 				} else if (line.match(noteSacrificeSkillCondition)) {
 					obj.sacrificeLevel = parseInt(RegExp.$1);
+				} else if (line.match(noteDynamicMp)) {
+					obj.dynamicMp = parseInt(RegExp.$1);
 				}
 			}
 		}

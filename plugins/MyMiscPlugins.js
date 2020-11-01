@@ -366,6 +366,13 @@
 		else this.setAttack();
 	};
 
+	// 動的MP
+	Game_BattlerBase.prototype.skillMpCost = function(skill) {
+		// プレイ時間
+		if (skill.dynamicMp == 1) return Math.floor($gameSystem.playtime() / 3600);
+		else return Math.floor(skill.mpCost * this.mcr);
+	};
+
 	// Helpは基本一行
 	Window_Help.prototype.initialize = function(numLines) {
 		var width = Graphics.boxWidth;

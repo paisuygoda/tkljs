@@ -16,6 +16,8 @@
 		this.applyManipulateLevel(target);
 		// 自己犠牲スキル
 		this.applySacrifice(target);
+		// フォースフィルド
+		this.applyForceField();
 	}
 
 	// 盗み処理
@@ -131,6 +133,26 @@
 	Game_Action.prototype.applySacrifice = function(target) {
 		if (this.item().sacrificeLevel == 1) {
 			this.subject().addState(1);
+		}
+	}
+
+	// フォースフィルド
+	Game_Action.prototype.applyForceField = function() {
+		if (this.item().id == 107) {
+			["","物理","炎","氷","雷","水","土","風","光","闇","毒","回復","重力","蘇生"];
+			var candidate = [];
+			for (var i = 2; i < 11; i++) {
+				if (!BattleManager._forceField.contains(i)) candidate.push(i);
+			}
+			if (candidate.length > 0) {
+				var index = Math.randomInt(candidate.length);
+				BattleManager._forceField.push(candidate[index]);
+				BattleManager._logWindow.addItemNameText($dataSystem.elements[candidate[index]] + "の力が無効になった！");
+			} else {
+				BattleManager._logWindow.addItemNameText("効果が無かった");
+			}
+
+			BattleManager._waitAnim += 60;
 		}
 	}
 
