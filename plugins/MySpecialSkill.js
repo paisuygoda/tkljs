@@ -96,10 +96,9 @@
 	// ラーニング処理
 	Game_Action.prototype.applyLearning = function(target) {
 		var item = this.item();
-		if(target.isActor() 
-				&& item.stypeId == 5 
+		if(item.stypeId == 5 
 				&& (target.isStateAffected(48) || $gameParty.allMembers().some(actor => actor.isStateAffected(49)))
-				&& !target.isLearnedSkill(item.id)
+				&& !$gameParty.allMembers()[0].isLearnedSkill(item.id)
 				&& !BattleManager._learnedSkill.contains(item.id)) {
 			BattleManager._learnedSkill.push(item.id);
 		}
