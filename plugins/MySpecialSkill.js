@@ -18,6 +18,8 @@
 		this.applySacrifice(target);
 		// フォースフィルド
 		this.applyForceField();
+		// 波紋
+		this.applyRipple();
 	}
 
 	// 盗み処理
@@ -139,7 +141,6 @@
 	// フォースフィルド
 	Game_Action.prototype.applyForceField = function() {
 		if (this.item().id == 107) {
-			["","物理","炎","氷","雷","水","土","風","光","闇","毒","回復","重力","蘇生"];
 			var candidate = [];
 			for (var i = 2; i < 11; i++) {
 				if (!BattleManager._forceField.contains(i)) candidate.push(i);
@@ -153,6 +154,23 @@
 			}
 
 			BattleManager._waitAnim += 60;
+		}
+	}
+
+	// 波紋
+	Game_Action.prototype.applyRipple = function(target) {
+		if (this.item().id == 109) {
+			var subject = this.subject();
+			var temp = subject._states;
+			subject.clearStates();
+			var passiveStates = [9, 11, 26, 31, 35];
+			for (var i = 0; i < target._states.length; i++) {
+				if (!passiveStates.contains(target._states[i])) subject.addState(target._states[i], true);
+			}
+			target.clearStates();
+			for (var i = 0; i < temp._states.length; i++) {
+				if (!passiveStates.contains(temp._states[i])) target.addState(temp._states[i], true);
+			}
 		}
 	}
 
