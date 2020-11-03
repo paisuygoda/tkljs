@@ -32,6 +32,8 @@
 		var noteAttributeCondition = /<(?:CounterAttributeCondition):[ ](\d+)>/i;
 		var noteSkillTypeCondition = /<(?:CounterSkillTypeCondition):[ ](\d+)>/i;
 		var noteAction = /<(?:CounterAction):[ ](\d+)>/i;
+		// 擬態時に使われるスキル
+		var noteMimicSkill = /<(?:MimicSkill):[ ](\d+)>/i;
 		for (var n = 1; n < group.length; n++) {
 			var obj = group[n];
 			var notedata = obj.note.split(/[\r\n]+/);
@@ -41,6 +43,8 @@
 			var hitCondition = 1;
 			var attributeCondition = 0;
 			var skillTypeCondition = 0;
+
+			obj._mimicSkillId = null;
 
 			for (var i = 0; i < notedata.length; i++) {
 				var line = notedata[i];
@@ -65,6 +69,10 @@
 					hitCondition = 1;
 					attributeCondition = 0;
 					skillTypeCondition = 0;
+				}
+				// 擬態時に使われるスキル
+				else if  (line.match(noteMimicSkill)) {
+					obj._mimicSkillId = parseInt(RegExp.$1);
 				}
 			}
 		}

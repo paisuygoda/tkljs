@@ -27,9 +27,11 @@
 				var id = this._action._item._itemId;
 				// ものまね系だったらものまね対象に切り替え
 				if (id == 21) this._action.traceSkill($gameParty._lastSkillId);
-				if (id == 22) this._action.traceSkill($gameTroop._lastSkillId);
-				if (id == 23) this._action.traceSkill(BattleManager._lastSkillId);
-				if (id == 24) this._action.traceSkill(this._subject._lastSkillId);
+				else if (id == 22) this._action.traceSkill($gameTroop._lastSkillId);
+				else if (id == 23) this._action.traceSkill(BattleManager._lastSkillId);
+				else if (id == 24) this._action.traceSkill(this._subject._lastSkillId);
+				// 擬態だったらその技に切り替え
+				else if (id == 114) this._action.traceSkill(this._action.opponentsUnit().smoothTarget(this._targetIndex)._mimicSkillId);
 			}
 		}
 		// ものまねスロットに登録
